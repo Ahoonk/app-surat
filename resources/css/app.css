@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide spinner arrows on number inputs so users type values manually. */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Global table header style across app menus. */
+table thead th {
+    background-color: #dc2626; /* red-600 */
+    color: #ffffff;
+    text-align: center;
+}
+
+/* Reusable small icon action button style. */
+.action-icon {
+    display: inline-flex;
+    height: 2rem;
+    width: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.action-icon-gray { background-color: #f3f4f6; color: #374151; }
+.action-icon-blue { background-color: #eff6ff; color: #1d4ed8; }
+.action-icon-emerald { background-color: #ecfdf5; color: #047857; }
+.action-icon-red { background-color: #fef2f2; color: #b91c1c; }
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
