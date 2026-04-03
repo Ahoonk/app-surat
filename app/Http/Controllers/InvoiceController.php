@@ -68,7 +68,7 @@ class InvoiceController extends Controller
 
         $fileName = 'invoice-' . str_replace('/', '-', $invoice->nomor) . '.pdf';
         $pdf = Pdf::loadView('invoice.pdf', compact('invoice', 'penawaran'))
-            ->setPaper('legal', 'portrait');
+            ->setPaper('a4', 'portrait');
 
         if (request()->boolean('download')) {
             return $pdf->download($fileName);
@@ -99,7 +99,7 @@ class InvoiceController extends Controller
 
         $fileName = 'invoice-' . str_replace('/', '-', $invoice->nomor) . '.pdf';
         $pdf = Pdf::loadView('invoice.pdf', compact('invoice', 'penawaran'))
-            ->setPaper('legal', 'portrait');
+            ->setPaper('a4', 'portrait');
         $pdfData = $pdf->output();
 
         try {
@@ -150,16 +150,23 @@ class InvoiceController extends Controller
             'tanggal' => ['required', 'date'],
         ]);
 
-        $newNomor = $this->rebuildInvoiceNumberWithDate($invoice->nomor, $validated['tanggal']);
+        $mitra = $invoice->penawaran->mitra;
+        $newNomor = $mitra?->nomor_invoice
+            ? $invoice->nomor
+            : $this->rebuildInvoiceNumberWithDate($invoice->nomor, $validated['tanggal']);
 
         $invoice->update([
             'tanggal' => $validated['tanggal'],
             'nomor' => $newNomor,
         ]);
 
+        $suratJalanNomor = $mitra?->nomor_surat_jalan
+            ? $mitra->nomor_surat_jalan
+            : preg_replace('/^INV\//', 'SJ/', $newNomor);
+
         SuratJalan::where('invoice_id', $invoice->id)->update([
             'tanggal' => $validated['tanggal'],
-            'nomor' => preg_replace('/^INV\//', 'SJ/', $newNomor),
+            'nomor' => $suratJalanNomor,
         ]);
 
         return redirect()->route('invoice.index')

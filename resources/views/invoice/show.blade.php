@@ -13,6 +13,13 @@
     </div>
 
     @php
+        $mitra = $penawaran->mitra;
+        $mitraTemplatePath = $mitra?->template_invoice_path
+            ? public_path('storage/' . $mitra->template_invoice_path)
+            : null;
+        $mitraTemplate = $mitraTemplatePath && file_exists($mitraTemplatePath)
+            ? asset('storage/' . $mitra->template_invoice_path) . '?v=' . filemtime($mitraTemplatePath)
+            : null;
         $invoiceTemplatePath = public_path('storage/logos/template-invoice.png');
         $invoiceFooterPath = public_path('storage/logos/kopbawah-invoice.png');
         $invoiceTemplate = file_exists($invoiceTemplatePath)
@@ -22,7 +29,9 @@
             ? asset('storage/logos/kopbawah-invoice.png') . '?v=' . filemtime($invoiceFooterPath)
             : null;
         $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 18mm 6mm 10mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center;';
-        if ($invoiceTemplate) {
+        if ($mitraTemplate) {
+            $previewStyle .= " background-image: url('{$mitraTemplate}'); background-size: 100% 100%; transform: translateX(6mm);";
+        } elseif ($invoiceTemplate) {
             $previewStyle .= " background-image: url('{$invoiceTemplate}'); transform: translateX(6mm);";
         }
     @endphp
@@ -107,7 +116,7 @@
                 <p>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</p>
             </div>
         </div>
-        @if($invoiceFooter)
+        @if(!$mitraTemplate && $invoiceFooter)
             <img src="{{ $invoiceFooter }}" alt="Footer Invoice" style="position:absolute; left:0; right:0; bottom:-140mm; width:100%; height:34mm; object-fit:fill; transform:translateX(-0.5mm);">
         @endif
         </div>

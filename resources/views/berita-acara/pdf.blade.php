@@ -72,26 +72,35 @@
 
         return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
     };
+    $mitra = $penawaran->mitra;
+    $mitraTemplatePath = $mitra?->template_berita_acara_path
+        ? public_path('storage/' . $mitra->template_berita_acara_path)
+        : null;
+    $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
     $kopAtasAsset = $toDataUri(public_path('storage/logos/kopatas.png'));
     $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah.png'));
     $bgAsset = $toDataUri(public_path('storage/logos/backgroud-template.png'))
         ?: $toDataUri(public_path('storage/logos/background-template.png'));
 @endphp
 
-@if ($bgAsset)
-    <div style="position: fixed; inset: 0; background-image: url('{{ $bgAsset }}'); background-repeat: no-repeat; background-position: center 36%; background-size: 50% auto; z-index: 0;"></div>
-@endif
+@if ($mitraTemplateAsset)
+    <div style="position: fixed; inset: 0; background-image: url('{{ $mitraTemplateAsset }}'); background-repeat: no-repeat; background-position: center; background-size: 100% 100%; z-index: 0;"></div>
+@else
+    @if ($bgAsset)
+        <div style="position: fixed; inset: 0; background-image: url('{{ $bgAsset }}'); background-repeat: no-repeat; background-position: center 36%; background-size: 50% auto; z-index: 0;"></div>
+    @endif
 
-@if ($kopAtasAsset)
-    <div style="position: fixed; top: -15mm; left: 0; right: 0; z-index: 1;">
-        <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="width: 112%; margin-left: -6%; height: auto; display: block;">
-    </div>
-@endif
+    @if ($kopAtasAsset)
+        <div style="position: fixed; top: -15mm; left: 0; right: 0; z-index: 1;">
+            <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="width: 112%; margin-left: -6%; height: auto; display: block;">
+        </div>
+    @endif
 
-@if ($kopBawahAsset)
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 1;">
-        <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="width: 100%; height: auto; display: block; transform: translateX(-3mm);">
-    </div>
+    @if ($kopBawahAsset)
+        <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 1;">
+            <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="width: 100%; height: auto; display: block; transform: translateX(-3mm);">
+        </div>
+    @endif
 @endif
 
 <div style="padding-top: 145px; padding-bottom: 110px; position: relative; z-index: 2;">

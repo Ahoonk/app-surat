@@ -11,6 +11,7 @@ use App\Http\Controllers\SuratJalanController;
 use App\Http\Controllers\NotaTokoController;
 use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MitraController;
 use App\Http\Controllers\TelegramBotController;
 use App\Models\FakturPajak;
 use App\Models\Invoice;
@@ -108,6 +109,7 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth'])->group(function () {
     Route::get('penawaran/{penawaran}/pdf', [PenawaranController::class, 'pdf'])->name('penawaran.pdf');
     Route::post('penawaran/{penawaran}/send', [PenawaranController::class, 'send'])->name('penawaran.send');
+    Route::get('penawaran-mitra/create', [PenawaranController::class, 'createMitra'])->name('penawaran.mitra.create');
     Route::post('penawaran/{penawaran}/approve-invoice', [PenawaranController::class, 'approveForInvoice'])
         ->name('penawaran.approve-invoice');
     Route::get('purchasing-order', [PurchasingOrderController::class, 'index'])->name('purchasing-order.index');
@@ -174,5 +176,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
+    Route::get('mitra', [MitraController::class, 'index'])->name('mitra.index');
+    Route::post('mitra', [MitraController::class, 'store'])->name('mitra.store');
+    Route::get('mitra/{mitra}/edit', [MitraController::class, 'edit'])->name('mitra.edit');
+    Route::put('mitra/{mitra}', [MitraController::class, 'update'])->name('mitra.update');
+    Route::delete('mitra/{mitra}', [MitraController::class, 'destroy'])->name('mitra.destroy');
 
 });

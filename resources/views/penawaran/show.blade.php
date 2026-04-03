@@ -13,6 +13,13 @@
     </div>
 
     @php
+        $mitra = $penawaran->mitra;
+        $mitraTemplatePath = $mitra?->template_penawaran_path
+            ? public_path('storage/' . $mitra->template_penawaran_path)
+            : null;
+        $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
+            ? asset('storage/' . $mitra->template_penawaran_path) . '?v=' . filemtime($mitraTemplatePath)
+            : null;
         $bgPrimary = public_path('storage/logos/background-template.png');
         $bgFallback = public_path('storage/logos/background-tempplate.png');
         $bgAsset = file_exists($bgPrimary)
@@ -23,8 +30,12 @@
     @endphp
 
     <div class="bg-white rounded-2xl shadow-xl px-4 sm:px-6 lg:px-10 pb-6 sm:pb-10 pt-0 max-w-5xl text-[12px] sm:text-[13px] leading-6 bg-no-repeat bg-center"
-         @if($bgAsset) style="background-image: url('{{ $bgAsset }}'); background-size: 50% auto;" @endif>
-        @if ($kopAtasAsset)
+         @if($mitraTemplateAsset)
+             style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%;"
+         @elseif($bgAsset)
+             style="background-image: url('{{ $bgAsset }}'); background-size: 50% auto;"
+         @endif>
+        @if (!$mitraTemplateAsset && $kopAtasAsset)
             <div class="mb-4 -mx-10">
                 <img src="{{ $kopAtasAsset }}" alt="Kop Atas" class="w-full h-auto block">
             </div>
@@ -109,7 +120,7 @@
             </div>
         </div>
 
-        @if ($kopBawahAsset)
+        @if (!$mitraTemplateAsset && $kopBawahAsset)
             <div class="mt-8 -mx-10 -mb-10">
                 <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" class="w-full h-auto block">
             </div>

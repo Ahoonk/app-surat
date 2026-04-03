@@ -109,7 +109,8 @@ class PurchasingOrderController extends Controller
 
         $sequence = 1;
         $invoiceDate = now()->toDateString();
-        $invoiceNumber = $this->buildInvoiceNumber($invoiceDate);
+        $mitra = $penawaran->mitra;
+        $invoiceNumber = $mitra?->nomor_invoice ?: $this->buildInvoiceNumber($invoiceDate);
 
         $invoice = Invoice::create([
             'penawaran_id' => $penawaran->id,
@@ -121,10 +122,12 @@ class PurchasingOrderController extends Controller
             'created_by' => auth()->id(),
         ]);
 
+        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: preg_replace('/^INV\//', 'SJ/', $invoice->nomor);
+
         SuratJalan::firstOrCreate(
             ['invoice_id' => $invoice->id],
             [
-                'nomor' => preg_replace('/^INV\//', 'SJ/', $invoice->nomor),
+                'nomor' => $suratJalanNomor,
                 'tanggal' => $invoiceDate,
                 'created_by' => auth()->id(),
             ]
@@ -159,7 +162,8 @@ class PurchasingOrderController extends Controller
         abort_if($latestSequence < 1, 403);
         $currentSequence = max((int) $penawaran->invoice_sequence, $latestSequence, 1);
         $nextSequence = $currentSequence + 1;
-        $invoiceNumber = $this->buildInvoiceNumber($validated['invoice_date']);
+        $mitra = $penawaran->mitra;
+        $invoiceNumber = $mitra?->nomor_invoice ?: $this->buildInvoiceNumber($validated['invoice_date']);
 
         $invoice = Invoice::create([
             'penawaran_id' => $penawaran->id,
@@ -171,10 +175,12 @@ class PurchasingOrderController extends Controller
             'created_by' => auth()->id(),
         ]);
 
+        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: preg_replace('/^INV\//', 'SJ/', $invoice->nomor);
+
         SuratJalan::firstOrCreate(
             ['invoice_id' => $invoice->id],
             [
-                'nomor' => preg_replace('/^INV\//', 'SJ/', $invoice->nomor),
+                'nomor' => $suratJalanNomor,
                 'tanggal' => $validated['invoice_date'],
                 'created_by' => auth()->id(),
             ]

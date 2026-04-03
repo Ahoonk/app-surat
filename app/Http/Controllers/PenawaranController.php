@@ -6,6 +6,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Concerns\ResolvesCompanyId;
 use App\Models\Penawaran;
 use App\Models\Customer;
+use App\Models\Mitra;
 use App\Mail\PenawaranMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,33 @@ class PenawaranController extends Controller
             ->get();
 
         return view('penawaran.create', compact('nomorPreview', 'toCompanyOptions', 'customers'));
+    }
+
+    public function createMitra()
+    {
+        $companyId = $this->getCompanyIdOrRedirect();
+        if (!is_int($companyId)) {
+            return $companyId;
+        }
+
+        $nomorPreview = $this->generateNomor($companyId);
+        $toCompanyOptions = $this->companyPenawarans($companyId)
+            ->whereNotNull('to_company')
+            ->where('to_company', '!=', '')
+            ->select('to_company')
+            ->distinct()
+            ->orderBy('to_company')
+            ->pluck('to_company');
+
+        $customers = Customer::where('company_id', $companyId)
+            ->orderBy('nama')
+            ->get();
+
+        $mitras = Mitra::where('company_id', $companyId)
+            ->orderBy('nama')
+            ->get();
+
+        return view('penawaran.create-mitra', compact('nomorPreview', 'toCompanyOptions', 'customers', 'mitras'));
     }
 
     public function show(Penawaran $penawaran)
@@ -171,6 +199,7 @@ class PenawaranController extends Controller
         }
 
         $validated = $request->validate([
+            'mitra_id' => ['nullable', 'exists:mitras,id'],
             'tanggal' => ['required', 'date'],
             'to_company' => ['required', 'string', 'max:255'],
             'to_address' => ['nullable', 'string', 'max:500'],
@@ -186,6 +215,13 @@ class PenawaranController extends Controller
             'items.*.satuan' => ['required', 'in:month,pcs,item,unit'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
         ]);
+
+        $mitra = null;
+        if (!empty($validated['mitra_id'])) {
+            $mitra = Mitra::where('company_id', $companyId)
+                ->where('id', $validated['mitra_id'])
+                ->firstOrFail();
+        }
 
         $taxPercent = (float) ($validated['tax_percent'] ?? 11);
         $subtotal = 0;
@@ -221,11 +257,19 @@ class PenawaranController extends Controller
         $taxAmount = $subtotal * ($taxPercent / 100);
         $total = $subtotal + $taxAmount;
 
-        $penawaran = DB::transaction(function () use ($companyId, $validated, $taxPercent, $subtotal, $taxAmount, $total, $items, $resolvedAddress) {
-            $nomor = $this->generateNomor($companyId);
+        $nomor = $mitra?->nomor_penawaran ?: $this->generateNomor($companyId);
+
+        if (Penawaran::where('nomor', $nomor)->exists()) {
+            return back()
+                ->withErrors(['mitra_id' => 'Nomor penawaran untuk mitra ini sudah digunakan.'])
+                ->withInput();
+        }
+
+        $penawaran = DB::transaction(function () use ($companyId, $validated, $taxPercent, $subtotal, $taxAmount, $total, $items, $resolvedAddress, $nomor, $mitra) {
 
             $penawaran = Penawaran::create([
                 'company_id' => $companyId,
+                'mitra_id' => $mitra?->id,
                 'user_id' => auth()->id(),
                 'nomor' => $nomor,
                 'tanggal' => $validated['tanggal'],

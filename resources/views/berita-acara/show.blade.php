@@ -5,6 +5,13 @@
     $invoice = $beritaAcara->invoice;
     $penawaran = $invoice->penawaran;
     $po = $invoice->purchasingOrder;
+    $mitra = $penawaran->mitra;
+    $mitraTemplatePath = $mitra?->template_berita_acara_path
+        ? public_path('storage/' . $mitra->template_berita_acara_path)
+        : null;
+    $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
+        ? asset('storage/' . $mitra->template_berita_acara_path) . '?v=' . filemtime($mitraTemplatePath)
+        : null;
     $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? asset('storage/logos/kopatas.png') : null;
     $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah.png')) ? asset('storage/logos/kopbawah.png') : null;
     $bgPrimaryPath = public_path('storage/logos/backgroud-template.png');
@@ -68,14 +75,18 @@
     </div>
 
     <div class="mx-auto bg-white rounded-2xl shadow-xl relative overflow-hidden" style="{{ $previewPaperStyle }}">
-        @if ($bgAsset)
-            <div style="position:absolute;inset:0;background-image:url('{{ $bgAsset }}');background-repeat:no-repeat;background-position:center 36%;background-size:50% auto;z-index:0;"></div>
-        @endif
-        @if ($kopAtasAsset)
-            <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="position:absolute;top:-8mm;left:0;right:0;width:106%;margin-left:-1%;height:auto;display:block;z-index:1;">
-        @endif
-        @if ($kopBawahAsset)
-            <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="position:absolute;bottom:0;left:0;right:0;width:100%;height:auto;display:block;z-index:1;">
+        @if ($mitraTemplateAsset)
+            <div style="position:absolute;inset:0;background-image:url('{{ $mitraTemplateAsset }}');background-repeat:no-repeat;background-position:center;background-size:100% 100%;z-index:0;"></div>
+        @else
+            @if ($bgAsset)
+                <div style="position:absolute;inset:0;background-image:url('{{ $bgAsset }}');background-repeat:no-repeat;background-position:center 36%;background-size:50% auto;z-index:0;"></div>
+            @endif
+            @if ($kopAtasAsset)
+                <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="position:absolute;top:-8mm;left:0;right:0;width:106%;margin-left:-1%;height:auto;display:block;z-index:1;">
+            @endif
+            @if ($kopBawahAsset)
+                <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="position:absolute;bottom:0;left:0;right:0;width:100%;height:auto;display:block;z-index:1;">
+            @endif
         @endif
 
         <div style="{{ $previewContentStyle }}">

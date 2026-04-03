@@ -33,26 +33,43 @@
 </head>
 <body>
 @php
+    $toDataUri = static function (string $path): ?string {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match ($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'image/png',
+        };
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+    };
+
+    $mitra = $penawaran->mitra;
+    $mitraTemplatePath = $mitra?->template_invoice_path
+        ? public_path('storage/' . $mitra->template_invoice_path)
+        : null;
+    $mitraTemplateInvoice = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+
     $templatePath = public_path('storage/logos/template-invoice.png');
     $footerPath = public_path('storage/logos/kopbawah-invoice.png');
-    $templateInvoice = null;
-    $footerInvoice = null;
-
-    if (file_exists($templatePath)) {
-        $data = base64_encode(file_get_contents($templatePath));
-        $templateInvoice = 'data:image/png;base64,' . $data;
-    }
-    if (file_exists($footerPath)) {
-        $dataFooter = base64_encode(file_get_contents($footerPath));
-        $footerInvoice = 'data:image/png;base64,' . $dataFooter;
-    }
+    $templateInvoice = $toDataUri($templatePath);
+    $footerInvoice = $toDataUri($footerPath);
 @endphp
 
-@if ($templateInvoice)
-    <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>
-@endif
-@if ($footerInvoice)
-    <div class="footer-layer" style="background-image: url('{{ $footerInvoice }}');"></div>
+@if ($mitraTemplateInvoice)
+    <div class="bg-layer" style="background-image: url('{{ $mitraTemplateInvoice }}'); background-size: 100% 100%;"></div>
+@else
+    @if ($templateInvoice)
+        <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>
+    @endif
+    @if ($footerInvoice)
+        <div class="footer-layer" style="background-image: url('{{ $footerInvoice }}');"></div>
+    @endif
 @endif
 
 <div class="paper">

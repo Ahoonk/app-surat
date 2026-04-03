@@ -54,6 +54,12 @@
             return 'data:' . $mime . ';base64,' . $data;
         };
 
+        $mitra = $penawaran->mitra;
+        $mitraTemplatePath = $mitra?->template_penawaran_path
+            ? public_path('storage/' . $mitra->template_penawaran_path)
+            : null;
+        $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+
         $bgPrimary = public_path('storage/logos/background-template.png');
         $bgFallback = public_path('storage/logos/background-tempplate.png');
         $bgPath = file_exists($bgPrimary) ? $bgPrimary : (file_exists($bgFallback) ? $bgFallback : null);
@@ -62,20 +68,24 @@
         $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah-penawaran.png'));
     @endphp
 
-    @if ($bgAsset)
-        <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
-    @endif
+    @if ($mitraTemplateAsset)
+        <div class="bg-layer" style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; opacity: 1;"></div>
+    @else
+        @if ($bgAsset)
+            <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
+        @endif
 
-    @if ($kopAtasAsset)
-        <div class="head-layer">
-            <img src="{{ $kopAtasAsset }}" alt="Kop Atas" class="kop-top">
-        </div>
-    @endif
+        @if ($kopAtasAsset)
+            <div class="head-layer">
+                <img src="{{ $kopAtasAsset }}" alt="Kop Atas" class="kop-top">
+            </div>
+        @endif
 
-    @if ($kopBawahAsset)
-        <div class="foot-layer">
-            <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" class="kop-bottom">
-        </div>
+        @if ($kopBawahAsset)
+            <div class="foot-layer">
+                <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" class="kop-bottom">
+            </div>
+        @endif
     @endif
 
     <div class="paper content-space">
