@@ -66,16 +66,7 @@
     $footerPath = public_path('storage/logos/kopbawah-invoice.png');
     $templateInvoice = $toDataUri($templatePath);
     $footerInvoice = $toDataUri($footerPath);
-
-    $paperStyle = $isMitra ? 'padding: 50mm 18mm 6mm 10mm;' : '';
-    $contentStyle = $isMitra ? 'left: 0; width: calc(100% + 10mm);' : '';
 @endphp
-
-@if ($isMitra)
-    <style>
-        @page { size: A4 portrait; margin: 0; }
-    </style>
-@endif
 
 @if ($mitraTemplateInvoice)
     <div class="bg-layer" style="inset: 0; background-image: url('{{ $mitraTemplateInvoice }}'); background-size: 100% 100%; background-position: top center; transform: none;"></div>
@@ -88,8 +79,8 @@
     @endif
 @endif
 
-<div class="paper" style="{{ $paperStyle }}">
-    <div class="content-wrap" style="{{ $contentStyle }}">
+<div class="paper">
+    <div class="content-wrap">
     <div class="head block-90">
         <div class="left">
             <div style="font-size:11px; color:#555; font-weight:700;">Bill To</div>
