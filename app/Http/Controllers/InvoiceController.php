@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\ResolvesCompanyId;
+use App\Mail\InvoiceMail;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\SuratJalan;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class InvoiceController extends Controller
@@ -72,6 +75,40 @@ class InvoiceController extends Controller
         }
 
         return $pdf->stream($fileName);
+    }
+
+    public function send(Invoice $invoice)
+    {
+        $companyId = $this->getCompanyIdOrRedirect();
+        if (!is_int($companyId)) {
+            return $companyId;
+        }
+
+        $invoice->load('penawaran.items', 'purchasingOrder');
+        $penawaran = $invoice->penawaran;
+        abort_if(!$penawaran || $penawaran->company_id !== $companyId, 403);
+
+        $customerName = $penawaran->to_company ?? $penawaran->customer_nama;
+        $resolvedEmail = Customer::where('company_id', $companyId)
+            ->where('nama', $customerName)
+            ->value('email');
+
+        if (empty($resolvedEmail)) {
+            return back()->with('error', 'Email customer belum diisi.');
+        }
+
+        $fileName = 'invoice-' . str_replace('/', '-', $invoice->nomor) . '.pdf';
+        $pdf = Pdf::loadView('invoice.pdf', compact('invoice', 'penawaran'))
+            ->setPaper('legal', 'portrait');
+        $pdfData = $pdf->output();
+
+        try {
+            Mail::to($resolvedEmail)->send(new InvoiceMail($invoice, $pdfData, $fileName));
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal mengirim email. Silakan cek konfigurasi email.');
+        }
+
+        return back()->with('success', 'Invoice berhasil dikirim ke email customer.');
     }
 
     public function verifyPayment(Request $request, Invoice $invoice)

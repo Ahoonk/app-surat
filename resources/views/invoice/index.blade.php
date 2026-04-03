@@ -7,6 +7,11 @@
             {{ session('success') }}
         </div>
     @endif
+    @if (session('error'))
+        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Invoice</h1>
@@ -41,6 +46,10 @@
                         <div class="mt-3">
                             <div class="action-buttons">
                                 <a href="{{ route('invoice.show', $invoice) }}" title="Preview" class="action-icon action-icon-blue text-sm">&#128065;</a>
+                                <form method="POST" action="{{ route('invoice.send', $invoice) }}" onsubmit="return confirm('Kirim invoice ke email customer?')">
+                                    @csrf
+                                    <button type="submit" title="Kirim" class="action-icon action-icon-gray text-sm">&#9993;</button>
+                                </form>
                                 <button type="button"
                                         title="Ubah Tanggal Cetak"
                                         class="print-date-btn action-icon action-icon-emerald text-sm"
@@ -104,6 +113,12 @@
                                     <a href="{{ route('invoice.show', $invoice) }}" title="Preview" class="action-icon action-icon-blue hover:text-blue-800">
                                         &#128065;
                                     </a>
+                                    <form method="POST" action="{{ route('invoice.send', $invoice) }}" onsubmit="return confirm('Kirim invoice ke email customer?')">
+                                        @csrf
+                                        <button type="submit" title="Kirim" class="action-icon action-icon-gray hover:text-gray-800">
+                                            &#9993;
+                                        </button>
+                                    </form>
                                     <button type="button"
                                             title="Ubah Tanggal Cetak"
                                             class="print-date-btn action-icon action-icon-emerald hover:text-emerald-800"

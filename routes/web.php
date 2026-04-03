@@ -121,6 +121,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('invoice', [InvoiceController::class, 'index'])->name('invoice.index');
     Route::get('invoice/{invoice}', [InvoiceController::class, 'show'])->name('invoice.show');
     Route::get('invoice/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoice.pdf');
+    Route::post('invoice/{invoice}/send', [InvoiceController::class, 'send'])->name('invoice.send');
     Route::post('invoice/{invoice}/update-print-date', [InvoiceController::class, 'updatePrintDate'])->name('invoice.update-print-date');
     Route::post('invoice/{invoice}/verify-payment', [InvoiceController::class, 'verifyPayment'])->name('invoice.verify-payment');
     Route::delete('invoice/{invoice}', [InvoiceController::class, 'destroy'])->name('invoice.destroy');
