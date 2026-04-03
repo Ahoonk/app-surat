@@ -150,8 +150,8 @@
                 </tr>
             @endif
             <tr>
-                <td>Grand Total</td>
-                <td class="right-text">Rp {{ number_format($penawaran->total, 2, ',', '.') }}</td>
+                <td>{{ $isMitra ? 'Amount (Net)' : 'Grand Total' }}</td>
+                <td class="right-text">Rp {{ number_format($isMitra ? ($penawaran->total - $pph23) : $penawaran->total, 2, ',', '.') }}</td>
             </tr>
         </table>
     </div>

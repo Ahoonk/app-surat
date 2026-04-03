@@ -114,8 +114,8 @@
                 </div>
             @endif
             <div class="flex justify-between py-2 font-semibold text-base">
-                <span>Grand Total</span>
-                <span>Rp {{ number_format($penawaran->total, 2, ',', '.') }}</span>
+                <span>{{ $isMitra ? 'Amount (Net)' : 'Grand Total' }}</span>
+                <span>Rp {{ number_format($isMitra ? ($penawaran->total - $pph23) : $penawaran->total, 2, ',', '.') }}</span>
             </div>
         </div>
 
