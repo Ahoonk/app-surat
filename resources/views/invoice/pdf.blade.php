@@ -69,7 +69,7 @@
 @endphp
 
 @if ($mitraTemplateInvoice)
-    <div class="bg-layer" style="background-image: url('{{ $mitraTemplateInvoice }}'); background-size: 100% 100%;"></div>
+    <div class="bg-layer" style="inset: 0; background-image: url('{{ $mitraTemplateInvoice }}'); background-size: 100% 100%; background-position: top center; transform: none;"></div>
 @else
     @if ($templateInvoice)
         <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>

@@ -37,7 +37,7 @@
             : null;
         $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 18mm 6mm 10mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center;';
         if ($mitraTemplate) {
-            $previewStyle .= " background-image: url('{$mitraTemplate}'); background-size: 100% 100%; transform: translateX(6mm);";
+            $previewStyle .= " background-image: url('{$mitraTemplate}'); background-size: 100% 100%; background-position: top center;";
         } elseif ($invoiceTemplate) {
             $previewStyle .= " background-image: url('{$invoiceTemplate}'); transform: translateX(6mm);";
         }
