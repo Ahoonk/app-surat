@@ -50,6 +50,13 @@
     };
 
     $mitra = $penawaran->mitra;
+    $isMitra = (bool) $mitra;
+    $issuerName = $mitra?->nama ?? 'PT Aldera Saddatech Karya';
+    $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+    $divisor = 1 + ($taxPercent / 100);
+    $pph23 = $isMitra && $divisor > 0
+        ? ($penawaran->total / $divisor) * 0.02
+        : 0;
     $mitraTemplatePath = $mitra?->template_invoice_path
         ? public_path('storage/' . $mitra->template_invoice_path)
         : null;
@@ -89,10 +96,12 @@
         </div>
     </div>
 
-    <div class="po-meta">
-        <div><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</div>
-        <div><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</div>
-    </div>
+    @unless($isMitra)
+        <div class="po-meta">
+            <div><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</div>
+            <div><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</div>
+        </div>
+    @endunless
 
     <table class="main-table">
         <thead>
@@ -134,6 +143,12 @@
                 <td>Tax ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</td>
                 <td class="right-text">Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</td>
             </tr>
+            @if ($isMitra)
+                <tr>
+                    <td>PPh23 (2%)</td>
+                    <td class="right-text">Rp {{ number_format($pph23, 2, ',', '.') }}</td>
+                </tr>
+            @endif
             <tr>
                 <td>Grand Total</td>
                 <td class="right-text">Rp {{ number_format($penawaran->total, 2, ',', '.') }}</td>
@@ -143,11 +158,17 @@
 
     <div class="notes block-90">
         <strong>Payment To :</strong><br>
-        <span>2950701709 (BCA)</span><br>
-        <span>a.n Aldera Saddatech Karya</span>
+        @if ($isMitra)
+            <span>Bank : Mandiri</span><br>
+            <span>No : 1630010438169</span><br>
+            <span>a.n : {{ $issuerName }}</span>
+        @else
+            <span>2950701709 (BCA)</span><br>
+            <span>a.n Aldera Saddatech Karya</span>
+        @endif
         <div class="signoff">
             <div>Hormat kami,</div>
-            <div style="margin-top:4px;"><strong>PT Aldera Saddatech Karya</strong></div>
+            <div style="margin-top:4px;"><strong>{{ $issuerName }}</strong></div>
             <div style="height:96px;"></div>
             <div><strong><u>{{ $penawaran->user->name ?? auth()->user()->name }}</u></strong></div>
             <div>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</div>
