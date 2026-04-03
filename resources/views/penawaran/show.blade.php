@@ -31,7 +31,7 @@
 
     <div class="bg-white rounded-2xl shadow-xl px-4 sm:px-6 lg:px-10 pb-6 sm:pb-10 pt-0 max-w-5xl text-[12px] sm:text-[13px] leading-6 bg-no-repeat bg-center"
          @if($mitraTemplateAsset)
-             style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: top center;"
+             style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: center -10mm;"
          @elseif($bgAsset)
              style="background-image: url('{{ $bgAsset }}'); background-size: 50% auto;"
          @endif>

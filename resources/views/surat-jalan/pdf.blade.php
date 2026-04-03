@@ -49,7 +49,7 @@
         ?: $toDataUri(public_path('storage/logos/background-template.png'));
 @endphp
     @if ($mitraTemplateAsset)
-        <div style="position: fixed; inset: 0; background-image: url('{{ $mitraTemplateAsset }}'); background-repeat: no-repeat; background-position: top center; background-size: 100% 100%; z-index: 0;"></div>
+        <div style="position: fixed; inset: 0; background-image: url('{{ $mitraTemplateAsset }}'); background-repeat: no-repeat; background-position: center -10mm; background-size: 100% 100%; z-index: 0;"></div>
     @else
         @if ($bgAsset)
             <div style="position: fixed; inset: 0; background-image: url('{{ $bgAsset }}'); background-repeat: no-repeat; background-position: center 36%; background-size: 50% auto; z-index: 0;"></div>
