@@ -171,9 +171,13 @@
             <div class="mt-1" style="white-space: pre-line;">{{ $penawaran->keterangan ?: '-' }}</div>
         </div>
 
+        @php
+            $issuerName = $penawaran->mitra?->nama ?? 'PT Aldera Saddatech Karya';
+        @endphp
+
         <div class="ttd-wrap mt-6">
             <div>Hormat kami,</div>
-            <div class="mt-1"><strong>PT Aldera Saddatech Karya</strong></div>
+            <div class="mt-1"><strong>{{ $issuerName }}</strong></div>
             <div style="height:70px;"></div>
             <div style="margin-top:2px;"><strong><u>{{ auth()->user()->name }}</u></strong></div>
             <div>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</div>

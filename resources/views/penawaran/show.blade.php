@@ -123,10 +123,14 @@
             <p class="whitespace-pre-line">{!! e($penawaran->keterangan ?: '-') !!}</p>
         </div>
 
+        @php
+            $issuerName = $penawaran->mitra?->nama ?? 'PT Aldera Saddatech Karya';
+        @endphp
+
         <div class="mt-12 flex justify-end">
             <div class="w-72 text-center">
                 <p>Hormat kami,</p>
-                <p class="font-semibold">PT Aldera Saddatech Karya</p>
+                <p class="font-semibold">{{ $issuerName }}</p>
 
                 <div class="h-24"></div>
 
