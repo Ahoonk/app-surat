@@ -69,7 +69,7 @@
     @endphp
 
     @if ($mitraTemplateAsset)
-        <div class="bg-layer" style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: center -10mm; opacity: 1;"></div>
+        <div class="bg-layer" style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: top center; opacity: 1;"></div>
     @else
         @if ($bgAsset)
             <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
