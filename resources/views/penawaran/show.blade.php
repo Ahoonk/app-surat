@@ -88,6 +88,15 @@
             </table>
         </div>
 
+        @php
+            $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+            $divisor = 1 + ($taxPercent / 100);
+            $pph23 = $penawaran->mitra_id
+                ? ($divisor > 0 ? ($penawaran->total / $divisor) * 0.02 : 0)
+                : 0;
+            $netAmount = $penawaran->total - $pph23;
+        @endphp
+
         <div class="ml-auto w-full max-w-sm">
             <div class="flex justify-between border-b py-2">
                 <span>Subtotal</span>
@@ -97,9 +106,15 @@
                 <span>Pajak ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</span>
                 <span>Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</span>
             </div>
+            @if ($penawaran->mitra_id)
+                <div class="flex justify-between border-b py-2">
+                    <span>PPh23 (2%)</span>
+                    <span>Rp {{ number_format($pph23, 2, ',', '.') }}</span>
+                </div>
+            @endif
             <div class="flex justify-between py-2 font-semibold">
-                <span>Total</span>
-                <span>Rp {{ number_format($penawaran->total, 2, ',', '.') }}</span>
+                <span>{{ $penawaran->mitra_id ? 'Amount (Net)' : 'Total' }}</span>
+                <span>Rp {{ number_format($penawaran->mitra_id ? $netAmount : $penawaran->total, 2, ',', '.') }}</span>
             </div>
         </div>
 

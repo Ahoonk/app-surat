@@ -129,8 +129,12 @@
                         <div class="p-3 bg-gray-50 rounded-lg border text-right" id="subtotal-display">Rp 0</div>
                         <div class="p-3 bg-gray-50 rounded-lg border">Pajak</div>
                         <div class="p-3 bg-gray-50 rounded-lg border text-right" id="tax-display">Rp 0</div>
+                        <div class="p-3 bg-gray-50 rounded-lg border">PPh23 (2%)</div>
+                        <div class="p-3 bg-gray-50 rounded-lg border text-right" id="pph23-display">Rp 0</div>
                         <div class="p-3 bg-blue-50 rounded-lg border font-semibold">Total</div>
                         <div class="p-3 bg-blue-50 rounded-lg border text-right font-semibold" id="total-display">Rp 0</div>
+                        <div class="p-3 bg-blue-50 rounded-lg border font-semibold">Amount (Net)</div>
+                        <div class="p-3 bg-blue-50 rounded-lg border text-right font-semibold" id="net-display">Rp 0</div>
                     </div>
                 </div>
             </div>
@@ -206,10 +210,15 @@
         const taxPercent = parseFloat(taxInput.value || 0);
         const tax = subtotal * (taxPercent / 100);
         const total = subtotal + tax;
+        const divisor = 1 + (taxPercent / 100 || 0);
+        const pph23 = divisor > 0 ? (total / divisor) * 0.02 : 0;
+        const netAmount = total - pph23;
 
         document.getElementById('subtotal-display').textContent = formatRupiah(subtotal);
         document.getElementById('tax-display').textContent = formatRupiah(tax);
+        document.getElementById('pph23-display').textContent = formatRupiah(pph23);
         document.getElementById('total-display').textContent = formatRupiah(total);
+        document.getElementById('net-display').textContent = formatRupiah(netAmount);
     }
 
     function addRow() {

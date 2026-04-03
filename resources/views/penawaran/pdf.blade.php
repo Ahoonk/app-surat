@@ -136,6 +136,15 @@
             </table>
         </div>
 
+        @php
+            $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+            $divisor = 1 + ($taxPercent / 100);
+            $pph23 = $penawaran->mitra_id
+                ? ($divisor > 0 ? ($penawaran->total / $divisor) * 0.02 : 0)
+                : 0;
+            $netAmount = $penawaran->total - $pph23;
+        @endphp
+
         <table class="summary mt-3">
             <tr>
                 <td>Subtotal</td>
@@ -145,9 +154,15 @@
                 <td>Pajak ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</td>
                 <td class="right">Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</td>
             </tr>
+            @if ($penawaran->mitra_id)
+                <tr>
+                    <td>PPh23 (2%)</td>
+                    <td class="right">Rp {{ number_format($pph23, 2, ',', '.') }}</td>
+                </tr>
+            @endif
             <tr>
-                <td>Total</td>
-                <td class="right">Rp {{ number_format($penawaran->total, 2, ',', '.') }}</td>
+                <td>{{ $penawaran->mitra_id ? 'Amount (Net)' : 'Total' }}</td>
+                <td class="right">Rp {{ number_format($penawaran->mitra_id ? $netAmount : $penawaran->total, 2, ',', '.') }}</td>
             </tr>
         </table>
 
