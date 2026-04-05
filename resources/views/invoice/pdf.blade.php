@@ -68,8 +68,17 @@
     $footerInvoice = $toDataUri($footerPath);
 @endphp
 
+@if ($isMitra)
+    <style>
+        @page { size: A4 portrait; margin: 0; }
+        .paper { max-width: 180mm; margin: 0 auto; padding: 170px 0 70px 0; }
+        .content-wrap { left: 0; width: 100%; }
+        .bg-layer { inset: 0; transform: none; background-position: top center; background-size: 100% 100%; }
+    </style>
+@endif
+
 @if ($mitraTemplateInvoice)
-    <div class="bg-layer" style="inset: 0; background-image: url('{{ $mitraTemplateInvoice }}'); background-size: 100% 100%; background-position: top center; transform: none;"></div>
+    <div class="bg-layer" style="background-image: url('{{ $mitraTemplateInvoice }}');"></div>
 @else
     @if ($templateInvoice)
         <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>
