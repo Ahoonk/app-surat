@@ -71,7 +71,7 @@
 @if ($isMitra)
     <style>
         @page { size: A4 portrait; margin: 0; }
-        .paper { max-width: 195mm; margin: 0 auto; padding: 170px 0 70px 0; }
+        .paper { max-width: 190mm; margin: 0 auto; padding: 170px 0 70px 0; }
         .content-wrap { left: 0; width: 100%; }
         .block-90, .main-table, .summary-wrap, .po-meta { width: 100%; }
         .bg-layer { inset: 0; transform: none; background-position: top center; background-size: 100% 100%; }
