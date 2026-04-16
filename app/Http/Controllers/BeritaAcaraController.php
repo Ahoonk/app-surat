@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class BeritaAcaraController extends Controller
@@ -22,7 +23,14 @@ class BeritaAcaraController extends Controller
             return $companyId;
         }
 
-        $this->syncFromInvoices($companyId);
+        try {
+            $this->syncFromInvoices($companyId);
+        } catch (\Throwable $e) {
+            Log::error('Gagal sinkron berita acara dari invoice.', [
+                'company_id' => $companyId,
+                'message' => $e->getMessage(),
+            ]);
+        }
 
         $beritaAcaras = BeritaAcara::whereHas('invoice.penawaran', function ($query) use ($companyId) {
             $query->where('company_id', $companyId);
@@ -139,22 +147,13 @@ class BeritaAcaraController extends Controller
     {
         $invoices = Invoice::whereHas('penawaran', function ($query) use ($companyId) {
             $query->where('company_id', $companyId);
-        })->get();
+        })->with('penawaran.mitra')->get();
 
         foreach ($invoices as $invoice) {
-            $mitra = $invoice->penawaran?->mitra;
-            $nomor = $mitra?->nomor_berita_acara ?: preg_replace('/^INV\//', 'BA/', $invoice->nomor);
+            $baseNumber = $this->buildBeritaAcaraNumber($invoice);
+            $nomor = $this->resolveUniqueBeritaAcaraNumber($invoice->id, $baseNumber);
 
-            if ($mitra?->nomor_berita_acara) {
-                $exists = BeritaAcara::where('nomor', $nomor)
-                    ->where('invoice_id', '!=', $invoice->id)
-                    ->exists();
-                if ($exists) {
-                    $nomor = preg_replace('/^INV\//', 'BA/', $invoice->nomor);
-                }
-            }
-
-            BeritaAcara::firstOrCreate(
+            BeritaAcara::updateOrCreate(
                 ['invoice_id' => $invoice->id],
                 [
                     'nomor' => $nomor,
@@ -163,5 +162,33 @@ class BeritaAcaraController extends Controller
                 ]
             );
         }
+    }
+
+    private function buildBeritaAcaraNumber(Invoice $invoice): string
+    {
+        $mitra = $invoice->penawaran?->mitra;
+
+        if (!empty($mitra?->nomor_berita_acara)) {
+            return $mitra->nomor_berita_acara;
+        }
+
+        return preg_replace('/^INV\//', 'BA/', $invoice->nomor);
+    }
+
+    private function resolveUniqueBeritaAcaraNumber(int $invoiceId, string $baseNumber): string
+    {
+        $candidate = $baseNumber;
+        $suffix = 2;
+
+        while (
+            BeritaAcara::where('nomor', $candidate)
+                ->where('invoice_id', '!=', $invoiceId)
+                ->exists()
+        ) {
+            $candidate = $baseNumber . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $candidate;
     }
 }
