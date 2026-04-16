@@ -16,8 +16,8 @@
 <body>
 @php
     $invoice = $beritaAcara->invoice;
-    $penawaran = $invoice->penawaran;
-    $po = $invoice->purchasingOrder;
+    $penawaran = $invoice?->penawaran;
+    $po = $invoice?->purchasingOrder;
     $tanggalSource = $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
     $tanggalObj = \Illuminate\Support\Carbon::parse($tanggalSource);
     $hariMap = [
@@ -72,7 +72,7 @@
 
         return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
     };
-    $mitra = $penawaran->mitra;
+    $mitra = $penawaran?->mitra;
     $mitraTemplatePath = $mitra?->template_berita_acara_path
         ? public_path('storage/' . $mitra->template_berita_acara_path)
         : null;
@@ -113,8 +113,8 @@
     <p>Pada hari ini, {{ $tanggalDeskriptif }},&nbsp;&nbsp;yang bertanda tangan dibawah ini</p>
 
     <div style="margin-left: 22px; margin-top: 8px;">
-        <div><span class="w-no">I.</span><span class="w-label">Nama</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran->to_company ?? $penawaran->customer_nama }}</span></div>
-        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran->to_address ?? '-' }}</span></div>
+        <div><span class="w-no">I.</span><span class="w-label">Nama</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</span></div>
+        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran?->to_address ?? '-' }}</span></div>
         <div style="margin-top: 4px;">Yang selanjutnya disebut <strong>PIHAK PERTAMA</strong></div>
     </div>
 
@@ -125,7 +125,7 @@
     </div>
 
     <p style="margin-top: 16px;">
-        Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po->nomor_po ?? '-' }}, PIHAK KEDUA telah
+        Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po?->nomor_po ?? '-' }}, PIHAK KEDUA telah
         melaksanakan pekerjaan untuk PIHAK PERTAMA {{ $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.' }}
     </p>
 

@@ -3,9 +3,9 @@
 @section('content')
 @php
     $invoice = $beritaAcara->invoice;
-    $penawaran = $invoice->penawaran;
-    $po = $invoice->purchasingOrder;
-    $mitra = $penawaran->mitra;
+    $penawaran = $invoice?->penawaran;
+    $po = $invoice?->purchasingOrder;
+    $mitra = $penawaran?->mitra;
     $mitraTemplatePath = $mitra?->template_berita_acara_path
         ? public_path('storage/' . $mitra->template_berita_acara_path)
         : null;
@@ -100,8 +100,8 @@
             <p>Pada hari ini, {{ $tanggalDeskriptif }},&nbsp;&nbsp;yang bertanda tangan dibawah ini</p>
 
             <div class="mt-4 ml-8">
-                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran->to_company ?? $penawaran->customer_nama }}</span></p>
-                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran->to_address ?? '-' }}</span></p>
+                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</span></p>
+                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_address ?? '-' }}</span></p>
                 <p class="mt-1">Yang selanjutnya disebut <strong>PIHAK PERTAMA</strong></p>
             </div>
 
@@ -112,7 +112,7 @@
             </div>
 
             <p class="mt-6">
-                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po->nomor_po ?? '-' }}, PIHAK KEDUA telah
+                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po?->nomor_po ?? '-' }}, PIHAK KEDUA telah
                 melaksanakan pekerjaan untuk PIHAK PERTAMA {{ $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.' }}
             </p>
 

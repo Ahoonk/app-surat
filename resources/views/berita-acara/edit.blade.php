@@ -3,7 +3,7 @@
 @section('content')
 @php
     $invoice = $beritaAcara->invoice;
-    $penawaran = $invoice->penawaran;
+    $penawaran = $invoice?->penawaran;
     $tanggalTtd = $beritaAcara->kota_tanggal_manual
         ? \Illuminate\Support\Carbon::parse($beritaAcara->kota_tanggal_manual)->format('Y-m-d')
         : \Illuminate\Support\Carbon::parse($beritaAcara->tanggal)->format('Y-m-d');
@@ -47,8 +47,8 @@
 
         <div class="mt-6 border-t pt-4 text-sm text-gray-600">
             <p><strong>Nomor:</strong> {{ $beritaAcara->nomor }}</p>
-            <p><strong>No Invoice:</strong> {{ $invoice->nomor }}</p>
-            <p><strong>Customer:</strong> {{ $penawaran->to_company ?? $penawaran->customer_nama }}</p>
+            <p><strong>No Invoice:</strong> {{ $invoice?->nomor ?? '-' }}</p>
+            <p><strong>Customer:</strong> {{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</p>
         </div>
     </div>
 </div>

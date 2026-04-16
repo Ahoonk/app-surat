@@ -31,11 +31,15 @@
                     </thead>
                     <tbody>
                         @foreach ($beritaAcaras as $beritaAcara)
+                            @php
+                                $invoice = $beritaAcara->invoice;
+                                $penawaran = $invoice?->penawaran;
+                            @endphp
                             <tr class="border-b">
                                 <td class="py-3 pr-4">{{ $beritaAcara->nomor }}</td>
                                 <td class="py-3 pr-4">{{ \Illuminate\Support\Carbon::parse($beritaAcara->tanggal)->translatedFormat('d F Y') }}</td>
-                                <td class="py-3 pr-4">{{ $beritaAcara->invoice->nomor }}</td>
-                                <td class="py-3 pr-4">{{ $beritaAcara->invoice->penawaran->to_company ?? $beritaAcara->invoice->penawaran->customer_nama }}</td>
+                                <td class="py-3 pr-4">{{ $invoice?->nomor ?? '-' }}</td>
+                                <td class="py-3 pr-4">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</td>
                                 <td class="py-3 pr-4">
                                     <div class="action-buttons">
                                         <a href="{{ route('berita-acara.edit', $beritaAcara) }}" title="Ubah Data" class="action-icon action-icon-gray">&#9998;</a>
@@ -44,8 +48,8 @@
                                             @csrf
                                             <button type="submit" title="Kirim" class="action-icon action-icon-gray">&#9993;</button>
                                         </form>
-                                        @if (($beritaAcara->invoice->penawaran->status ?? null) === 'draft')
-                                            <form method="POST" action="{{ route('invoice.destroy', $beritaAcara->invoice) }}" onsubmit="return confirm('Hapus transaksi yang dibatalkan ini?')">
+                                        @if (($penawaran?->status ?? null) === 'draft')
+                                            <form method="POST" action="{{ route('invoice.destroy', $invoice) }}" onsubmit="return confirm('Hapus transaksi yang dibatalkan ini?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" title="Hapus Transaksi" class="action-icon action-icon-red">&#128465;</button>
