@@ -144,10 +144,13 @@ class SuratJalanController extends Controller
         })->get();
 
         foreach ($invoices as $invoice) {
+            $mitra = $invoice->penawaran?->mitra;
+            $nomor = $mitra?->nomor_surat_jalan ?: preg_replace('/^INV\//', 'SJ/', $invoice->nomor);
+
             SuratJalan::firstOrCreate(
                 ['invoice_id' => $invoice->id],
                 [
-                    'nomor' => preg_replace('/^INV\//', 'SJ/', $invoice->nomor),
+                    'nomor' => $nomor,
                     'tanggal' => $invoice->tanggal,
                     'created_by' => $invoice->created_by ?? auth()->id(),
                 ]

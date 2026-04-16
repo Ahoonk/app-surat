@@ -13,6 +13,13 @@
     </div>
 
     @php
+        $mitra = $penawaran->mitra;
+        $mitraTemplatePath = $mitra?->template_penawaran_path
+            ? public_path('storage/' . $mitra->template_penawaran_path)
+            : null;
+        $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
+            ? asset('storage/' . $mitra->template_penawaran_path) . '?v=' . filemtime($mitraTemplatePath)
+            : null;
         $bgPrimary = public_path('storage/logos/background-template.png');
         $bgFallback = public_path('storage/logos/background-tempplate.png');
         $bgAsset = file_exists($bgPrimary)
@@ -23,8 +30,12 @@
     @endphp
 
     <div class="bg-white rounded-2xl shadow-xl px-4 sm:px-6 lg:px-10 pb-6 sm:pb-10 pt-0 max-w-5xl text-[12px] sm:text-[13px] leading-6 bg-no-repeat bg-center"
-         @if($bgAsset) style="background-image: url('{{ $bgAsset }}'); background-size: 50% auto;" @endif>
-        @if ($kopAtasAsset)
+         @if($mitraTemplateAsset)
+             style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: top center;"
+         @elseif($bgAsset)
+             style="background-image: url('{{ $bgAsset }}'); background-size: 50% auto;"
+         @endif>
+        @if (!$mitraTemplateAsset && $kopAtasAsset)
             <div class="mb-4 -mx-10">
                 <img src="{{ $kopAtasAsset }}" alt="Kop Atas" class="w-full h-auto block">
             </div>
@@ -77,6 +88,15 @@
             </table>
         </div>
 
+        @php
+            $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+            $divisor = 1 + ($taxPercent / 100);
+            $pph23 = $penawaran->mitra_id
+                ? ($divisor > 0 ? ($penawaran->total / $divisor) * 0.02 : 0)
+                : 0;
+            $netAmount = $penawaran->total - $pph23;
+        @endphp
+
         <div class="ml-auto w-full max-w-sm">
             <div class="flex justify-between border-b py-2">
                 <span>Subtotal</span>
@@ -86,9 +106,15 @@
                 <span>Pajak ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</span>
                 <span>Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</span>
             </div>
+            @if ($penawaran->mitra_id)
+                <div class="flex justify-between border-b py-2">
+                    <span>PPh23 (2%)</span>
+                    <span>Rp {{ number_format($pph23, 2, ',', '.') }}</span>
+                </div>
+            @endif
             <div class="flex justify-between py-2 font-semibold">
-                <span>Total</span>
-                <span>Rp {{ number_format($penawaran->total, 2, ',', '.') }}</span>
+                <span>{{ $penawaran->mitra_id ? 'Amount (Net)' : 'Total' }}</span>
+                <span>Rp {{ number_format($penawaran->mitra_id ? $netAmount : $penawaran->total, 2, ',', '.') }}</span>
             </div>
         </div>
 
@@ -97,10 +123,14 @@
             <p class="whitespace-pre-line">{!! e($penawaran->keterangan ?: '-') !!}</p>
         </div>
 
+        @php
+            $issuerName = $penawaran->mitra?->nama ?? 'PT Aldera Saddatech Karya';
+        @endphp
+
         <div class="mt-12 flex justify-end">
             <div class="w-72 text-center">
                 <p>Hormat kami,</p>
-                <p class="font-semibold">PT Aldera Saddatech Karya</p>
+                <p class="font-semibold">{{ $issuerName }}</p>
 
                 <div class="h-24"></div>
 
@@ -109,7 +139,7 @@
             </div>
         </div>
 
-        @if ($kopBawahAsset)
+        @if (!$mitraTemplateAsset && $kopBawahAsset)
             <div class="mt-8 -mx-10 -mb-10">
                 <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" class="w-full h-auto block">
             </div>

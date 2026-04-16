@@ -142,10 +142,22 @@ class BeritaAcaraController extends Controller
         })->get();
 
         foreach ($invoices as $invoice) {
+            $mitra = $invoice->penawaran?->mitra;
+            $nomor = $mitra?->nomor_berita_acara ?: preg_replace('/^INV\//', 'BA/', $invoice->nomor);
+
+            if ($mitra?->nomor_berita_acara) {
+                $exists = BeritaAcara::where('nomor', $nomor)
+                    ->where('invoice_id', '!=', $invoice->id)
+                    ->exists();
+                if ($exists) {
+                    $nomor = preg_replace('/^INV\//', 'BA/', $invoice->nomor);
+                }
+            }
+
             BeritaAcara::firstOrCreate(
                 ['invoice_id' => $invoice->id],
                 [
-                    'nomor' => preg_replace('/^INV\//', 'BA/', $invoice->nomor),
+                    'nomor' => $nomor,
                     'tanggal' => $invoice->tanggal,
                     'created_by' => $invoice->created_by ?? auth()->id(),
                 ]

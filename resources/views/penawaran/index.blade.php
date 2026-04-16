@@ -20,10 +20,16 @@
             Surat Penawaran
         </h1>
 
-        <a href="{{ route('penawaran.create') }}"
-           class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-            + Buat Penawaran
-        </a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('penawaran.create') }}"
+               class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+                + Buat Penawaran
+            </a>
+            <a href="{{ route('penawaran.mitra.create') }}"
+               class="bg-emerald-600 text-white px-5 py-2 rounded-lg shadow hover:bg-emerald-700 transition">
+                + Penawaran Mitra
+            </a>
+        </div>
     </div>
 
     <div class="bg-white rounded-xl shadow p-6">

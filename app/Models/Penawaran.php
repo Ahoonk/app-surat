@@ -9,6 +9,7 @@ class Penawaran extends Model
 {
     protected $fillable = [
         'company_id',
+        'mitra_id',
         'user_id',
         'nomor',
         'tanggal',
@@ -48,6 +49,11 @@ class Penawaran extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PenawaranItem::class);
+    }
+
+    public function mitra()
+    {
+        return $this->belongsTo(Mitra::class);
     }
 
     public function purchasingOrder()

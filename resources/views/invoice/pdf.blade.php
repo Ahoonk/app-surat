@@ -33,26 +33,60 @@
 </head>
 <body>
 @php
+    $toDataUri = static function (string $path): ?string {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match ($ext) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'image/png',
+        };
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+    };
+
+    $mitra = $penawaran->mitra;
+    $isMitra = (bool) $mitra;
+    $issuerName = $mitra?->nama ?? 'PT Aldera Saddatech Karya';
+    $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+    $divisor = 1 + ($taxPercent / 100);
+    $pph23 = $isMitra && $divisor > 0
+        ? ($penawaran->total / $divisor) * 0.02
+        : 0;
+    $mitraTemplatePath = $mitra?->template_invoice_path
+        ? public_path('storage/' . $mitra->template_invoice_path)
+        : null;
+    $mitraTemplateInvoice = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+
     $templatePath = public_path('storage/logos/template-invoice.png');
     $footerPath = public_path('storage/logos/kopbawah-invoice.png');
-    $templateInvoice = null;
-    $footerInvoice = null;
-
-    if (file_exists($templatePath)) {
-        $data = base64_encode(file_get_contents($templatePath));
-        $templateInvoice = 'data:image/png;base64,' . $data;
-    }
-    if (file_exists($footerPath)) {
-        $dataFooter = base64_encode(file_get_contents($footerPath));
-        $footerInvoice = 'data:image/png;base64,' . $dataFooter;
-    }
+    $templateInvoice = $toDataUri($templatePath);
+    $footerInvoice = $toDataUri($footerPath);
 @endphp
 
-@if ($templateInvoice)
-    <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>
+@if ($isMitra)
+    <style>
+        @page { size: A4 portrait; margin: 0; }
+        .paper { max-width: 190mm; margin: 0 auto; padding: 170px 0 70px 0; }
+        .content-wrap { left: 0; width: 100%; }
+        .block-90, .main-table, .summary-wrap, .po-meta { width: 100%; }
+        .bg-layer { inset: 0; transform: none; background-position: top center; background-size: 100% 100%; }
+    </style>
 @endif
-@if ($footerInvoice)
-    <div class="footer-layer" style="background-image: url('{{ $footerInvoice }}');"></div>
+
+@if ($mitraTemplateInvoice)
+    <div class="bg-layer" style="background-image: url('{{ $mitraTemplateInvoice }}');"></div>
+@else
+    @if ($templateInvoice)
+        <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>
+    @endif
+    @if ($footerInvoice)
+        <div class="footer-layer" style="background-image: url('{{ $footerInvoice }}');"></div>
+    @endif
 @endif
 
 <div class="paper">
@@ -72,10 +106,12 @@
         </div>
     </div>
 
-    <div class="po-meta">
-        <div><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</div>
-        <div><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</div>
-    </div>
+    @unless($isMitra)
+        <div class="po-meta">
+            <div><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</div>
+            <div><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</div>
+        </div>
+    @endunless
 
     <table class="main-table">
         <thead>
@@ -117,20 +153,32 @@
                 <td>Tax ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</td>
                 <td class="right-text">Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</td>
             </tr>
+            @if ($isMitra)
+                <tr>
+                    <td>PPh23 (2%)</td>
+                    <td class="right-text">Rp {{ number_format($pph23, 2, ',', '.') }}</td>
+                </tr>
+            @endif
             <tr>
-                <td>Grand Total</td>
-                <td class="right-text">Rp {{ number_format($penawaran->total, 2, ',', '.') }}</td>
+                <td>{{ $isMitra ? 'Amount' : 'Grand Total' }}</td>
+                <td class="right-text">Rp {{ number_format($isMitra ? ($penawaran->total - $pph23) : $penawaran->total, 2, ',', '.') }}</td>
             </tr>
         </table>
     </div>
 
     <div class="notes block-90">
         <strong>Payment To :</strong><br>
-        <span>2950701709 (BCA)</span><br>
-        <span>a.n Aldera Saddatech Karya</span>
+        @if ($isMitra)
+            <span>Bank : Mandiri</span><br>
+            <span>No : 1630010438169</span><br>
+            <span>a.n : {{ $issuerName }}</span>
+        @else
+            <span>2950701709 (BCA)</span><br>
+            <span>a.n Aldera Saddatech Karya</span>
+        @endif
         <div class="signoff">
             <div>Hormat kami,</div>
-            <div style="margin-top:4px;"><strong>PT Aldera Saddatech Karya</strong></div>
+            <div style="margin-top:4px;"><strong>{{ $issuerName }}</strong></div>
             <div style="height:96px;"></div>
             <div><strong><u>{{ $penawaran->user->name ?? auth()->user()->name }}</u></strong></div>
             <div>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</div>

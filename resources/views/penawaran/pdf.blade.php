@@ -54,6 +54,12 @@
             return 'data:' . $mime . ';base64,' . $data;
         };
 
+        $mitra = $penawaran->mitra;
+        $mitraTemplatePath = $mitra?->template_penawaran_path
+            ? public_path('storage/' . $mitra->template_penawaran_path)
+            : null;
+        $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+
         $bgPrimary = public_path('storage/logos/background-template.png');
         $bgFallback = public_path('storage/logos/background-tempplate.png');
         $bgPath = file_exists($bgPrimary) ? $bgPrimary : (file_exists($bgFallback) ? $bgFallback : null);
@@ -62,20 +68,24 @@
         $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah-penawaran.png'));
     @endphp
 
-    @if ($bgAsset)
-        <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
-    @endif
+    @if ($mitraTemplateAsset)
+        <div class="bg-layer" style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: top center; opacity: 1;"></div>
+    @else
+        @if ($bgAsset)
+            <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
+        @endif
 
-    @if ($kopAtasAsset)
-        <div class="head-layer">
-            <img src="{{ $kopAtasAsset }}" alt="Kop Atas" class="kop-top">
-        </div>
-    @endif
+        @if ($kopAtasAsset)
+            <div class="head-layer">
+                <img src="{{ $kopAtasAsset }}" alt="Kop Atas" class="kop-top">
+            </div>
+        @endif
 
-    @if ($kopBawahAsset)
-        <div class="foot-layer">
-            <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" class="kop-bottom">
-        </div>
+        @if ($kopBawahAsset)
+            <div class="foot-layer">
+                <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" class="kop-bottom">
+            </div>
+        @endif
     @endif
 
     <div class="paper content-space">
@@ -126,6 +136,15 @@
             </table>
         </div>
 
+        @php
+            $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+            $divisor = 1 + ($taxPercent / 100);
+            $pph23 = $penawaran->mitra_id
+                ? ($divisor > 0 ? ($penawaran->total / $divisor) * 0.02 : 0)
+                : 0;
+            $netAmount = $penawaran->total - $pph23;
+        @endphp
+
         <table class="summary mt-3">
             <tr>
                 <td>Subtotal</td>
@@ -135,9 +154,15 @@
                 <td>Pajak ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</td>
                 <td class="right">Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</td>
             </tr>
+            @if ($penawaran->mitra_id)
+                <tr>
+                    <td>PPh23 (2%)</td>
+                    <td class="right">Rp {{ number_format($pph23, 2, ',', '.') }}</td>
+                </tr>
+            @endif
             <tr>
-                <td>Total</td>
-                <td class="right">Rp {{ number_format($penawaran->total, 2, ',', '.') }}</td>
+                <td>{{ $penawaran->mitra_id ? 'Amount (Net)' : 'Total' }}</td>
+                <td class="right">Rp {{ number_format($penawaran->mitra_id ? $netAmount : $penawaran->total, 2, ',', '.') }}</td>
             </tr>
         </table>
 
@@ -146,9 +171,13 @@
             <div class="mt-1" style="white-space: pre-line;">{{ $penawaran->keterangan ?: '-' }}</div>
         </div>
 
+        @php
+            $issuerName = $penawaran->mitra?->nama ?? 'PT Aldera Saddatech Karya';
+        @endphp
+
         <div class="ttd-wrap mt-6">
             <div>Hormat kami,</div>
-            <div class="mt-1"><strong>PT Aldera Saddatech Karya</strong></div>
+            <div class="mt-1"><strong>{{ $issuerName }}</strong></div>
             <div style="height:70px;"></div>
             <div style="margin-top:2px;"><strong><u>{{ auth()->user()->name }}</u></strong></div>
             <div>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</div>

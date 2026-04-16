@@ -16,8 +16,8 @@
 <body>
 @php
     $invoice = $beritaAcara->invoice;
-    $penawaran = $invoice->penawaran;
-    $po = $invoice->purchasingOrder;
+    $penawaran = $invoice?->penawaran;
+    $po = $invoice?->purchasingOrder;
     $tanggalSource = $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
     $tanggalObj = \Illuminate\Support\Carbon::parse($tanggalSource);
     $hariMap = [
@@ -72,26 +72,35 @@
 
         return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
     };
+    $mitra = $penawaran?->mitra;
+    $mitraTemplatePath = $mitra?->template_berita_acara_path
+        ? public_path('storage/' . $mitra->template_berita_acara_path)
+        : null;
+    $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
     $kopAtasAsset = $toDataUri(public_path('storage/logos/kopatas.png'));
     $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah.png'));
     $bgAsset = $toDataUri(public_path('storage/logos/backgroud-template.png'))
         ?: $toDataUri(public_path('storage/logos/background-template.png'));
 @endphp
 
-@if ($bgAsset)
-    <div style="position: fixed; inset: 0; background-image: url('{{ $bgAsset }}'); background-repeat: no-repeat; background-position: center 36%; background-size: 50% auto; z-index: 0;"></div>
-@endif
+@if ($mitraTemplateAsset)
+    <div style="position: fixed; inset: 0; background-image: url('{{ $mitraTemplateAsset }}'); background-repeat: no-repeat; background-position: top center; background-size: 100% 100%; z-index: 0;"></div>
+@else
+    @if ($bgAsset)
+        <div style="position: fixed; inset: 0; background-image: url('{{ $bgAsset }}'); background-repeat: no-repeat; background-position: center 36%; background-size: 50% auto; z-index: 0;"></div>
+    @endif
 
-@if ($kopAtasAsset)
-    <div style="position: fixed; top: -15mm; left: 0; right: 0; z-index: 1;">
-        <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="width: 112%; margin-left: -6%; height: auto; display: block;">
-    </div>
-@endif
+    @if ($kopAtasAsset)
+        <div style="position: fixed; top: -15mm; left: 0; right: 0; z-index: 1;">
+            <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="width: 112%; margin-left: -6%; height: auto; display: block;">
+        </div>
+    @endif
 
-@if ($kopBawahAsset)
-    <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 1;">
-        <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="width: 100%; height: auto; display: block; transform: translateX(-3mm);">
-    </div>
+    @if ($kopBawahAsset)
+        <div style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 1;">
+            <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="width: 100%; height: auto; display: block; transform: translateX(-3mm);">
+        </div>
+    @endif
 @endif
 
 <div style="padding-top: 145px; padding-bottom: 110px; position: relative; z-index: 2;">
@@ -104,8 +113,8 @@
     <p>Pada hari ini, {{ $tanggalDeskriptif }},&nbsp;&nbsp;yang bertanda tangan dibawah ini</p>
 
     <div style="margin-left: 22px; margin-top: 8px;">
-        <div><span class="w-no">I.</span><span class="w-label">Nama</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran->to_company ?? $penawaran->customer_nama }}</span></div>
-        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran->to_address ?? '-' }}</span></div>
+        <div><span class="w-no">I.</span><span class="w-label">Nama</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</span></div>
+        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran?->to_address ?? '-' }}</span></div>
         <div style="margin-top: 4px;">Yang selanjutnya disebut <strong>PIHAK PERTAMA</strong></div>
     </div>
 
@@ -116,7 +125,7 @@
     </div>
 
     <p style="margin-top: 16px;">
-        Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po->nomor_po ?? '-' }}, PIHAK KEDUA telah
+        Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po?->nomor_po ?? '-' }}, PIHAK KEDUA telah
         melaksanakan pekerjaan untuk PIHAK PERTAMA {{ $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.' }}
     </p>
 

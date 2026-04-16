@@ -115,6 +115,11 @@
                     Customer
                 </a>
 
+                <a href="{{ route('mitra.index') }}"
+                   class="{{ $menuClass('mitra.*') }}">
+                    Daftar Mitra
+                </a>
+
                 @if(auth()->user()?->isSuperAdmin())
                     <a href="{{ route('users.index') }}"
                        class="{{ $menuClass('users.*') }}">

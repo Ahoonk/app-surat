@@ -3,8 +3,15 @@
 @section('content')
 @php
     $invoice = $beritaAcara->invoice;
-    $penawaran = $invoice->penawaran;
-    $po = $invoice->purchasingOrder;
+    $penawaran = $invoice?->penawaran;
+    $po = $invoice?->purchasingOrder;
+    $mitra = $penawaran?->mitra;
+    $mitraTemplatePath = $mitra?->template_berita_acara_path
+        ? public_path('storage/' . $mitra->template_berita_acara_path)
+        : null;
+    $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
+        ? asset('storage/' . $mitra->template_berita_acara_path) . '?v=' . filemtime($mitraTemplatePath)
+        : null;
     $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? asset('storage/logos/kopatas.png') : null;
     $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah.png')) ? asset('storage/logos/kopbawah.png') : null;
     $bgPrimaryPath = public_path('storage/logos/backgroud-template.png');
@@ -68,14 +75,18 @@
     </div>
 
     <div class="mx-auto bg-white rounded-2xl shadow-xl relative overflow-hidden" style="{{ $previewPaperStyle }}">
-        @if ($bgAsset)
-            <div style="position:absolute;inset:0;background-image:url('{{ $bgAsset }}');background-repeat:no-repeat;background-position:center 36%;background-size:50% auto;z-index:0;"></div>
-        @endif
-        @if ($kopAtasAsset)
-            <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="position:absolute;top:-8mm;left:0;right:0;width:106%;margin-left:-1%;height:auto;display:block;z-index:1;">
-        @endif
-        @if ($kopBawahAsset)
-            <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="position:absolute;bottom:0;left:0;right:0;width:100%;height:auto;display:block;z-index:1;">
+        @if ($mitraTemplateAsset)
+            <div style="position:absolute;inset:0;background-image:url('{{ $mitraTemplateAsset }}');background-repeat:no-repeat;background-position:top center;background-size:100% 100%;z-index:0;"></div>
+        @else
+            @if ($bgAsset)
+                <div style="position:absolute;inset:0;background-image:url('{{ $bgAsset }}');background-repeat:no-repeat;background-position:center 36%;background-size:50% auto;z-index:0;"></div>
+            @endif
+            @if ($kopAtasAsset)
+                <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="position:absolute;top:-8mm;left:0;right:0;width:106%;margin-left:-1%;height:auto;display:block;z-index:1;">
+            @endif
+            @if ($kopBawahAsset)
+                <img src="{{ $kopBawahAsset }}" alt="Kop Bawah" style="position:absolute;bottom:0;left:0;right:0;width:100%;height:auto;display:block;z-index:1;">
+            @endif
         @endif
 
         <div style="{{ $previewContentStyle }}">
@@ -89,8 +100,8 @@
             <p>Pada hari ini, {{ $tanggalDeskriptif }},&nbsp;&nbsp;yang bertanda tangan dibawah ini</p>
 
             <div class="mt-4 ml-8">
-                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran->to_company ?? $penawaran->customer_nama }}</span></p>
-                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran->to_address ?? '-' }}</span></p>
+                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</span></p>
+                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_address ?? '-' }}</span></p>
                 <p class="mt-1">Yang selanjutnya disebut <strong>PIHAK PERTAMA</strong></p>
             </div>
 
@@ -101,7 +112,7 @@
             </div>
 
             <p class="mt-6">
-                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po->nomor_po ?? '-' }}, PIHAK KEDUA telah
+                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po?->nomor_po ?? '-' }}, PIHAK KEDUA telah
                 melaksanakan pekerjaan untuk PIHAK PERTAMA {{ $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.' }}
             </p>
 

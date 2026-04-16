@@ -13,6 +13,20 @@
     </div>
 
     @php
+        $mitra = $penawaran->mitra;
+        $isMitra = (bool) $mitra;
+        $issuerName = $mitra?->nama ?? 'PT Aldera Saddatech Karya';
+        $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+        $divisor = 1 + ($taxPercent / 100);
+        $pph23 = $isMitra && $divisor > 0
+            ? ($penawaran->total / $divisor) * 0.02
+            : 0;
+        $mitraTemplatePath = $mitra?->template_invoice_path
+            ? public_path('storage/' . $mitra->template_invoice_path)
+            : null;
+        $mitraTemplate = $mitraTemplatePath && file_exists($mitraTemplatePath)
+            ? asset('storage/' . $mitra->template_invoice_path) . '?v=' . filemtime($mitraTemplatePath)
+            : null;
         $invoiceTemplatePath = public_path('storage/logos/template-invoice.png');
         $invoiceFooterPath = public_path('storage/logos/kopbawah-invoice.png');
         $invoiceTemplate = file_exists($invoiceTemplatePath)
@@ -22,7 +36,9 @@
             ? asset('storage/logos/kopbawah-invoice.png') . '?v=' . filemtime($invoiceFooterPath)
             : null;
         $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 18mm 6mm 10mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center;';
-        if ($invoiceTemplate) {
+        if ($mitraTemplate) {
+            $previewStyle .= " background-image: url('{$mitraTemplate}'); background-size: 100% 100%; background-position: top center;";
+        } elseif ($invoiceTemplate) {
             $previewStyle .= " background-image: url('{$invoiceTemplate}'); transform: translateX(6mm);";
         }
     @endphp
@@ -43,10 +59,12 @@
             </div>
         </div>
 
-        <div class="mt-3 mb-2 text-[11px]">
-            <p><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</p>
-            <p><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</p>
-        </div>
+        @unless($isMitra)
+            <div class="mt-3 mb-2 text-[11px]">
+                <p><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</p>
+                <p><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</p>
+            </div>
+        @endunless
 
         <div class="mt-6 overflow-x-auto">
             <table class="w-full border-collapse">
@@ -89,25 +107,37 @@
                 <span>Tax ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</span>
                 <span>Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</span>
             </div>
+            @if($isMitra)
+                <div class="flex justify-between border-b py-2">
+                    <span>PPh23 (2%)</span>
+                    <span>Rp {{ number_format($pph23, 2, ',', '.') }}</span>
+                </div>
+            @endif
             <div class="flex justify-between py-2 font-semibold text-base">
-                <span>Grand Total</span>
-                <span>Rp {{ number_format($penawaran->total, 2, ',', '.') }}</span>
+                <span>{{ $isMitra ? 'Amount' : 'Grand Total' }}</span>
+                <span>Rp {{ number_format($isMitra ? ($penawaran->total - $pph23) : $penawaran->total, 2, ',', '.') }}</span>
             </div>
         </div>
 
         <div class="mt-10 text-[11px]">
             <p><strong>Payment To :</strong></p>
-            <p>2950701709 (BCA)</p>
-            <p>a.n Aldera Saddatech Karya</p>
+            @if($isMitra)
+                <p>Bank : Mandiri</p>
+                <p>No : 1630010438169</p>
+                <p>a.n : {{ $issuerName }}</p>
+            @else
+                <p>2950701709 (BCA)</p>
+                <p>a.n Aldera Saddatech Karya</p>
+            @endif
             <div class="w-[260px] ml-auto mt-4 text-center">
                 <p>Hormat kami,</p>
-                <p class="font-semibold mt-1">PT Aldera Saddatech Karya</p>
+                <p class="font-semibold mt-1">{{ $issuerName }}</p>
                 <div class="h-20"></div>
                 <p class="font-semibold underline">{{ $penawaran->user->name ?? auth()->user()->name }}</p>
                 <p>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</p>
             </div>
         </div>
-        @if($invoiceFooter)
+        @if(!$mitraTemplate && $invoiceFooter)
             <img src="{{ $invoiceFooter }}" alt="Footer Invoice" style="position:absolute; left:0; right:0; bottom:-140mm; width:100%; height:34mm; object-fit:fill; transform:translateX(-0.5mm);">
         @endif
         </div>
