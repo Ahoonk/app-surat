@@ -24,6 +24,35 @@
                     <strong>{{ auth()->user()->company->name }}</strong>
                 </p>
 
+                @php
+                    $invoiceTotalAll = $dashboardFinancial['total_semua'] ?? 0;
+                    $invoiceTotalPaid = $dashboardFinancial['total_sudah_dibayar'] ?? 0;
+                    $invoiceTotalUnpaid = $dashboardFinancial['total_belum_dibayar'] ?? 0;
+                    $invoiceCountAll = $dashboardFinancial['jumlah_semua'] ?? 0;
+                    $invoiceCountPaid = $dashboardFinancial['jumlah_sudah_dibayar'] ?? 0;
+                    $invoiceCountUnpaid = $dashboardFinancial['jumlah_belum_dibayar'] ?? 0;
+                @endphp
+
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                        <p class="text-sm text-slate-500">Total Semua Invoice</p>
+                        <p class="mt-2 text-2xl font-bold text-slate-900">Rp {{ number_format($invoiceTotalAll, 2, ',', '.') }}</p>
+                        <p class="mt-1 text-xs text-slate-500">{{ $invoiceCountAll }} invoice</p>
+                    </div>
+
+                    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+                        <p class="text-sm text-emerald-700">Total Invoice Sudah Dibayar</p>
+                        <p class="mt-2 text-2xl font-bold text-emerald-800">Rp {{ number_format($invoiceTotalPaid, 2, ',', '.') }}</p>
+                        <p class="mt-1 text-xs text-emerald-700">{{ $invoiceCountPaid }} invoice</p>
+                    </div>
+
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                        <p class="text-sm text-amber-700">Total Invoice Belum Dibayar</p>
+                        <p class="mt-2 text-2xl font-bold text-amber-800">Rp {{ number_format($invoiceTotalUnpaid, 2, ',', '.') }}</p>
+                        <p class="mt-1 text-xs text-amber-700">{{ $invoiceCountUnpaid }} invoice</p>
+                    </div>
+                </div>
+
                 <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div class="rounded-lg border p-4">
                         <h4 class="font-semibold mb-2">Status Penawaran</h4>
