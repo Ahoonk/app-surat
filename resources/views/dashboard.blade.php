@@ -15,14 +15,23 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 
-                <h3 class="text-lg font-bold">
-                    Selamat datang, {{ auth()->user()->name }}
-                </h3>
+                <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold">
+                            Selamat datang, {{ auth()->user()->name }}
+                        </h3>
 
-                <p class="mt-2">
-                    Perusahaan: 
-                    <strong>{{ auth()->user()->company->name }}</strong>
-                </p>
+                        <p class="mt-2">
+                            Perusahaan:
+                            <strong>{{ auth()->user()->company->name }}</strong>
+                        </p>
+                    </div>
+
+                    <div class="text-left md:text-right">
+                        <h3 class="text-2xl font-bold text-gray-900">Laporan Keuangan</h3>
+                        <p class="mt-1 text-sm text-gray-500">Tahun 2026</p>
+                    </div>
+                </div>
 
                 @php
                     $invoiceTotalAll = $dashboardFinancial['total_semua'] ?? 0;
@@ -66,9 +75,6 @@
                 </div>
 
                 <div class="mt-6">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-lg font-semibold text-gray-800">Data Pajak / PPh21</h4>
-                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                             <p class="text-sm text-slate-500">Total Pajak Semua</p>
@@ -91,9 +97,6 @@
                 </div>
 
                 <div class="mt-6">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-lg font-semibold text-gray-800">Data Nota Toko</h4>
-                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
                             <p class="text-sm text-slate-500">Total Semua Nota Toko</p>
