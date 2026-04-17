@@ -20,6 +20,8 @@ class NotaToko extends Model
         'tax_percent',
         'tax_amount',
         'total',
+        'payment_status',
+        'payment_date',
     ];
 
     public function items(): HasMany
