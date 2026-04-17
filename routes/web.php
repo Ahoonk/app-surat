@@ -16,6 +16,7 @@ use App\Http\Controllers\TelegramBotController;
 use App\Models\FakturPajak;
 use App\Models\Invoice;
 use App\Models\Penawaran;
+use App\Models\NotaToko;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -77,6 +78,17 @@ Route::get('/dashboard', function () {
     $fakturPaid = (clone $fakturQuery)->where('payment_status', 'paid')->count();
     $fakturPendingUpload = (clone $invoiceQuery)->whereDoesntHave('fakturPajak')->count();
 
+    $notaTokoQuery = NotaToko::where('company_id', $companyId);
+    $notaTokoUnpaid = (clone $notaTokoQuery)->where('payment_status', 'unpaid')->count();
+    $notaTokoPaid = (clone $notaTokoQuery)->where('payment_status', 'paid')->count();
+    $notaTokoTotalAll = (clone $notaTokoQuery)->sum('total');
+    $notaTokoTotalPaid = (clone $notaTokoQuery)
+        ->where('payment_status', 'paid')
+        ->sum('total');
+    $notaTokoTotalUnpaid = (clone $notaTokoQuery)
+        ->where('payment_status', 'unpaid')
+        ->sum('total');
+
     $dashboardStatus = [
         'penawaran' => [
             'draft' => (clone $penawaranQuery)->where('status', 'draft')->count(),
@@ -117,6 +129,15 @@ Route::get('/dashboard', function () {
         'jumlah_belum_dibayar' => $invoiceUnpaid,
     ];
 
+    $dashboardNotaToko = [
+        'total_semua' => $notaTokoTotalAll,
+        'total_sudah_dibayar' => $notaTokoTotalPaid,
+        'total_belum_dibayar' => $notaTokoTotalUnpaid,
+        'jumlah_semua' => $notaTokoUnpaid + $notaTokoPaid,
+        'jumlah_sudah_dibayar' => $notaTokoPaid,
+        'jumlah_belum_dibayar' => $notaTokoUnpaid,
+    ];
+
     $dashboardTransactions = $penawaranQuery
         ->with([
             'items',
@@ -139,7 +160,7 @@ Route::get('/dashboard', function () {
             ];
         });
 
-    return view('dashboard', compact('dashboardFinancial', 'dashboardStatus', 'dashboardTax', 'dashboardTransactions'));
+    return view('dashboard', compact('dashboardFinancial', 'dashboardStatus', 'dashboardTax', 'dashboardNotaToko', 'dashboardTransactions'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('telegram/webhook', [TelegramBotController::class, 'webhook'])->name('telegram.webhook');
