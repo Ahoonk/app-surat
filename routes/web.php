@@ -41,6 +41,14 @@ Route::get('/dashboard', function () {
     $invoiceUnpaid = (clone $invoiceQuery)->where('payment_status', 'unpaid')->count();
     $invoicePaid = (clone $invoiceQuery)->where('payment_status', 'paid')->count();
 
+    $invoiceTotalAll = (clone $invoiceQuery)->sum('total');
+    $invoiceTotalPaid = (clone $invoiceQuery)
+        ->where('payment_status', 'paid')
+        ->sum('total');
+    $invoiceTotalUnpaid = (clone $invoiceQuery)
+        ->where('payment_status', 'unpaid')
+        ->sum('total');
+
     $fakturQuery = FakturPajak::whereHas('invoice.penawaran', function ($query) use ($companyId) {
         $query->where('company_id', $companyId);
     });
@@ -71,6 +79,15 @@ Route::get('/dashboard', function () {
         ],
     ];
 
+    $dashboardFinancial = [
+        'total_semua' => $invoiceTotalAll,
+        'total_sudah_dibayar' => $invoiceTotalPaid,
+        'total_belum_dibayar' => $invoiceTotalUnpaid,
+        'jumlah_semua' => $invoiceUnpaid + $invoicePaid,
+        'jumlah_sudah_dibayar' => $invoicePaid,
+        'jumlah_belum_dibayar' => $invoiceUnpaid,
+    ];
+
     $dashboardTransactions = $penawaranQuery
         ->with([
             'items',
@@ -93,7 +110,7 @@ Route::get('/dashboard', function () {
             ];
         });
 
-    return view('dashboard', compact('dashboardStatus', 'dashboardTransactions'));
+    return view('dashboard', compact('dashboardFinancial', 'dashboardStatus', 'dashboardTransactions'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('telegram/webhook', [TelegramBotController::class, 'webhook'])->name('telegram.webhook');
