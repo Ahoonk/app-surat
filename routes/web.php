@@ -49,6 +49,26 @@ Route::get('/dashboard', function () {
         ->where('payment_status', 'unpaid')
         ->sum('total');
 
+    $invoiceTaxRows = (clone $invoiceQuery)
+        ->with(['penawaran:id,tax_amount']);
+    $invoiceTaxTotalAll = $invoiceTaxRows->get()->sum(function ($invoice) {
+        return (float) ($invoice->penawaran?->tax_amount ?? 0);
+    });
+    $invoiceTaxTotalPaid = (clone $invoiceQuery)
+        ->where('payment_status', 'paid')
+        ->with(['penawaran:id,tax_amount'])
+        ->get()
+        ->sum(function ($invoice) {
+            return (float) ($invoice->penawaran?->tax_amount ?? 0);
+        });
+    $invoiceTaxTotalUnpaid = (clone $invoiceQuery)
+        ->where('payment_status', 'unpaid')
+        ->with(['penawaran:id,tax_amount'])
+        ->get()
+        ->sum(function ($invoice) {
+            return (float) ($invoice->penawaran?->tax_amount ?? 0);
+        });
+
     $fakturQuery = FakturPajak::whereHas('invoice.penawaran', function ($query) use ($companyId) {
         $query->where('company_id', $companyId);
     });
@@ -88,6 +108,15 @@ Route::get('/dashboard', function () {
         'jumlah_belum_dibayar' => $invoiceUnpaid,
     ];
 
+    $dashboardTax = [
+        'total_semua' => $invoiceTaxTotalAll,
+        'total_sudah_dibayar' => $invoiceTaxTotalPaid,
+        'total_belum_dibayar' => $invoiceTaxTotalUnpaid,
+        'jumlah_semua' => $invoiceUnpaid + $invoicePaid,
+        'jumlah_sudah_dibayar' => $invoicePaid,
+        'jumlah_belum_dibayar' => $invoiceUnpaid,
+    ];
+
     $dashboardTransactions = $penawaranQuery
         ->with([
             'items',
@@ -110,7 +139,7 @@ Route::get('/dashboard', function () {
             ];
         });
 
-    return view('dashboard', compact('dashboardFinancial', 'dashboardStatus', 'dashboardTransactions'));
+    return view('dashboard', compact('dashboardFinancial', 'dashboardStatus', 'dashboardTax', 'dashboardTransactions'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('telegram/webhook', [TelegramBotController::class, 'webhook'])->name('telegram.webhook');
