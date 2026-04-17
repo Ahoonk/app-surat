@@ -31,6 +31,12 @@
                     $invoiceCountAll = $dashboardFinancial['jumlah_semua'] ?? 0;
                     $invoiceCountPaid = $dashboardFinancial['jumlah_sudah_dibayar'] ?? 0;
                     $invoiceCountUnpaid = $dashboardFinancial['jumlah_belum_dibayar'] ?? 0;
+                    $taxTotalAll = $dashboardTax['total_semua'] ?? 0;
+                    $taxTotalPaid = $dashboardTax['total_sudah_dibayar'] ?? 0;
+                    $taxTotalUnpaid = $dashboardTax['total_belum_dibayar'] ?? 0;
+                    $taxCountAll = $dashboardTax['jumlah_semua'] ?? 0;
+                    $taxCountPaid = $dashboardTax['jumlah_sudah_dibayar'] ?? 0;
+                    $taxCountUnpaid = $dashboardTax['jumlah_belum_dibayar'] ?? 0;
                 @endphp
 
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -50,6 +56,32 @@
                         <p class="text-sm text-amber-700">Total Invoice Belum Dibayar</p>
                         <p class="mt-2 text-2xl font-bold text-amber-800">Rp {{ number_format($invoiceTotalUnpaid, 2, ',', '.') }}</p>
                         <p class="mt-1 text-xs text-amber-700">{{ $invoiceCountUnpaid }} invoice</p>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-lg font-semibold text-gray-800">Data Pajak / PPh21</h4>
+                        <span class="text-xs text-gray-500">Berdasarkan nilai pajak yang tertera di dokumen</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Total Pajak Semua</p>
+                            <p class="mt-2 text-2xl font-bold text-slate-900">Rp {{ number_format($taxTotalAll, 2, ',', '.') }}</p>
+                            <p class="mt-1 text-xs text-slate-500">{{ $taxCountAll }} invoice</p>
+                        </div>
+
+                        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+                            <p class="text-sm text-emerald-700">Total Pajak Sudah Dibayar</p>
+                            <p class="mt-2 text-2xl font-bold text-emerald-800">Rp {{ number_format($taxTotalPaid, 2, ',', '.') }}</p>
+                            <p class="mt-1 text-xs text-emerald-700">{{ $taxCountPaid }} invoice</p>
+                        </div>
+
+                        <div class="rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                            <p class="text-sm text-amber-700">Total Pajak Belum Dibayar</p>
+                            <p class="mt-2 text-2xl font-bold text-amber-800">Rp {{ number_format($taxTotalUnpaid, 2, ',', '.') }}</p>
+                            <p class="mt-1 text-xs text-amber-700">{{ $taxCountUnpaid }} invoice</p>
+                        </div>
                     </div>
                 </div>
 
