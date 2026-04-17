@@ -37,6 +37,12 @@
                     $taxCountAll = $dashboardTax['jumlah_semua'] ?? 0;
                     $taxCountPaid = $dashboardTax['jumlah_sudah_dibayar'] ?? 0;
                     $taxCountUnpaid = $dashboardTax['jumlah_belum_dibayar'] ?? 0;
+                    $notaTotalAll = $dashboardNotaToko['total_semua'] ?? 0;
+                    $notaTotalPaid = $dashboardNotaToko['total_sudah_dibayar'] ?? 0;
+                    $notaTotalUnpaid = $dashboardNotaToko['total_belum_dibayar'] ?? 0;
+                    $notaCountAll = $dashboardNotaToko['jumlah_semua'] ?? 0;
+                    $notaCountPaid = $dashboardNotaToko['jumlah_sudah_dibayar'] ?? 0;
+                    $notaCountUnpaid = $dashboardNotaToko['jumlah_belum_dibayar'] ?? 0;
                 @endphp
 
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -80,6 +86,31 @@
                             <p class="text-sm text-amber-700">Total Pajak Belum Dibayar</p>
                             <p class="mt-2 text-2xl font-bold text-amber-800">Rp {{ number_format($taxTotalUnpaid, 2, ',', '.') }}</p>
                             <p class="mt-1 text-xs text-amber-700">{{ $taxCountUnpaid }} invoice</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-lg font-semibold text-gray-800">Data Nota Toko</h4>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                            <p class="text-sm text-slate-500">Total Semua Nota Toko</p>
+                            <p class="mt-2 text-2xl font-bold text-slate-900">Rp {{ number_format($notaTotalAll, 2, ',', '.') }}</p>
+                            <p class="mt-1 text-xs text-slate-500">{{ $notaCountAll }} nota</p>
+                        </div>
+
+                        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+                            <p class="text-sm text-emerald-700">Total Nota Toko Sudah Dibayar</p>
+                            <p class="mt-2 text-2xl font-bold text-emerald-800">Rp {{ number_format($notaTotalPaid, 2, ',', '.') }}</p>
+                            <p class="mt-1 text-xs text-emerald-700">{{ $notaCountPaid }} nota</p>
+                        </div>
+
+                        <div class="rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                            <p class="text-sm text-amber-700">Total Nota Toko Belum Dibayar</p>
+                            <p class="mt-2 text-2xl font-bold text-amber-800">Rp {{ number_format($notaTotalUnpaid, 2, ',', '.') }}</p>
+                            <p class="mt-1 text-xs text-amber-700">{{ $notaCountUnpaid }} nota</p>
                         </div>
                     </div>
                 </div>
