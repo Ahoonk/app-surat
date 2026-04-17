@@ -41,6 +41,29 @@
         </div>
     </div>
 
+    <div class="mb-4 rounded-xl border bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+            <p class="text-sm text-gray-500">Status Pembayaran</p>
+            @if (($notaToko->payment_status ?? 'unpaid') === 'paid')
+                <p class="font-semibold text-emerald-600">Sudah Dibayar</p>
+                <p class="text-xs text-gray-500">
+                    {{ $notaToko->payment_date ? \Illuminate\Support\Carbon::parse($notaToko->payment_date)->translatedFormat('d F Y') : '-' }}
+                </p>
+            @else
+                <p class="font-semibold text-amber-600">Belum Dibayar</p>
+            @endif
+        </div>
+        @if (($notaToko->payment_status ?? 'unpaid') !== 'paid' && in_array(auth()->user()?->role, ['admin', 'superadmin'], true))
+            <button type="button"
+                    title="Verifikasi Pembayaran"
+                    class="verify-nota-btn px-4 py-2 bg-emerald-600 text-white rounded-lg"
+                    data-action="{{ route('nota-toko.verify-payment', $notaToko) }}"
+                    data-default-date="{{ now()->format('Y-m-d') }}">
+                Verifikasi Bayar
+            </button>
+        @endif
+    </div>
+
     <div class="mx-auto bg-white rounded-2xl shadow-xl relative overflow-hidden" style="{{ $previewPaperStyle }}">
         @if ($templateNotaAsset)
             <div style="position:absolute;inset:0;background-image:url('{{ $templateNotaAsset }}');background-repeat:no-repeat;background-position:top center;background-size:100% auto;z-index:0;"></div>
@@ -135,4 +158,52 @@
         @endif
     </div>
 </div>
+
+<div id="verify-nota-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">Verifikasi Pembayaran Nota Toko</h3>
+        <p class="text-sm text-gray-600 mb-4">Pilih tanggal pembayaran untuk mengubah status menjadi sudah dibayar.</p>
+        <form id="verify-nota-form" method="POST">
+            @csrf
+            <div>
+                <label for="nota_payment_date" class="block text-sm font-medium mb-2">Tanggal Pembayaran</label>
+                <input id="nota_payment_date" type="date" name="payment_date" required
+                       class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" id="cancel-verify-nota" class="px-4 py-2 bg-gray-200 rounded-lg">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const verifyNotaModal = document.getElementById('verify-nota-modal');
+    const verifyNotaForm = document.getElementById('verify-nota-form');
+    const notaPaymentDateInput = document.getElementById('nota_payment_date');
+    const cancelVerifyNotaButton = document.getElementById('cancel-verify-nota');
+
+    document.querySelectorAll('.verify-nota-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+            verifyNotaForm.action = button.dataset.action;
+            notaPaymentDateInput.value = button.dataset.defaultDate || '';
+            verifyNotaModal.classList.remove('hidden');
+            verifyNotaModal.classList.add('flex');
+        });
+    });
+
+    function closeVerifyNotaModal() {
+        verifyNotaModal.classList.add('hidden');
+        verifyNotaModal.classList.remove('flex');
+    }
+
+    cancelVerifyNotaButton?.addEventListener('click', closeVerifyNotaModal);
+
+    verifyNotaModal?.addEventListener('click', (event) => {
+        if (event.target === verifyNotaModal) {
+            closeVerifyNotaModal();
+        }
+    });
+</script>
 @endsection

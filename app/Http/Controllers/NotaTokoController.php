@@ -123,6 +123,8 @@ class NotaTokoController extends Controller
                 'tax_percent' => $taxPercent,
                 'tax_amount' => $taxAmount,
                 'total' => $total,
+                'payment_status' => 'unpaid',
+                'payment_date' => null,
             ]);
 
             $notaToko->items()->createMany($items);
@@ -244,6 +246,30 @@ class NotaTokoController extends Controller
         });
 
         return redirect()->route('nota-toko.index')->with('success', 'Nota toko berhasil diperbarui.');
+    }
+
+    public function verifyPayment(Request $request, NotaToko $notaToko)
+    {
+        abort_unless(auth()->user()?->role && in_array(auth()->user()->role, ['admin', 'superadmin'], true), 403);
+
+        $companyId = $this->getCompanyIdOrRedirect();
+        if (!is_int($companyId)) {
+            return $companyId;
+        }
+
+        abort_if($notaToko->company_id !== $companyId, 403);
+
+        $validated = $request->validate([
+            'payment_date' => ['required', 'date'],
+        ]);
+
+        $notaToko->update([
+            'payment_status' => 'paid',
+            'payment_date' => $validated['payment_date'],
+        ]);
+
+        return redirect()->route('nota-toko.index')
+            ->with('success', 'Status pembayaran nota toko berhasil diubah menjadi sudah dibayarkan.');
     }
 
     public function pdf(NotaToko $notaToko)

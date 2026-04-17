@@ -62,7 +62,6 @@
                 <div class="mt-6">
                     <div class="flex items-center justify-between mb-3">
                         <h4 class="text-lg font-semibold text-gray-800">Data Pajak / PPh21</h4>
-                        <span class="text-xs text-gray-500">Berdasarkan nilai pajak yang tertera di dokumen</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-sm">

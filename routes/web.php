@@ -208,6 +208,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('berita-acara/{beritaAcara}/send', [BeritaAcaraController::class, 'send'])->name('berita-acara.send');
     Route::get('nota-toko/{notaToko}/pdf', [NotaTokoController::class, 'pdf'])->name('nota-toko.pdf');
     Route::post('nota-toko/{notaToko}/send', [NotaTokoController::class, 'send'])->name('nota-toko.send');
+    Route::post('nota-toko/{notaToko}/verify-payment', [NotaTokoController::class, 'verifyPayment'])->name('nota-toko.verify-payment');
     Route::resource('nota-toko', NotaTokoController::class)->only([
         'index',
         'create',
