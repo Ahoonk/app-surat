@@ -127,11 +127,148 @@
                     'Detail Item Transaksi (Kontrak)' => $trxKontrak,
                 ] as $title => $transactions)
                     <div class="mt-8">
-                        <h4 class="font-semibold mb-3">{{ $title }}</h4>
+                        <div class="flex items-end justify-between gap-3 mb-3">
+                            <h4 class="font-semibold">{{ $title }}</h4>
+                            <p class="hidden sm:block text-xs text-gray-500">Scroll ke bawah untuk melihat transaksi lain.</p>
+                        </div>
                         @if ($transactions->isEmpty())
                             <p class="text-sm text-gray-500">Belum ada item transaksi.</p>
                         @else
-                            <div class="overflow-x-auto">
+                            <div class="md:hidden">
+                                <div class="max-h-[72vh] overflow-y-auto pr-1 space-y-3 scroll-smooth">
+                                    @foreach ($transactions as $trx)
+                                        @php
+                                            $penawaran = $trx['penawaran'];
+                                            $invoice = $trx['invoice'];
+                                            $fakturPajak = $trx['faktur_pajak'];
+                                            $isKontrakSection = $title === 'Detail Item Transaksi (Kontrak)';
+                                            $poStatus = '-';
+                                            if ($penawaran->status === 'draft') {
+                                                $poStatus = '-';
+                                            } elseif ($penawaran->purchasingOrder) {
+                                                $poStatus = $penawaran->purchasingOrder;
+                                            } elseif ($penawaran->status === 'approved') {
+                                                $poStatus = 'Upload PO';
+                                            }
+                                            $itemNames = $penawaran->items->pluck('nama')->filter()->values();
+                                        @endphp
+                                        @if ($isKontrakSection && $penawaran->invoices->isNotEmpty())
+                                            @foreach ($penawaran->invoices as $invItem)
+                                                <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                                    <div class="flex items-start justify-between gap-3">
+                                                        <div>
+                                                            <p class="text-sm font-semibold text-slate-900">{{ $penawaran->to_company ?? $penawaran->customer_nama ?? '-' }}</p>
+                                                            <p class="text-xs text-slate-500">Invoice {{ $invItem->nomor }}</p>
+                                                        </div>
+                                                        <span class="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                                                            {{ $penawaran->jenis_kontrak ?? 'satuan' }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="mt-4 space-y-3 text-sm">
+                                                        <div>
+                                                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Item</p>
+                                                            <div class="mt-1 flex flex-wrap gap-2">
+                                                                @foreach ($itemNames as $name)
+                                                                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">{{ $name }}</span>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="grid grid-cols-1 gap-2">
+                                                            <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                                <span class="text-slate-500">Status Penawaran</span>
+                                                                <span class="font-medium capitalize text-slate-900">{{ $penawaran->status }}</span>
+                                                            </div>
+                                                            <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                                <span class="text-slate-500">PO</span>
+                                                                <span class="font-medium text-slate-900">
+                                                                    @if (is_string($poStatus))
+                                                                        {{ $poStatus }}
+                                                                    @else
+                                                                        <a href="{{ asset('storage/' . $poStatus->dokumen_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800">Preview</a>
+                                                                    @endif
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                                <span class="text-slate-500">Invoice</span>
+                                                                <span class="font-medium text-slate-900">
+                                                                    <a href="{{ route('invoice.show', $invItem) }}" target="_blank" class="text-blue-600 hover:text-blue-800">Preview</a>
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                                <span class="text-slate-500">Bayar Invoice</span>
+                                                                <span class="font-medium {{ ($invItem->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-600' : 'text-amber-600' }}">
+                                                                    {{ ($invItem->payment_status ?? 'unpaid') === 'paid' ? 'Sudah' : 'Belum' }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                                <span class="text-slate-500">Bayar Pajak</span>
+                                                                <span class="font-medium {{ ($invItem->fakturPajak?->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-600' : 'text-amber-600' }}">
+                                                                    {{ ($invItem->fakturPajak?->payment_status ?? 'unpaid') === 'paid' ? 'Sudah' : 'Belum' }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            @endforeach
+                                        @else
+                                            <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                                                <div class="flex items-start justify-between gap-3">
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-slate-900">{{ $penawaran->to_company ?? $penawaran->customer_nama ?? '-' }}</p>
+                                                        <p class="text-xs text-slate-500">{{ $itemNames->isNotEmpty() ? $itemNames->implode(', ') : 'Item belum tersedia' }}</p>
+                                                    </div>
+                                                    <span class="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                                                        {{ $penawaran->jenis_kontrak ?? 'satuan' }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="mt-4 space-y-3 text-sm">
+                                                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                        <span class="text-slate-500">Status Penawaran</span>
+                                                        <span class="font-medium capitalize text-slate-900">{{ $penawaran->status }}</span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                        <span class="text-slate-500">PO</span>
+                                                        <span class="font-medium text-slate-900">
+                                                            @if (is_string($poStatus))
+                                                                {{ $poStatus }}
+                                                            @else
+                                                                <a href="{{ asset('storage/' . $poStatus->dokumen_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800">Preview</a>
+                                                            @endif
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                        <span class="text-slate-500">Invoice</span>
+                                                        <span class="font-medium text-slate-900">
+                                                            @if ($invoice)
+                                                                <a href="{{ route('invoice.show', $invoice) }}" target="_blank" class="text-blue-600 hover:text-blue-800">Preview</a>
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                        <span class="text-slate-500">Bayar Invoice</span>
+                                                        <span class="font-medium {{ ($invoice?->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-600' : 'text-amber-600' }}">
+                                                            {{ $invoice ? (($invoice->payment_status ?? 'unpaid') === 'paid' ? 'Sudah' : 'Belum') : '-' }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+                                                        <span class="text-slate-500">Bayar Pajak</span>
+                                                        <span class="font-medium {{ ($fakturPajak?->payment_status ?? 'unpaid') === 'paid' ? 'text-emerald-600' : 'text-amber-600' }}">
+                                                            {{ $fakturPajak ? (($fakturPajak->payment_status ?? 'unpaid') === 'paid' ? 'Sudah' : 'Belum') : '-' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="hidden md:block overflow-x-auto">
                                 <table class="dashboard-detail-table w-full text-xs sm:text-sm text-left border table-fixed">
                                     <thead class="bg-gray-50">
                                         <tr class="border-b">
@@ -164,11 +301,11 @@
                                                 @foreach ($penawaran->invoices as $invItem)
                                                     <tr class="border-b">
                                                         <td class="py-2 px-3">{{ $penawaran->to_company ?? $penawaran->customer_nama ?? '-' }}</td>
-                                                <td class="py-2 px-3">
-                                                    @foreach ($penawaran->items as $rowItem)
-                                                        <div>{{ $rowItem->nama }}</div>
-                                                    @endforeach
-                                                </td>
+                                                        <td class="py-2 px-3">
+                                                            @foreach ($penawaran->items as $rowItem)
+                                                                <div>{{ $rowItem->nama }}</div>
+                                                            @endforeach
+                                                        </td>
                                                         <td class="py-2 px-3 capitalize">{{ $penawaran->status }}</td>
                                                         <td class="py-2 px-3">
                                                             @if (is_string($poStatus))
