@@ -99,20 +99,32 @@
         <thead>
             <tr>
                 <th style="width:8%;">No</th>
-                <th style="width:44%;">Item</th>
-                <th style="width:23%;">Rincian</th>
-                <th style="width:12%;">Qty</th>
-                <th style="width:13%;">Satuan</th>
+                <th style="width:77%;">Description</th>
+                <th style="width:15%;">Qty</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($penawaran->items as $item)
+                @php
+                    $rincianLines = preg_split('/\r\n|\r|\n/', trim((string) $item->rincian));
+                    $rincianLines = array_values(array_filter(array_map('trim', $rincianLines ?: []), fn ($line) => $line !== ''));
+                @endphp
                 <tr>
                     <td style="text-align:center;">{{ $loop->iteration }}</td>
-                    <td>{{ $item->nama }}</td>
-                    <td>{{ $item->rincian ?: '-' }}</td>
+                    <td>
+                        <div style="font-weight:700;">{{ $item->nama }}</div>
+                        @if (!empty($rincianLines))
+                            <div style="margin-top:6px; font-size:11px; line-height:1.5; color:#444;">
+                                @foreach ($rincianLines as $line)
+                                    <div style="display:flex; gap:6px; margin-bottom:2px;">
+                                        <span style="flex:0 0 auto;">&#8226;</span>
+                                        <span>{{ $line }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </td>
                     <td style="text-align:center;">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
-                    <td style="text-align:center;">{{ strtoupper($item->satuan) }}</td>
                 </tr>
             @endforeach
         </tbody>
