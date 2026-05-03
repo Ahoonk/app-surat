@@ -99,9 +99,10 @@
         <thead>
             <tr>
                 <th style="width:8%;">No</th>
-                <th style="width:62%;">Item</th>
-                <th style="width:15%;">Qty</th>
-                <th style="width:15%;">Satuan</th>
+                <th style="width:44%;">Item</th>
+                <th style="width:23%;">Rincian</th>
+                <th style="width:12%;">Qty</th>
+                <th style="width:13%;">Satuan</th>
             </tr>
         </thead>
         <tbody>
@@ -109,6 +110,7 @@
                 <tr>
                     <td style="text-align:center;">{{ $loop->iteration }}</td>
                     <td>{{ $item->nama }}</td>
+                    <td>{{ $item->rincian ?: '-' }}</td>
                     <td style="text-align:center;">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
                     <td style="text-align:center;">{{ strtoupper($item->satuan) }}</td>
                 </tr>
