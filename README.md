@@ -53,6 +53,7 @@ Script deploy akan:
 - menjalankan `optimize`, `config:cache`, `route:cache`, dan `view:cache`
 
 Kalau server belum punya folder `frontend/`, langkah build frontend akan otomatis dilewati.
+Kalau `.env` masih memakai `DB_CONNECTION=sqlite`, script juga akan membuat `database/database.sqlite` jika belum ada.
 
 Kalau kamu pernah menjalankan deploy dengan ownership `www-data` di folder runtime, jalankan sekali:
 

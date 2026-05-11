@@ -28,6 +28,11 @@ echo "==> Fix permissions"
 mkdir -p storage/logs bootstrap/cache
 touch storage/logs/laravel.log
 
+if grep -q '^DB_CONNECTION=sqlite' .env 2>/dev/null; then
+  mkdir -p database
+  touch database/database.sqlite
+fi
+
 if command -v sudo >/dev/null 2>&1; then
   sudo chown -R "$DEPLOY_USER:www-data" storage bootstrap/cache
   sudo chmod -R 775 storage bootstrap/cache
@@ -58,18 +63,13 @@ if [ -d frontend ] && [ -f frontend/package.json ]; then
 fi
 
 echo "==> Clear and rebuild caches"
-if command -v sudo >/dev/null 2>&1; then
-  sudo -u www-data php artisan optimize:clear
-  sudo -u www-data php artisan config:cache
-  sudo -u www-data php artisan route:cache
-  sudo -u www-data php artisan view:cache
-  sudo -u www-data php artisan storage:link
-else
-  php artisan optimize:clear
-  php artisan config:cache
-  php artisan route:cache
-  php artisan view:cache
-  php artisan storage:link
-fi
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan event:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan storage:link
 
 echo "==> Done"
