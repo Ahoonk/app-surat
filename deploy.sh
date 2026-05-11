@@ -4,6 +4,14 @@ set -euo pipefail
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$APP_DIR"
 
+DEPLOY_USER="$(id -un)"
+DEPLOY_GROUP="$(id -gn)"
+
+echo "==> Fix repository ownership"
+if command -v sudo >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  sudo chown -R "$DEPLOY_USER:$DEPLOY_GROUP" .git .
+fi
+
 echo "==> Pull latest code"
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git pull origin main
