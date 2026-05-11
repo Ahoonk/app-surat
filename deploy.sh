@@ -29,9 +29,9 @@ mkdir -p storage/logs bootstrap/cache
 touch storage/logs/laravel.log
 
 if command -v sudo >/dev/null 2>&1; then
-  sudo chown -R www-data:www-data storage bootstrap/cache
-  sudo chmod -R ug+rwX storage bootstrap/cache
-  sudo chown www-data:www-data storage/logs/laravel.log
+  sudo chown -R "$DEPLOY_USER:www-data" storage bootstrap/cache
+  sudo chmod -R 775 storage bootstrap/cache
+  sudo chown "$DEPLOY_USER:www-data" storage/logs/laravel.log
   sudo chmod 664 storage/logs/laravel.log
 else
   chmod -R ug+rwX storage bootstrap/cache || true
