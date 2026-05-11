@@ -59,6 +59,7 @@ const { session, logout } = useSession()
 
 const links = [
   { label: 'Dashboard', to: '/dashboard', hint: 'Ringkasan' },
+  { label: 'Company Profile', to: '/about-us', hint: 'Profil' },
   { label: 'Surat Penawaran', to: '/penawaran', hint: 'Proposal' },
   { label: 'Invoice', to: '/invoice', hint: 'Penagihan' },
   { label: 'Surat Jalan', to: '/surat-jalan', hint: 'Delivery' },
@@ -69,6 +70,7 @@ const links = [
 
 const currentTitle = computed(() => {
   if (route.path === '/dashboard') return 'Dashboard'
+  if (route.path.startsWith('/about-us')) return 'Company Profile'
   if (route.path.startsWith('/penawaran')) return 'Surat Penawaran'
   if (route.path.startsWith('/invoice')) return 'Invoice'
   if (route.path.startsWith('/surat-jalan')) return 'Surat Jalan'
