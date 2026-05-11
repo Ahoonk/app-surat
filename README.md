@@ -34,6 +34,26 @@ npm install
 npm run dev
 ```
 
+## Deploy VPS
+
+Jalankan dari root repo di server, misalnya `/var/www/app-surat`:
+
+```bash
+cd /var/www/app-surat
+bash deploy.sh
+```
+
+Script deploy akan:
+
+- `git pull origin main`
+- memperbaiki permission `storage/` dan `bootstrap/cache/`
+- menjalankan `composer install --no-dev --optimize-autoloader`
+- build asset Laravel Vite di root
+- build frontend Nuxt di `frontend/` bila folder itu ada
+- menjalankan `optimize`, `config:cache`, `route:cache`, dan `view:cache`
+
+Kalau server belum punya folder `frontend/`, langkah build frontend akan otomatis dilewati.
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
