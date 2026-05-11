@@ -13,6 +13,7 @@ use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\TelegramBotController;
+use App\Models\Company;
 use App\Services\DashboardDataService;
 use Illuminate\Support\Facades\Route;
 
@@ -24,8 +25,21 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function (DashboardDataService $dashboardDataService) {
     $companyId = auth()->user()->company_id;
+    $company = Company::query()
+        ->whereKey($companyId)
+        ->withCount(['siteClients', 'siteProducts'])
+        ->with([
+            'siteClients' => fn ($query) => $query->orderBy('sort_order')->orderBy('id')->limit(3),
+            'siteProducts' => fn ($query) => $query->orderBy('sort_order')->orderBy('id')->limit(3),
+        ])
+        ->first();
 
-    return view('dashboard', $dashboardDataService->forCompany($companyId));
+    return view('dashboard', array_merge(
+        $dashboardDataService->forCompany($companyId),
+        [
+            'company' => $company,
+        ]
+    ));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('telegram/webhook', [TelegramBotController::class, 'webhook'])->name('telegram.webhook');
