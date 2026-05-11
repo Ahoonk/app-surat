@@ -14,7 +14,7 @@ fi
 
 echo "==> Pull latest code"
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  git pull origin main
+  git pull --rebase --autostash origin main
 else
   echo "    Skipping git pull: not inside a git worktree."
 fi
