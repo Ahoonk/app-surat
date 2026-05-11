@@ -77,71 +77,12 @@ export interface BootstrapResponse {
     name: string | null
     address: string | null
     logo: string | null
-    settings: CompanySettings | null
   }
   dashboard: DashboardResponse
   lookups: {
     customers: any[]
     mitras: any[]
   }
-  siteProfile: {
-    clients: SiteClient[]
-    products: SiteProduct[]
-  }
-}
-
-export interface CompanySettings {
-  company_name?: string | null
-  home_seo_title?: string | null
-  home_seo_description?: string | null
-  home_seo_keywords?: string | null
-  tagline?: string | null
-  hero_title?: string | null
-  hero_description?: string | null
-  profile_title?: string | null
-  profile_description?: string | null
-  vision_title?: string | null
-  vision_description?: string | null
-  mission_items?: string[] | null
-  about_title?: string | null
-  about_description?: string | null
-  about_slug?: string | null
-  about_seo_title?: string | null
-  about_seo_description?: string | null
-  about_seo_keywords?: string | null
-  clients_slug?: string | null
-  clients_seo_title?: string | null
-  clients_seo_description?: string | null
-  clients_seo_keywords?: string | null
-  products_slug?: string | null
-  products_seo_title?: string | null
-  products_seo_description?: string | null
-  products_seo_keywords?: string | null
-  contact_email?: string | null
-  contact_phone?: string | null
-  contact_whatsapp?: string | null
-  company_address?: string | null
-  logo_image_path?: string | null
-  hero_image_path?: string | null
-  about_image_path?: string | null
-}
-
-export interface SiteClient {
-  id: number
-  name: string
-  sector: string | null
-  description: string | null
-  image_path: string | null
-  sort_order: number
-}
-
-export interface SiteProduct {
-  id: number
-  name: string
-  description: string | null
-  features: string[] | null
-  image_path: string | null
-  sort_order: number
 }
 
 export interface ApiListResponse<T> {

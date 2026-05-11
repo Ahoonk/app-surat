@@ -117,52 +117,6 @@
                     </div>
                 </div>
 
-                <div class="mt-8 rounded-2xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm">
-                    @php
-                        $recoveredClients = $company?->siteClients ?? collect();
-                        $recoveredProducts = $company?->siteProducts ?? collect();
-                    @endphp
-
-                    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                        <div>
-                            <p class="text-sm uppercase tracking-[0.28em] text-cyan-700">Recovered Profile</p>
-                            <h3 class="mt-2 text-xl font-bold text-slate-900">
-                                {{ $company->name ?? 'PT Aldera Saddatech Karya' }}
-                            </h3>
-                            <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                                {{ data_get($company, 'settings.tagline') ?? $company->address ?? '-' }}
-                            </p>
-                        </div>
-                        <div class="text-sm text-slate-600">
-                            <p><span class="font-semibold text-slate-900">Clients:</span> {{ $company->site_clients_count ?? 0 }}</p>
-                            <p><span class="font-semibold text-slate-900">Products:</span> {{ $company->site_products_count ?? 0 }}</p>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 grid gap-4 md:grid-cols-2">
-                        <div class="rounded-xl bg-white p-4">
-                            <p class="text-xs uppercase tracking-[0.25em] text-cyan-700">Recent Clients</p>
-                            <ul class="mt-3 space-y-2 text-sm text-slate-700">
-                                @forelse ($recoveredClients as $client)
-                                    <li>{{ $client->name }}</li>
-                                @empty
-                                    <li class="text-slate-500">Belum ada data client.</li>
-                                @endforelse
-                            </ul>
-                        </div>
-                        <div class="rounded-xl bg-white p-4">
-                            <p class="text-xs uppercase tracking-[0.25em] text-cyan-700">Recent Products</p>
-                            <ul class="mt-3 space-y-2 text-sm text-slate-700">
-                                @forelse ($recoveredProducts as $product)
-                                    <li>{{ $product->name }}</li>
-                                @empty
-                                    <li class="text-slate-500">Belum ada data product.</li>
-                                @endforelse
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
                 @php
                     $trxSatuan = $dashboardTransactions->filter(fn ($trx) => ($trx['penawaran']->jenis_kontrak ?? 'satuan') === 'satuan');
                     $trxKontrak = $dashboardTransactions->filter(fn ($trx) => ($trx['penawaran']->jenis_kontrak ?? '') === 'kontrak');

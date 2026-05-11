@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\ResolvesCompanyId;
 use App\Models\Customer;
 use App\Models\Mitra;
-use App\Models\SiteClient;
-use App\Models\SiteProduct;
 use App\Services\DashboardDataService;
 use Illuminate\Http\JsonResponse;
 
@@ -39,30 +37,6 @@ class BootstrapController extends Controller
                 'nomor_berita_acara',
             ]);
 
-        $siteClients = SiteClient::where('company_id', $companyId)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get([
-                'id',
-                'name',
-                'sector',
-                'description',
-                'image_path',
-                'sort_order',
-            ]);
-
-        $siteProducts = SiteProduct::where('company_id', $companyId)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get([
-                'id',
-                'name',
-                'description',
-                'features',
-                'image_path',
-                'sort_order',
-            ]);
-
         return response()->json([
             'user' => [
                 'id' => $user->id,
@@ -75,16 +49,11 @@ class BootstrapController extends Controller
                 'name' => $user->company?->name,
                 'address' => $user->company?->address,
                 'logo' => $user->company?->logo,
-                'settings' => $user->company?->settings,
             ],
             'dashboard' => $dashboard,
             'lookups' => [
                 'customers' => $customers,
                 'mitras' => $mitras,
-            ],
-            'siteProfile' => [
-                'clients' => $siteClients,
-                'products' => $siteProducts,
             ],
         ]);
     }

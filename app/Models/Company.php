@@ -11,15 +11,7 @@ class Company extends Model
         'name',
         'address',
         'logo',
-        'settings',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'settings' => 'array',
-        ];
-    }
 
     public function users(): HasMany
     {
@@ -29,15 +21,5 @@ class Company extends Model
     public function penawarans(): HasMany
     {
         return $this->hasMany(Penawaran::class);
-    }
-
-    public function siteClients(): HasMany
-    {
-        return $this->hasMany(SiteClient::class);
-    }
-
-    public function siteProducts(): HasMany
-    {
-        return $this->hasMany(SiteProduct::class);
     }
 }
