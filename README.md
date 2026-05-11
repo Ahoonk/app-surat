@@ -21,6 +21,19 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Frontend Terpisah
+
+Repo ini sekarang juga punya scaffold frontend terpisah di folder [`frontend/`](frontend/).
+Backend Laravel tetap berjalan seperti semula, sementara frontend baru bisa dipakai bertahap sebagai consumer API.
+
+Untuk menjalankan frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.

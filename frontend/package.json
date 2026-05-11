@@ -1,0 +1,19 @@
+{
+  "name": "surat-app-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev -p 3000",
+    "build": "nuxt build",
+    "preview": "nuxt preview -p 3000"
+  },
+  "dependencies": {
+    "nuxt": "^4.2.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.8.3",
+    "vue-tsc": "^2.2.10"
+  }
+}
