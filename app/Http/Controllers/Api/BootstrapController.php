@@ -49,6 +49,7 @@ class BootstrapController extends Controller
                 'name' => $user->company?->name,
                 'address' => $user->company?->address,
                 'logo' => $user->company?->logo,
+                'settings' => $user->company?->settings,
             ],
             'dashboard' => $dashboard,
             'lookups' => [

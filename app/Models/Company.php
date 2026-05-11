@@ -11,7 +11,15 @@ class Company extends Model
         'name',
         'address',
         'logo',
+        'settings',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'array',
+        ];
+    }
 
     public function users(): HasMany
     {

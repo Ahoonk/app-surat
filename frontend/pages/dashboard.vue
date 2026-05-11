@@ -25,7 +25,9 @@
         <div class="rounded-[22px] bg-gradient-to-br from-slate-950 to-cyan-900 p-5 text-white">
           <p class="text-xs uppercase tracking-[0.3em] text-cyan-200/70">Company</p>
           <h3 class="mt-3 text-2xl font-semibold">{{ session?.company?.name ?? '-' }}</h3>
-          <p class="mt-2 text-sm leading-6 text-slate-200/80">{{ session?.company?.address ?? '-' }}</p>
+          <p class="mt-2 text-sm leading-6 text-slate-200/80">
+            {{ session?.company?.settings?.tagline ?? session?.company?.address ?? '-' }}
+          </p>
 
           <div class="mt-5 grid grid-cols-2 gap-3">
             <div class="rounded-2xl bg-white/10 p-4">
