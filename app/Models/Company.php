@@ -30,4 +30,14 @@ class Company extends Model
     {
         return $this->hasMany(Penawaran::class);
     }
+
+    public function siteClients(): HasMany
+    {
+        return $this->hasMany(SiteClient::class);
+    }
+
+    public function siteProducts(): HasMany
+    {
+        return $this->hasMany(SiteProduct::class);
+    }
 }

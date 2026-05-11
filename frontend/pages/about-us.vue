@@ -87,6 +87,34 @@
         </div>
       </article>
     </section>
+
+    <section class="grid gap-4 md:grid-cols-2">
+      <article class="panel p-6">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Clients</p>
+            <h3 class="mt-3 text-xl font-semibold text-slate-900">Portofolio yang tersimpan</h3>
+          </div>
+          <NuxtLink to="/clients" class="button-ghost px-3 py-2 text-sm">Lihat semua</NuxtLink>
+        </div>
+        <p class="mt-4 text-sm leading-7 text-slate-600">
+          Data client lama sudah kita taruh di database baru dan bisa ditampilkan kembali di frontend ini.
+        </p>
+      </article>
+
+      <article class="panel p-6">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Products</p>
+            <h3 class="mt-3 text-xl font-semibold text-slate-900">Layanan utama</h3>
+          </div>
+          <NuxtLink to="/products" class="button-ghost px-3 py-2 text-sm">Lihat semua</NuxtLink>
+        </div>
+        <p class="mt-4 text-sm leading-7 text-slate-600">
+          Produk dan layanan lama juga bisa dihidupkan kembali sebagai katalog perusahaan.
+        </p>
+      </article>
+    </section>
   </div>
 </template>
 

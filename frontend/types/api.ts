@@ -84,6 +84,10 @@ export interface BootstrapResponse {
     customers: any[]
     mitras: any[]
   }
+  siteProfile: {
+    clients: SiteClient[]
+    products: SiteProduct[]
+  }
 }
 
 export interface CompanySettings {
@@ -120,6 +124,24 @@ export interface CompanySettings {
   logo_image_path?: string | null
   hero_image_path?: string | null
   about_image_path?: string | null
+}
+
+export interface SiteClient {
+  id: number
+  name: string
+  sector: string | null
+  description: string | null
+  image_path: string | null
+  sort_order: number
+}
+
+export interface SiteProduct {
+  id: number
+  name: string
+  description: string | null
+  features: string[] | null
+  image_path: string | null
+  sort_order: number
 }
 
 export interface ApiListResponse<T> {
