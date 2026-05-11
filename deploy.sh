@@ -12,6 +12,11 @@ if command -v sudo >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/
   sudo chown -R "$DEPLOY_USER:$DEPLOY_GROUP" .git .
 fi
 
+echo "==> Reset storage symlink"
+if [ -L public/storage ] || [ -d public/storage ]; then
+  rm -rf public/storage
+fi
+
 echo "==> Pull latest code"
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git pull --rebase --autostash origin main
@@ -58,11 +63,13 @@ if command -v sudo >/dev/null 2>&1; then
   sudo -u www-data php artisan config:cache
   sudo -u www-data php artisan route:cache
   sudo -u www-data php artisan view:cache
+  sudo -u www-data php artisan storage:link
 else
   php artisan optimize:clear
   php artisan config:cache
   php artisan route:cache
   php artisan view:cache
+  php artisan storage:link
 fi
 
 echo "==> Done"
