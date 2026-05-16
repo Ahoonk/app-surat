@@ -39,8 +39,12 @@
                     <section class="p-6 sm:p-8 lg:p-10 xl:p-12">
                         <div class="mx-auto flex max-w-md flex-col justify-center">
                             <div class="mb-6 text-center">
-                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg sm:h-20 sm:w-20">
-                                    <span class="text-xl font-black tracking-[0.18em] sm:text-2xl">{{ $appInitials }}</span>
+                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg ring-1 ring-slate-200 sm:h-20 sm:w-20">
+                                    <img
+                                        src="{{ asset('storage/logos/aldera.png') }}"
+                                        class="h-12 w-12 object-contain sm:h-14 sm:w-14"
+                                        alt="Logo PT ASKARYA"
+                                    >
                                 </div>
                                 <h2 class="mt-5 text-2xl font-semibold text-slate-900 sm:text-3xl">
                                     {{ $appName }}

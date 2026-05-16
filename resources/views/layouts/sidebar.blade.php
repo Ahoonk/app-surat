@@ -1,9 +1,6 @@
 @php
     $appName = config('app.name', 'PT ASKARYA');
-    $appInitials = collect(preg_split('/\s+/', $appName, -1, PREG_SPLIT_NO_EMPTY))
-        ->map(fn ($word) => mb_substr($word, 0, 1))
-        ->implode('');
-    $appInitials = mb_strtoupper(mb_substr($appInitials ?: 'SA', 0, 2));
+    $brandLogo = asset('storage/logos/aldera.png');
 @endphp
 
 <div class="w-64 bg-gradient-to-b from-blue-950 via-blue-900 to-blue-800 
@@ -23,8 +20,8 @@
     <div class="flex items-center gap-4">
 
         <!-- BRAND MARK -->
-        <div class="w-16 h-16 flex items-center justify-center bg-white rounded-full shadow-md shrink-0">
-            <span class="text-lg font-black tracking-[0.18em] text-blue-700">{{ $appInitials }}</span>
+        <div class="w-16 h-16 flex items-center justify-center bg-white rounded-full shadow-md shrink-0 overflow-hidden">
+            <img src="{{ $brandLogo }}" class="h-12 w-12 object-contain" alt="Logo PT ASKARYA">
         </div>
 
         <!-- TEXT -->
@@ -36,8 +33,9 @@
             <div class="text-sm text-blue-200 mt-1">
                 {{ auth()->user()->name }}
             </div>
-            <div class="text-xs text-blue-300/80 mt-1 capitalize">
-                {{ auth()->user()->role ?? 'admin' }}
+            <div class="mt-1 flex items-center gap-2 text-xs text-blue-300/80 capitalize">
+                <img src="{{ $brandLogo }}" class="h-4 w-4 rounded-full bg-white/10 p-0.5 object-contain" alt="Logo">
+                <span>{{ auth()->user()->role ?? 'admin' }}</span>
             </div>
         </div>
 
