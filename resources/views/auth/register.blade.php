@@ -1,6 +1,6 @@
 <x-guest-layout>
     @php
-        $appName = config('app.name', 'Surat App');
+        $appName = config('app.name', 'PT ASKARYA');
     @endphp
 
     <form method="POST" action="{{ route('register') }}">

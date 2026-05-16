@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'PT ASKARYA') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -27,7 +27,7 @@
                     <button id="sidebar-open" type="button" class="rounded-lg border px-3 py-2 text-sm">
                         Menu
                     </button>
-                    <div class="text-sm font-semibold text-gray-700">Surat App</div>
+                    <div class="text-sm font-semibold text-gray-700">{{ config('app.name', 'PT ASKARYA') }}</div>
                 </div>
 
                 <main class="p-4 sm:p-6 lg:p-8">

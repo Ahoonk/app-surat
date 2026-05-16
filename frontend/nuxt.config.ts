@@ -6,8 +6,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: '%s | Surat App',
-      title: 'Surat App',
+      titleTemplate: '%s | PT ASKARYA',
+      title: 'PT ASKARYA',
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'theme-color', content: '#0f172a' },
@@ -18,7 +18,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000',
-      appName: process.env.NUXT_PUBLIC_APP_NAME || 'Surat App',
+      appName: process.env.NUXT_PUBLIC_APP_NAME || 'PT ASKARYA',
     },
   },
 })

@@ -8,12 +8,12 @@
 
         <div class="relative z-10 flex h-full flex-col justify-between gap-12">
           <div>
-            <p class="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Surat App</p>
+            <p class="text-sm uppercase tracking-[0.35em] text-cyan-200/80">PT ASKARYA</p>
             <h1 class="mt-4 max-w-xl text-4xl font-semibold leading-tight sm:text-5xl">
               Dashboard dokumen bisnis yang lebih tenang, cepat, dan terstruktur.
             </h1>
             <p class="mt-4 max-w-xl text-sm leading-7 text-slate-200/85">
-              Login ke backend Laravel, lalu lanjutkan pengelolaan penawaran, invoice, PO, dan dokumen turunan dari satu alur kerja.
+              Login ke backend PT ASKARYA, lalu lanjutkan pengelolaan penawaran, invoice, PO, dan dokumen turunan dari satu alur kerja.
             </p>
           </div>
 
@@ -28,7 +28,7 @@
             </div>
             <div class="rounded-2xl border border-white/10 bg-white/8 p-4">
               <p class="text-xs uppercase tracking-[0.25em] text-cyan-100/70">Backend</p>
-              <p class="mt-2 text-lg font-semibold">Laravel API</p>
+              <p class="mt-2 text-lg font-semibold">PT ASKARYA API</p>
             </div>
           </div>
         </div>

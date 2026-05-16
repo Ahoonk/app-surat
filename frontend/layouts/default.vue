@@ -2,7 +2,7 @@
   <div class="min-h-screen grid lg:grid-cols-[290px_1fr]">
     <aside class="hidden lg:flex flex-col bg-slate-950 text-slate-100">
       <div class="p-6 border-b border-white/10">
-        <p class="text-xs uppercase tracking-[0.4em] text-cyan-200/80">Surat App</p>
+        <p class="text-xs uppercase tracking-[0.4em] text-cyan-200/80">PT ASKARYA</p>
         <h2 class="mt-2 text-2xl font-semibold">Workspace</h2>
         <p class="mt-2 text-sm text-slate-300">Frontend terpisah untuk alur dokumen yang sudah berjalan.</p>
       </div>
@@ -29,8 +29,8 @@
     <main class="min-h-screen">
       <header class="sticky top-0 z-20 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
         <div class="flex items-center justify-between gap-4 px-5 py-4 lg:px-8">
-          <div>
-            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Surat App</p>
+        <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-500">PT ASKARYA</p>
             <h1 class="text-lg font-semibold text-slate-900">{{ currentTitle }}</h1>
           </div>
 
@@ -75,7 +75,7 @@ const currentTitle = computed(() => {
   if (route.path.startsWith('/berita-acara')) return 'Berita Acara'
   if (route.path.startsWith('/customers')) return 'Customer'
   if (route.path.startsWith('/mitras')) return 'Mitra'
-  return 'Surat App'
+  return 'PT ASKARYA'
 })
 
 const initials = computed(() => {

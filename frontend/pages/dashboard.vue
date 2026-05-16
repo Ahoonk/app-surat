@@ -6,7 +6,7 @@
           <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Ringkasan</p>
           <h2 class="section-title mt-3">Dashboard operasional yang langsung terbaca.</h2>
           <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-            Semua data di halaman ini datang dari backend Laravel lewat API bootstrap yang sama, jadi frontend baru bisa tumbuh tanpa memecah flow lama.
+            Semua data di halaman ini datang dari backend PT ASKARYA lewat API bootstrap yang sama, jadi frontend baru bisa tumbuh tanpa memecah flow lama.
           </p>
 
           <div class="mt-6 flex flex-wrap gap-3">

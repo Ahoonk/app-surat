@@ -4,7 +4,7 @@
       <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Masuk</p>
       <h1 class="mt-3 text-3xl font-semibold text-slate-900">Login ke workspace</h1>
       <p class="mt-3 text-sm leading-6 text-slate-600">
-        Gunakan akun Laravel yang sudah tersambung ke company. Session akan dipakai untuk mengakses API dan halaman frontend ini.
+        Gunakan akun PT ASKARYA yang sudah tersambung ke company. Session akan dipakai untuk mengakses API dan halaman frontend ini.
       </p>
     </div>
 

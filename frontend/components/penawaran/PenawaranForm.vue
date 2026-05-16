@@ -11,7 +11,7 @@
           </h2>
           <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
             Form ini mengikuti alur lama, tapi sekarang sudah siap dipakai dari frontend Nuxt.
-            Nomor surat, customer, dan total item tetap dihitung dari backend Laravel.
+            Nomor surat, customer, dan total item tetap dihitung dari backend PT ASKARYA.
           </p>
         </div>
 

@@ -1,5 +1,5 @@
 @php
-    $appName = config('app.name', 'Surat App');
+    $appName = config('app.name', 'PT ASKARYA');
     $appInitials = collect(preg_split('/\s+/', $appName, -1, PREG_SPLIT_NO_EMPTY))
         ->map(fn ($word) => mb_substr($word, 0, 1))
         ->implode('');
