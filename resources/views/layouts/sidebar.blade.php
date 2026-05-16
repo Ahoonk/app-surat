@@ -33,9 +33,8 @@
             <div class="text-sm text-blue-200 mt-1">
                 {{ auth()->user()->name }}
             </div>
-            <div class="mt-1 flex items-center gap-2 text-xs text-blue-300/80 capitalize">
-                <img src="{{ $brandLogo }}" class="h-4 w-4 rounded-full bg-white/10 p-0.5 object-contain" alt="Logo">
-                <span>{{ auth()->user()->role ?? 'admin' }}</span>
+            <div class="mt-1 text-xs text-blue-300/80 capitalize">
+                {{ auth()->user()->role ?? 'admin' }}
             </div>
         </div>
 
