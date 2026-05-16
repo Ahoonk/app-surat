@@ -1,3 +1,11 @@
+@php
+    $appName = config('app.name', 'Surat App');
+    $appInitials = collect(preg_split('/\s+/', $appName, -1, PREG_SPLIT_NO_EMPTY))
+        ->map(fn ($word) => mb_substr($word, 0, 1))
+        ->implode('');
+    $appInitials = mb_strtoupper(mb_substr($appInitials ?: 'SA', 0, 2));
+@endphp
+
 <div class="w-64 bg-gradient-to-b from-blue-950 via-blue-900 to-blue-800 
             text-blue-100 h-full min-h-screen lg:min-h-0 flex flex-col shadow-2xl">
 @php
@@ -14,18 +22,15 @@
 
     <div class="flex items-center gap-4">
 
-        <!-- LOGO BULAT -->
-       <div class="w-16 h-16 flex items-center justify-center 
-            bg-white rounded-full shadow-md shrink-0">
-    <img src="{{ asset('storage/logos/aldera.png') }}"
-         class="h-11 w-11 object-contain"
-         alt="Logo">
-</div>
+        <!-- BRAND MARK -->
+        <div class="w-16 h-16 flex items-center justify-center bg-white rounded-full shadow-md shrink-0">
+            <span class="text-lg font-black tracking-[0.18em] text-blue-700">{{ $appInitials }}</span>
+        </div>
 
         <!-- TEXT -->
         <div class="leading-tight">
             <div class="text-base font-semibold text-white">
-                PT Aldera Saddatech Karya
+                {{ $appName }}
             </div>
 
             <div class="text-sm text-blue-200 mt-1">

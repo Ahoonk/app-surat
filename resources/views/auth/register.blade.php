@@ -1,4 +1,8 @@
 <x-guest-layout>
+    @php
+        $appName = config('app.name', 'Surat App');
+    @endphp
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
@@ -25,7 +29,7 @@
         
         <div class="mt-4">
             <x-input-label :value="'Perusahaan'" />
-            <x-text-input class="block mt-1 w-full bg-gray-100" type="text" value="PT Aldera Saddatech Karya" disabled />
+            <x-text-input class="block mt-1 w-full bg-gray-100" type="text" value="{{ $appName }}" disabled />
         </div>
 
         <!-- Password -->

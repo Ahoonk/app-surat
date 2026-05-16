@@ -15,11 +15,19 @@
         </div>
         <div class="absolute inset-0 bg-slate-950/65"></div>
 
-        <div class="relative z-10 min-h-screen flex flex-col">
-            <header class="px-4 pt-8 text-center sm:px-6 sm:pt-10 lg:pt-12">
-                <p class="text-xs font-semibold uppercase tracking-[0.4em] text-cyan-200/80">
-                    Sistem Administrasi Surat
-                </p>
+    <div class="relative z-10 min-h-screen flex flex-col">
+        @php
+            $appName = config('app.name', 'Surat App');
+            $appInitials = collect(preg_split('/\s+/', $appName, -1, PREG_SPLIT_NO_EMPTY))
+                ->map(fn ($word) => mb_substr($word, 0, 1))
+                ->implode('');
+            $appInitials = mb_strtoupper(mb_substr($appInitials ?: 'SA', 0, 2));
+        @endphp
+
+        <header class="px-4 pt-8 text-center sm:px-6 sm:pt-10 lg:pt-12">
+            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-cyan-200/80">
+                Sistem Administrasi Surat
+            </p>
                 <h1 class="mt-4 text-3xl font-black uppercase tracking-wide text-white sm:text-4xl lg:text-5xl"
                     style="font-family: Georgia, serif;">
                     Aplikasi Surat Elektronik
@@ -31,11 +39,11 @@
                     <section class="p-6 sm:p-8 lg:p-10 xl:p-12">
                         <div class="mx-auto flex max-w-md flex-col justify-center">
                             <div class="mb-6 text-center">
-                                <img src="{{ asset('storage/logos/aldera.png') }}"
-                                     class="mx-auto h-16 w-auto object-contain sm:h-20"
-                                     alt="Logo">
+                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg sm:h-20 sm:w-20">
+                                    <span class="text-xl font-black tracking-[0.18em] sm:text-2xl">{{ $appInitials }}</span>
+                                </div>
                                 <h2 class="mt-5 text-2xl font-semibold text-slate-900 sm:text-3xl">
-                                    Aldera Saddatech Karya
+                                    {{ $appName }}
                                 </h2>
                                 <p class="mt-2 text-sm text-slate-500">
                                     Masuk untuk mengelola surat, invoice, dan dokumen transaksi.
