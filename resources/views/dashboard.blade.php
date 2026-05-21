@@ -13,7 +13,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl border border-gray-200 sm:rounded-2xl p-6">
+            <div class="bg-red-500 text-white overflow-hidden shadow-xl border-8 border-black sm:rounded-2xl p-6">
                 
                 <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
