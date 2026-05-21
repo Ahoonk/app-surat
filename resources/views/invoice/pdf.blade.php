@@ -47,15 +47,26 @@
         };
 
         return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
-    };
+        };
 
+    $snapshot = $invoice->snapshot_data ?? [];
     $mitra = $penawaran->mitra;
-    $isMitra = (bool) $mitra;
-    $issuerName = $mitra?->nama ?? 'PT Aldera Saddatech Karya';
-    $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+    $isMitra = (bool) data_get($snapshot, 'is_mitra', $mitra);
+    $issuerName = data_get($snapshot, 'issuer_name', $mitra?->nama ?? 'PT Aldera Saddatech Karya');
+    $customerName = data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama);
+    $customerAddress = data_get($snapshot, 'customer_address', $penawaran->to_address ?? '-');
+    $invoiceNumber = data_get($snapshot, 'invoice_number', $invoice->nomor);
+    $invoiceDate = data_get($snapshot, 'invoice_date', $invoice->tanggal);
+    $poNumber = data_get($snapshot, 'po_number', $invoice->purchasingOrder?->nomor_po);
+    $poDate = data_get($snapshot, 'po_date', $invoice->purchasingOrder?->tanggal_po);
+    $invoiceItems = data_get($snapshot, 'items', $penawaran->items);
+    $taxPercent = (float) data_get($snapshot, 'tax_percent', $penawaran->tax_percent ?? 0);
     $divisor = 1 + ($taxPercent / 100);
+    $subtotal = (float) data_get($snapshot, 'subtotal', $penawaran->subtotal ?? 0);
+    $taxAmount = (float) data_get($snapshot, 'tax_amount', $penawaran->tax_amount ?? 0);
+    $total = (float) data_get($snapshot, 'total', $penawaran->total ?? 0);
     $pph23 = $isMitra && $divisor > 0
-        ? ($penawaran->total / $divisor) * 0.02
+        ? ($total / $divisor) * 0.02
         : 0;
     $mitraTemplatePath = $mitra?->template_invoice_path
         ? public_path('storage/' . $mitra->template_invoice_path)
@@ -94,22 +105,22 @@
     <div class="head block-90">
         <div class="left">
             <div style="font-size:11px; color:#555; font-weight:700;">Bill To</div>
-            <div><strong>{{ $penawaran->to_company ?? $penawaran->customer_nama }}</strong></div>
-            <div>{{ $penawaran->to_address ?? '-' }}</div>
+            <div><strong>{{ $customerName }}</strong></div>
+            <div>{{ $customerAddress }}</div>
         </div>
         <div class="right">
             <div class="inv-meta">
                 <div style="color:#555; font-weight:700;">No Invoice</div>
-                <div style="margin-top:4px;"><strong>{{ $invoice->nomor }}</strong></div>
-                <div><strong>Date:</strong> {{ \Illuminate\Support\Carbon::parse($invoice->tanggal)->translatedFormat('d F Y') }}</div>
+                <div style="margin-top:4px;"><strong>{{ $invoiceNumber }}</strong></div>
+                <div><strong>Date:</strong> {{ \Illuminate\Support\Carbon::parse($invoiceDate)->translatedFormat('d F Y') }}</div>
             </div>
         </div>
     </div>
 
     @unless($isMitra)
         <div class="po-meta">
-            <div><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</div>
-            <div><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</div>
+            <div><strong>Nomor PO:</strong> {{ $poNumber ?: '-' }}</div>
+            <div><strong>Tanggal PO:</strong> {{ $poDate ? \Illuminate\Support\Carbon::parse($poDate)->translatedFormat('d F Y') : '-' }}</div>
         </div>
     @endunless
 
@@ -125,19 +136,19 @@
         </tr>
         </thead>
         <tbody>
-        @foreach ($penawaran->items as $item)
+        @foreach ($invoiceItems as $item)
             <tr>
                 <td class="center">{{ $loop->iteration }}</td>
                 <td style="text-align:left;">
-                    <div>{{ $item->nama }}</div>
-                    @if (!empty($item->rincian))
-                        <div style="font-size:11px; margin-top:4px; white-space: pre-line;">{{ $item->rincian }}</div>
+                    <div>{{ data_get($item, 'nama') }}</div>
+                    @if (!empty(data_get($item, 'rincian')))
+                        <div style="font-size:11px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
                     @endif
                 </td>
-                <td class="center">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
-                <td class="center">{{ strtoupper($item->satuan) }}</td>
-                <td class="right-text nowrap" style="font-size:11px;">Rp {{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                <td class="right-text nowrap" style="font-size:11px;">Rp {{ number_format($item->amount, 2, ',', '.') }}</td>
+                <td class="center">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
+                <td class="center">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
+                <td class="right-text nowrap" style="font-size:11px;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                <td class="right-text nowrap" style="font-size:11px;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
             </tr>
         @endforeach
         </tbody>
@@ -147,11 +158,11 @@
         <table class="summary">
             <tr>
                 <td>Subtotal</td>
-                <td class="right-text">Rp {{ number_format($penawaran->subtotal, 2, ',', '.') }}</td>
+                <td class="right-text">Rp {{ number_format($subtotal, 2, ',', '.') }}</td>
             </tr>
             <tr>
-                <td>Tax ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</td>
-                <td class="right-text">Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</td>
+                <td>Tax ({{ number_format($taxPercent, 2, ',', '.') }}%)</td>
+                <td class="right-text">Rp {{ number_format($taxAmount, 2, ',', '.') }}</td>
             </tr>
             @if ($isMitra)
                 <tr>
@@ -161,7 +172,7 @@
             @endif
             <tr>
                 <td>{{ $isMitra ? 'Amount' : 'Grand Total' }}</td>
-                <td class="right-text">Rp {{ number_format($isMitra ? ($penawaran->total - $pph23) : $penawaran->total, 2, ',', '.') }}</td>
+                <td class="right-text">Rp {{ number_format($isMitra ? ($total - $pph23) : $total, 2, ',', '.') }}</td>
             </tr>
         </table>
     </div>

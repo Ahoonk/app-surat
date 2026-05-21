@@ -15,10 +15,11 @@
 </head>
 <body>
 @php
+    $snapshot = $beritaAcara->snapshot_data ?? [];
     $invoice = $beritaAcara->invoice;
     $penawaran = $invoice?->penawaran;
     $po = $invoice?->purchasingOrder;
-    $tanggalSource = $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
+    $tanggalSource = data_get($snapshot, 'city_date_manual') ?: $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
     $tanggalObj = \Illuminate\Support\Carbon::parse($tanggalSource);
     $hariMap = [
         'Monday' => 'Senin',
@@ -107,14 +108,14 @@
     <div class="center" style="margin-bottom: 30px;">
         <h2 style="margin: 0 0 4px; text-decoration: underline;">Berita Acara</h2>
         <div>Nomor : {{ $beritaAcara->nomor }}</div>
-        <div>Perihal : {{ $beritaAcara->perihal ?: '-' }}</div>
+        <div>Perihal : {{ data_get($snapshot, 'subject', $beritaAcara->perihal ?: '-') }}</div>
     </div>
 
     <p>Pada hari ini, {{ $tanggalDeskriptif }},&nbsp;&nbsp;yang bertanda tangan dibawah ini</p>
 
     <div style="margin-left: 22px; margin-top: 8px;">
-        <div><span class="w-no">I.</span><span class="w-label">Nama</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</span></div>
-        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">{{ $penawaran?->to_address ?? '-' }}</span></div>
+        <div><span class="w-no">I.</span><span class="w-label">Nama</span><span class="w-colon">:</span><span class="w-value">{{ data_get($snapshot, 'customer_name', $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-') }}</span></div>
+        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">{{ data_get($snapshot, 'customer_address', $penawaran?->to_address ?? '-') }}</span></div>
         <div style="margin-top: 4px;">Yang selanjutnya disebut <strong>PIHAK PERTAMA</strong></div>
     </div>
 
@@ -125,8 +126,8 @@
     </div>
 
     <p style="margin-top: 16px;">
-        Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po?->nomor_po ?? '-' }}, PIHAK KEDUA telah
-        melaksanakan pekerjaan untuk PIHAK PERTAMA {{ $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.' }}
+        Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ data_get($snapshot, 'po_number', $po?->nomor_po ?? '-') }}, PIHAK KEDUA telah
+        melaksanakan pekerjaan untuk PIHAK PERTAMA {{ data_get($snapshot, 'closing_note', $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.') }}
     </p>
 
     <p>Demikian Berita Acara ini dibuat dan dapat digunakan sebagai mana mestinya.</p>

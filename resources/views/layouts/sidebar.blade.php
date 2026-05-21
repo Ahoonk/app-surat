@@ -86,6 +86,10 @@
                     <span>Mitra</span>
                     <span class="text-xs text-slate-400">Partner</span>
                 </a>
+                <a href="{{ route('document-templates.index') }}" class="{{ $menuClass('document-templates.*') }}">
+                    <span>Template Dokumen</span>
+                    <span class="text-xs text-slate-400">PDF</span>
+                </a>
                 @if ($user?->isSuperAdmin())
                     <a href="{{ route('users.index') }}" class="{{ $menuClass('users.*') }}">
                         <span>Manajemen User</span>

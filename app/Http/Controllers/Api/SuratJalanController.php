@@ -8,6 +8,9 @@ use App\Mail\SuratJalanMail;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\SuratJalan;
+use App\Services\DocumentTemplateResolver;
+use App\Services\DocumentNumberService;
+use App\Services\DocumentSnapshotService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
@@ -23,17 +26,24 @@ class SuratJalanController extends Controller
         })->with('penawaran.mitra')->get();
 
         foreach ($invoices as $invoice) {
-            $mitra = $invoice->penawaran?->mitra;
-            $nomor = $mitra?->nomor_surat_jalan ?: preg_replace('/^INV\//', 'SJ/', $invoice->nomor);
+            if (SuratJalan::where('invoice_id', $invoice->id)->exists()) {
+                continue;
+            }
 
-            SuratJalan::firstOrCreate(
-                ['invoice_id' => $invoice->id],
-                [
-                    'nomor' => $nomor,
-                    'tanggal' => $invoice->tanggal,
-                    'created_by' => $invoice->created_by ?? auth()->id(),
-                ]
-            );
+            $mitra = $invoice->penawaran?->mitra;
+            $nomor = $mitra?->nomor_surat_jalan ?: app(DocumentNumberService::class)->next($companyId, 'surat_jalan', $invoice->tanggal);
+
+            $suratJalan = SuratJalan::create([
+                'company_id' => $companyId,
+                'invoice_id' => $invoice->id,
+                'nomor' => $nomor,
+                'tanggal' => $invoice->tanggal,
+                'created_by' => $invoice->created_by ?? auth()->id(),
+            ]);
+
+            $suratJalan->update([
+                'snapshot_data' => app(DocumentSnapshotService::class)->forSuratJalan($suratJalan),
+            ]);
         }
     }
 
@@ -99,7 +109,8 @@ class SuratJalanController extends Controller
         }
 
         $fileName = 'surat-jalan-' . str_replace('/', '-', $suratJalan->nomor) . '.pdf';
-        $pdf = Pdf::loadView('surat-jalan.pdf', compact('suratJalan'))->setPaper('a4', 'portrait');
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'surat_jalan', 'surat-jalan.pdf');
+        $pdf = Pdf::loadView($view, compact('suratJalan'))->setPaper('a4', 'portrait');
         $pdfData = $pdf->output();
 
         try {
@@ -129,6 +140,7 @@ class SuratJalanController extends Controller
             'penerima_hp' => $suratJalan->penerima_hp,
             'kota_tanggal_manual' => $suratJalan->kota_tanggal_manual,
             'created_by' => $suratJalan->created_by,
+            'snapshot_data' => $suratJalan->snapshot_data,
             'invoice' => $includeInvoice && $suratJalan->relationLoaded('invoice') && $suratJalan->invoice ? [
                 'id' => $suratJalan->invoice->id,
                 'nomor' => $suratJalan->invoice->nomor,
@@ -141,6 +153,7 @@ class SuratJalanController extends Controller
                     'to_company' => $suratJalan->invoice->penawaran->to_company,
                     'status' => $suratJalan->invoice->penawaran->status,
                     'total' => (float) $suratJalan->invoice->penawaran->total,
+                    'snapshot_data' => $suratJalan->invoice->penawaran->snapshot_data,
                 ] : null,
                 'purchasing_order' => $suratJalan->invoice->relationLoaded('purchasingOrder') && $suratJalan->invoice->purchasingOrder ? [
                     'id' => $suratJalan->invoice->purchasingOrder->id,

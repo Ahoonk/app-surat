@@ -13,6 +13,7 @@ use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\TelegramBotController;
+use App\Http\Controllers\DocumentTemplateController;
 use App\Models\BeritaAcara;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -188,5 +189,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('mitra/{mitra}/edit', [MitraController::class, 'edit'])->name('mitra.edit');
     Route::put('mitra/{mitra}', [MitraController::class, 'update'])->name('mitra.update');
     Route::delete('mitra/{mitra}', [MitraController::class, 'destroy'])->name('mitra.destroy');
+
+    Route::get('document-templates', [DocumentTemplateController::class, 'index'])->name('document-templates.index');
+    Route::post('document-templates', [DocumentTemplateController::class, 'store'])->name('document-templates.store');
+    Route::put('document-templates/{documentTemplate}', [DocumentTemplateController::class, 'update'])->name('document-templates.update');
+    Route::delete('document-templates/{documentTemplate}', [DocumentTemplateController::class, 'destroy'])->name('document-templates.destroy');
 
 });

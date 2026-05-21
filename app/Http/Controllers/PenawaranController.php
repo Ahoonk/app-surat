@@ -8,6 +8,8 @@ use App\Models\Penawaran;
 use App\Models\Customer;
 use App\Models\Mitra;
 use App\Mail\PenawaranMail;
+use App\Services\DocumentSnapshotService;
+use App\Services\DocumentTemplateResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
@@ -112,7 +114,8 @@ class PenawaranController extends Controller
         $penawaran->load('items');
 
         $fileName = 'penawaran-' . str_replace('/', '-', $penawaran->nomor) . '.pdf';
-        $pdf = Pdf::loadView('penawaran.pdf', compact('penawaran'))
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'penawaran', 'penawaran.pdf');
+        $pdf = Pdf::loadView($view, compact('penawaran'))
             ->setPaper('a4', 'portrait');
 
         if (request()->boolean('download')) {
@@ -143,7 +146,8 @@ class PenawaranController extends Controller
         $penawaran->load('items');
 
         $fileName = 'penawaran-' . str_replace('/', '-', $penawaran->nomor) . '.pdf';
-        $pdf = Pdf::loadView('penawaran.pdf', compact('penawaran'))
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'penawaran', 'penawaran.pdf');
+        $pdf = Pdf::loadView($view, compact('penawaran'))
             ->setPaper('a4', 'portrait');
         $pdfData = $pdf->output();
 
@@ -291,6 +295,11 @@ class PenawaranController extends Controller
             return $penawaran;
         });
 
+        $penawaran->load('company', 'mitra', 'items', 'user');
+        $penawaran->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
+        ]);
+
         return redirect()->route('penawaran.show', $penawaran)
             ->with('success', 'Surat Penawaran berhasil dibuat.');
     }
@@ -400,6 +409,11 @@ class PenawaranController extends Controller
             $penawaran->items()->createMany($items);
         });
 
+        $penawaran->load('company', 'mitra', 'items', 'user');
+        $penawaran->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
+        ]);
+
         return redirect()->route('penawaran.index')
             ->with('success', 'Surat Penawaran berhasil diperbarui.');
     }
@@ -432,6 +446,11 @@ class PenawaranController extends Controller
             'status' => 'approved',
             'approved_by' => auth()->id(),
             'approved_at' => now(),
+        ]);
+
+        $penawaran->load('company', 'mitra', 'items', 'user');
+        $penawaran->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
         ]);
 
         return redirect()->route('purchasing-order.index')

@@ -2,6 +2,7 @@
 
 @section('content')
 @php
+    $snapshot = $suratJalan->snapshot_data ?? [];
     $invoice = $suratJalan->invoice;
     $penawaran = $invoice->penawaran;
     $mitra = $penawaran->mitra;
@@ -21,7 +22,7 @@
     } elseif (file_exists($bgFallbackPath)) {
         $bgAsset = asset('storage/logos/background-template.png') . '?v=' . filemtime($bgFallbackPath);
     }
-    $tanggalCetakSource = $suratJalan->kota_tanggal_manual ?: $suratJalan->tanggal;
+    $tanggalCetakSource = data_get($snapshot, 'city_date_manual') ?: $suratJalan->kota_tanggal_manual ?: $suratJalan->tanggal;
     $tanggalCetak = $tanggalCetakSource
         ? \Illuminate\Support\Carbon::parse($tanggalCetakSource)->translatedFormat('d F Y')
         : '-';
@@ -63,13 +64,13 @@
         <div style="{{ $previewContentStyle }}">
             <div class="text-center mb-6">
                 <h2 class="text-xl font-bold uppercase">Surat Jalan</h2>
-                <p>No: {{ $suratJalan->nomor }}</p>
+                <p>No: {{ data_get($snapshot, 'nomor', $suratJalan->nomor) }}</p>
             </div>
 
             <div class="mb-4 text-sm">
-                <p><strong>No Invoice:</strong> {{ $invoice->nomor }}</p>
-                <p><strong>Customer:</strong> {{ $penawaran->to_company ?? $penawaran->customer_nama }}</p>
-                <p><strong>Alamat:</strong> {{ $penawaran->to_address ?? '-' }}</p>
+                <p><strong>No Invoice:</strong> {{ data_get($snapshot, 'invoice_number', $invoice->nomor) }}</p>
+                <p><strong>Customer:</strong> {{ data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama) }}</p>
+                <p><strong>Alamat:</strong> {{ data_get($snapshot, 'customer_address', $penawaran->to_address ?? '-') }}</p>
             </div>
 
             <div class="space-y-4 text-sm">
@@ -79,17 +80,17 @@
                         <tr>
                             <td class="w-40 align-top">Nama</td>
                             <td class="w-3 align-top">:</td>
-                            <td class="align-top">{{ $suratJalan->pemberi_nama ?? 'Bayu Suderajat' }}</td>
+                            <td class="align-top">{{ data_get($snapshot, 'sender_name', $suratJalan->pemberi_nama ?? 'Bayu Suderajat') }}</td>
                         </tr>
                         <tr>
                             <td class="w-40 align-top">Jabatan</td>
                             <td class="w-3 align-top">:</td>
-                            <td class="align-top">{{ $suratJalan->pemberi_jabatan ?? 'Direktur' }}</td>
+                            <td class="align-top">{{ data_get($snapshot, 'sender_title', $suratJalan->pemberi_jabatan ?? 'Direktur') }}</td>
                         </tr>
                         <tr>
                             <td class="w-40 align-top">Alamat</td>
                             <td class="w-3 align-top">:</td>
-                            <td class="align-top">{{ $suratJalan->pemberi_alamat ?? 'Perum Bukit Cilegon Asri, Blok BK No.09, Rt/Rw. 014/006, Kelurahan Bagendung, Kecamatan Cilegon' }}</td>
+                            <td class="align-top">{{ data_get($snapshot, 'sender_address', $suratJalan->pemberi_alamat ?? 'Perum Bukit Cilegon Asri, Blok BK No.09, Rt/Rw. 014/006, Kelurahan Bagendung, Kecamatan Cilegon') }}</td>
                         </tr>
                     </table>
                 </div>
@@ -100,17 +101,17 @@
                         <tr>
                             <td class="w-40 align-top">Nama</td>
                             <td class="w-3 align-top">:</td>
-                            <td class="align-top">{{ $suratJalan->penerima_nama ?? '-' }}</td>
+                            <td class="align-top">{{ data_get($snapshot, 'receiver_name', $suratJalan->penerima_nama ?? '-') }}</td>
                         </tr>
                         <tr>
                             <td class="w-40 align-top">No. Handphone</td>
                             <td class="w-3 align-top">:</td>
-                            <td class="align-top">{{ $suratJalan->penerima_hp ?? '-' }}</td>
+                            <td class="align-top">{{ data_get($snapshot, 'receiver_phone', $suratJalan->penerima_hp ?? '-') }}</td>
                         </tr>
                     </table>
                 </div>
 
-                <p>Untuk membawa barang milik "{{ $penawaran->to_company ?? $penawaran->customer_nama }}", dengan rincian:</p>
+                <p>Untuk membawa barang milik "{{ data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama) }}", dengan rincian:</p>
             </div>
 
             <div class="overflow-x-auto mt-4">
@@ -123,15 +124,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($penawaran->items as $item)
+                        @foreach (data_get($snapshot, 'items', $penawaran->items) as $item)
                             @php
-                                $rincianLines = preg_split('/\r\n|\r|\n/', trim((string) $item->rincian));
+                                $rincianLines = preg_split('/\r\n|\r|\n/', trim((string) data_get($item, 'rincian')));
                                 $rincianLines = array_values(array_filter(array_map('trim', $rincianLines ?: []), fn ($line) => $line !== ''));
                             @endphp
                             <tr>
                                 <td class="border px-3 py-2 text-center align-top">{{ $loop->iteration }}</td>
                                 <td class="border px-3 py-2 align-top">
-                                    <div class="font-medium text-gray-900">{{ $item->nama }}</div>
+                                    <div class="font-medium text-gray-900">{{ data_get($item, 'nama') }}</div>
                                     @if (!empty($rincianLines))
                                         <div class="mt-2 space-y-1 text-[11px] leading-5 text-gray-600">
                                             @foreach ($rincianLines as $line)
@@ -143,7 +144,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="border px-3 py-2 text-center align-top">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
+                                <td class="border px-3 py-2 text-center align-top">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -157,7 +158,7 @@
                         <p>Kota Cilegon, {{ $tanggalCetak }}</p>
                         <p>Direktur</p>
                         <div class="h-16"></div>
-                        <p class="font-semibold">{{ $suratJalan->pemberi_nama ?? 'Bayu Suderajat' }}</p>
+                        <p class="font-semibold">{{ data_get($snapshot, 'sender_name', $suratJalan->pemberi_nama ?? 'Bayu Suderajat') }}</p>
                     </div>
                 </div>
             </div>

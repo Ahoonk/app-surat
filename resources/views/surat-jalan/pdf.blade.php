@@ -13,9 +13,10 @@
 </head>
 <body>
 @php
+    $snapshot = $suratJalan->snapshot_data ?? [];
     $invoice = $suratJalan->invoice;
     $penawaran = $invoice->penawaran;
-    $tanggalCetakSource = $suratJalan->kota_tanggal_manual ?: $suratJalan->tanggal;
+    $tanggalCetakSource = data_get($snapshot, 'city_date_manual') ?: $suratJalan->kota_tanggal_manual ?: $suratJalan->tanggal;
     $tanggalCetak = $tanggalCetakSource
         ? \Illuminate\Support\Carbon::parse($tanggalCetakSource)->translatedFormat('d F Y')
         : '-';
@@ -75,24 +76,24 @@
     </div>
 
     <div style="margin-top:18px;">
-        <div><strong>No Invoice:</strong> {{ $invoice->nomor }}</div>
-        <div><strong>Customer:</strong> {{ $penawaran->to_company ?? $penawaran->customer_nama }}</div>
-        <div><strong>Alamat:</strong> {{ $penawaran->to_address ?? '-' }}</div>
+        <div><strong>No Invoice:</strong> {{ data_get($snapshot, 'invoice_number', $invoice->nomor) }}</div>
+        <div><strong>Customer:</strong> {{ data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama) }}</div>
+        <div><strong>Alamat:</strong> {{ data_get($snapshot, 'customer_address', $penawaran->to_address ?? '-') }}</div>
     </div>
 
     <div style="margin-top:16px;">
         <div>Bersama ini, saya yang bertanda tangan dibawah:</div>
         <table style="margin-top:8px;">
-            <tr><td style="width:25%; border:0; padding:2px 0;">Nama</td><td style="border:0; padding:2px 0;">: {{ $suratJalan->pemberi_nama ?? 'Bayu Suderajat' }}</td></tr>
-            <tr><td style="border:0; padding:2px 0;">Jabatan</td><td style="border:0; padding:2px 0;">: {{ $suratJalan->pemberi_jabatan ?? 'Direktur' }}</td></tr>
-            <tr><td style="border:0; padding:2px 0;">Alamat</td><td style="border:0; padding:2px 0;">: {{ $suratJalan->pemberi_alamat ?? 'Perum Bukit Cilegon Asri, Blok BK No.09, Rt/Rw. 014/006, Kelurahan Bagendung, Kecamatan Cilegon' }}</td></tr>
+            <tr><td style="width:25%; border:0; padding:2px 0;">Nama</td><td style="border:0; padding:2px 0;">: {{ data_get($snapshot, 'sender_name', $suratJalan->pemberi_nama ?? 'Bayu Suderajat') }}</td></tr>
+            <tr><td style="border:0; padding:2px 0;">Jabatan</td><td style="border:0; padding:2px 0;">: {{ data_get($snapshot, 'sender_title', $suratJalan->pemberi_jabatan ?? 'Direktur') }}</td></tr>
+            <tr><td style="border:0; padding:2px 0;">Alamat</td><td style="border:0; padding:2px 0;">: {{ data_get($snapshot, 'sender_address', $suratJalan->pemberi_alamat ?? 'Perum Bukit Cilegon Asri, Blok BK No.09, Rt/Rw. 014/006, Kelurahan Bagendung, Kecamatan Cilegon') }}</td></tr>
         </table>
         <div style="margin-top:8px;">Memberikan kuasa kepada sebagai berikut:</div>
         <table style="margin-top:6px;">
-            <tr><td style="width:25%; border:0; padding:2px 0;">Nama</td><td style="border:0; padding:2px 0;">: {{ $suratJalan->penerima_nama ?? '-' }}</td></tr>
-            <tr><td style="border:0; padding:2px 0;">No. Handphone</td><td style="border:0; padding:2px 0;">: {{ $suratJalan->penerima_hp ?? '-' }}</td></tr>
+            <tr><td style="width:25%; border:0; padding:2px 0;">Nama</td><td style="border:0; padding:2px 0;">: {{ data_get($snapshot, 'receiver_name', $suratJalan->penerima_nama ?? '-') }}</td></tr>
+            <tr><td style="border:0; padding:2px 0;">No. Handphone</td><td style="border:0; padding:2px 0;">: {{ data_get($snapshot, 'receiver_phone', $suratJalan->penerima_hp ?? '-') }}</td></tr>
         </table>
-        <div style="margin-top:8px;">Untuk membawa barang milik "{{ $penawaran->to_company ?? $penawaran->customer_nama }}", dengan rincian:</div>
+        <div style="margin-top:8px;">Untuk membawa barang milik "{{ data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama) }}", dengan rincian:</div>
     </div>
 
     <table>
@@ -104,15 +105,16 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($penawaran->items as $item)
+            @foreach (data_get($snapshot, 'items', $penawaran->items) as $item)
                 @php
-                    $rincianLines = preg_split('/\r\n|\r|\n/', trim((string) $item->rincian));
+                    $rincian = data_get($item, 'rincian');
+                    $rincianLines = preg_split('/\r\n|\r|\n/', trim((string) $rincian));
                     $rincianLines = array_values(array_filter(array_map('trim', $rincianLines ?: []), fn ($line) => $line !== ''));
                 @endphp
                 <tr>
                     <td style="text-align:center;">{{ $loop->iteration }}</td>
                     <td>
-                        <div style="font-weight:700;">{{ $item->nama }}</div>
+                        <div style="font-weight:700;">{{ data_get($item, 'nama') }}</div>
                         @if (!empty($rincianLines))
                             <div style="margin-top:6px; font-size:11px; line-height:1.5; color:#444;">
                                 @foreach ($rincianLines as $line)
@@ -124,7 +126,7 @@
                             </div>
                         @endif
                     </td>
-                    <td style="text-align:center;">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
+                    <td style="text-align:center;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
                 </tr>
             @endforeach
         </tbody>

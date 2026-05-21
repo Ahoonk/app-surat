@@ -28,7 +28,15 @@ class Penawaran extends Model
         'invoice_number',
         'invoice_sequence',
         'approved_by',
-        'approved_at'
+        'approved_at',
+        'snapshot_data',
+    ];
+
+    protected $casts = [
+        'snapshot_data' => 'array',
+        'tanggal' => 'date',
+        'invoice_date' => 'date',
+        'approved_at' => 'datetime',
     ];
 
     public function company()

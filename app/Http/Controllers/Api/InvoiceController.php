@@ -8,6 +8,7 @@ use App\Mail\InvoiceMail;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\SuratJalan;
+use App\Services\DocumentTemplateResolver;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -83,7 +84,8 @@ class InvoiceController extends Controller
         }
 
         $fileName = 'invoice-' . str_replace('/', '-', $invoice->nomor) . '.pdf';
-        $pdf = Pdf::loadView('invoice.pdf', [
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'invoice', 'invoice.pdf');
+        $pdf = Pdf::loadView($view, [
             'invoice' => $invoice,
             'penawaran' => $invoice->penawaran,
         ])->setPaper('a4', 'portrait');
@@ -135,6 +137,9 @@ class InvoiceController extends Controller
         });
 
         $this->loadInvoiceRelations($invoice);
+        $invoice->update([
+            'snapshot_data' => app(\App\Services\DocumentSnapshotService::class)->forInvoice($invoice),
+        ]);
 
         return response()->json([
             'message' => 'Tanggal cetak invoice berhasil diperbarui.',
@@ -160,6 +165,9 @@ class InvoiceController extends Controller
         ]);
 
         $this->loadInvoiceRelations($invoice);
+        $invoice->update([
+            'snapshot_data' => app(\App\Services\DocumentSnapshotService::class)->forInvoice($invoice),
+        ]);
 
         return response()->json([
             'message' => 'Status pembayaran invoice berhasil diubah menjadi sudah dibayarkan.',
@@ -180,6 +188,7 @@ class InvoiceController extends Controller
             'payment_status' => $invoice->payment_status,
             'payment_date' => $invoice->payment_date,
             'created_by' => $invoice->created_by,
+            'snapshot_data' => $invoice->snapshot_data,
             'penawaran' => $invoice->relationLoaded('penawaran') && $invoice->penawaran ? [
                 'id' => $invoice->penawaran->id,
                 'company_id' => $invoice->penawaran->company_id,
@@ -193,6 +202,7 @@ class InvoiceController extends Controller
                 'tax_percent' => (float) $invoice->penawaran->tax_percent,
                 'tax_amount' => (float) $invoice->penawaran->tax_amount,
                 'total' => (float) $invoice->penawaran->total,
+                'snapshot_data' => $invoice->penawaran->snapshot_data,
                 'items' => $includeDocuments ? $invoice->penawaran->items->map(fn ($item) => [
                     'id' => $item->id,
                     'nama' => $item->nama,

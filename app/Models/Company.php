@@ -22,4 +22,14 @@ class Company extends Model
     {
         return $this->hasMany(Penawaran::class);
     }
+
+    public function documentSeries(): HasMany
+    {
+        return $this->hasMany(DocumentSeries::class);
+    }
+
+    public function documentTemplates(): HasMany
+    {
+        return $this->hasMany(DocumentTemplate::class);
+    }
 }

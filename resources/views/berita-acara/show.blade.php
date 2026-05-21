@@ -2,6 +2,7 @@
 
 @section('content')
 @php
+    $snapshot = $beritaAcara->snapshot_data ?? [];
     $invoice = $beritaAcara->invoice;
     $penawaran = $invoice?->penawaran;
     $po = $invoice?->purchasingOrder;
@@ -24,7 +25,7 @@
     }
     $previewPaperStyle = 'width:100%;max-width:794px;min-height:1123px;';
     $previewContentStyle = 'padding:170px 15mm 110px 15mm;position:relative;z-index:2;';
-    $tanggalSource = $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
+    $tanggalSource = data_get($snapshot, 'city_date_manual') ?: $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
     $tanggalObj = \Illuminate\Support\Carbon::parse($tanggalSource);
     $hariMap = [
         'Monday' => 'Senin',
@@ -93,15 +94,15 @@
         <div class="max-w-4xl mx-auto text-[16px] leading-7">
             <div class="text-center mb-10">
                 <h2 class="text-2xl font-bold underline mb-1">Berita Acara</h2>
-                <p>Nomor : {{ $beritaAcara->nomor }}</p>
-                <p>Perihal : {{ $beritaAcara->perihal ?: '-' }}</p>
+                <p>Nomor : {{ data_get($snapshot, 'nomor', $beritaAcara->nomor) }}</p>
+                <p>Perihal : {{ data_get($snapshot, 'subject', $beritaAcara->perihal ?: '-') }}</p>
             </div>
 
             <p>Pada hari ini, {{ $tanggalDeskriptif }},&nbsp;&nbsp;yang bertanda tangan dibawah ini</p>
 
             <div class="mt-4 ml-8">
-                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</span></p>
-                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_address ?? '-' }}</span></p>
+                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ data_get($snapshot, 'customer_name', $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-') }}</span></p>
+                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ data_get($snapshot, 'customer_address', $penawaran?->to_address ?? '-') }}</span></p>
                 <p class="mt-1">Yang selanjutnya disebut <strong>PIHAK PERTAMA</strong></p>
             </div>
 
@@ -112,8 +113,8 @@
             </div>
 
             <p class="mt-6">
-                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po?->nomor_po ?? '-' }}, PIHAK KEDUA telah
-                melaksanakan pekerjaan untuk PIHAK PERTAMA {{ $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.' }}
+                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ data_get($snapshot, 'po_number', $po?->nomor_po ?? '-') }}, PIHAK KEDUA telah
+                melaksanakan pekerjaan untuk PIHAK PERTAMA {{ data_get($snapshot, 'closing_note', $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.') }}
             </p>
 
             <p class="mt-3">Demikian Berita Acara ini dibuat dan dapat digunakan sebagai mana mestinya.</p>

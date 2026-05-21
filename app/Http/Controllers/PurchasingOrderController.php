@@ -7,6 +7,8 @@ use App\Models\Invoice;
 use App\Models\Penawaran;
 use App\Models\PurchasingOrder;
 use App\Models\SuratJalan;
+use App\Services\DocumentNumberService;
+use App\Services\DocumentSnapshotService;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Inertia\Inertia;
@@ -87,6 +89,7 @@ class PurchasingOrderController extends Controller
         $path = $file->store('purchasing-orders', 'public');
 
         PurchasingOrder::create([
+            'company_id' => $companyId,
             'penawaran_id' => $penawaran->id,
             'dokumen_path' => $path,
             'dokumen_name' => $file->getClientOriginalName(),
@@ -115,9 +118,10 @@ class PurchasingOrderController extends Controller
         $sequence = 1;
         $invoiceDate = now()->toDateString();
         $mitra = $penawaran->mitra;
-        $invoiceNumber = $mitra?->nomor_invoice ?: $this->buildInvoiceNumber($invoiceDate);
+        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->next($companyId, 'invoice', $invoiceDate);
 
         $invoice = Invoice::create([
+            'company_id' => $companyId,
             'penawaran_id' => $penawaran->id,
             'purchasing_order_id' => $penawaran->purchasingOrder->id,
             'nomor' => $invoiceNumber,
@@ -127,16 +131,25 @@ class PurchasingOrderController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: preg_replace('/^INV\//', 'SJ/', $invoice->nomor);
+        $invoice->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forInvoice($invoice),
+        ]);
 
-        SuratJalan::firstOrCreate(
+        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: app(DocumentNumberService::class)->next($companyId, 'surat_jalan', $invoiceDate);
+
+        $suratJalan = SuratJalan::firstOrCreate(
             ['invoice_id' => $invoice->id],
             [
+                'company_id' => $companyId,
                 'nomor' => $suratJalanNomor,
                 'tanggal' => $invoiceDate,
                 'created_by' => auth()->id(),
             ]
         );
+
+        $suratJalan->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forSuratJalan($suratJalan),
+        ]);
 
         $penawaran->update([
             'invoice_date' => $invoiceDate,
@@ -168,9 +181,10 @@ class PurchasingOrderController extends Controller
         $currentSequence = max((int) $penawaran->invoice_sequence, $latestSequence, 1);
         $nextSequence = $currentSequence + 1;
         $mitra = $penawaran->mitra;
-        $invoiceNumber = $mitra?->nomor_invoice ?: $this->buildInvoiceNumber($validated['invoice_date']);
+        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->next($companyId, 'invoice', $validated['invoice_date']);
 
         $invoice = Invoice::create([
+            'company_id' => $companyId,
             'penawaran_id' => $penawaran->id,
             'purchasing_order_id' => $penawaran->purchasingOrder->id,
             'nomor' => $invoiceNumber,
@@ -180,16 +194,25 @@ class PurchasingOrderController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: preg_replace('/^INV\//', 'SJ/', $invoice->nomor);
+        $invoice->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forInvoice($invoice),
+        ]);
 
-        SuratJalan::firstOrCreate(
+        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: app(DocumentNumberService::class)->next($companyId, 'surat_jalan', $validated['invoice_date']);
+
+        $suratJalan = SuratJalan::firstOrCreate(
             ['invoice_id' => $invoice->id],
             [
+                'company_id' => $companyId,
                 'nomor' => $suratJalanNomor,
                 'tanggal' => $validated['invoice_date'],
                 'created_by' => auth()->id(),
             ]
         );
+
+        $suratJalan->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forSuratJalan($suratJalan),
+        ]);
 
         $penawaran->update([
             'invoice_sequence' => $nextSequence,
@@ -221,34 +244,4 @@ class PurchasingOrderController extends Controller
             ->with('success', 'Status penawaran dikembalikan ke submitted.');
     }
 
-    private function buildInvoiceNumber(string $invoiceDate): string
-    {
-        $date = \Illuminate\Support\Carbon::parse($invoiceDate);
-        $runningNumber = $this->nextInvoiceRunningNumber();
-
-        return sprintf(
-            'INV/%s/%s/%s-ASK',
-            $date->format('Y'),
-            $date->format('m'),
-            str_pad((string) $runningNumber, 3, '0', STR_PAD_LEFT)
-        );
-    }
-
-    private function nextInvoiceRunningNumber(): int
-    {
-        $maxRunning = Invoice::query()
-            ->pluck('nomor')
-            ->map(function ($nomor) {
-                if (preg_match('/^INV\/\d{4}\/\d{2}\/(\d{3})-ASK$/', $nomor, $match)) {
-                    return (int) $match[1];
-                }
-
-                return null;
-            })
-            ->filter()
-            ->max();
-
-        // Existing manual invoice stops at 002, so app starts from 003.
-        return max((int) $maxRunning, 2) + 1;
-    }
 }

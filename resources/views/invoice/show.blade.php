@@ -12,15 +12,17 @@
         </div>
     </div>
 
-    @php
-        $mitra = $penawaran->mitra;
-        $isMitra = (bool) $mitra;
-        $issuerName = $mitra?->nama ?? 'PT Aldera Saddatech Karya';
-        $taxPercent = (float) ($penawaran->tax_percent ?? 0);
-        $divisor = 1 + ($taxPercent / 100);
-        $pph23 = $isMitra && $divisor > 0
-            ? ($penawaran->total / $divisor) * 0.02
-            : 0;
+@php
+    $snapshot = $invoice->snapshot_data ?? [];
+    $mitra = $penawaran->mitra;
+    $isMitra = (bool) data_get($snapshot, 'is_mitra', $mitra);
+    $issuerName = data_get($snapshot, 'issuer_name', $mitra?->nama ?? 'PT Aldera Saddatech Karya');
+    $taxPercent = (float) data_get($snapshot, 'tax_percent', $penawaran->tax_percent ?? 0);
+    $divisor = 1 + ($taxPercent / 100);
+    $baseTotal = (float) data_get($snapshot, 'total', $penawaran->total);
+    $pph23 = $isMitra && $divisor > 0
+        ? ($baseTotal / $divisor) * 0.02
+        : 0;
         $mitraTemplatePath = $mitra?->template_invoice_path
             ? public_path('storage/' . $mitra->template_invoice_path)
             : null;
@@ -49,20 +51,20 @@
         <div class="flex justify-between items-start border-b pb-4">
             <div>
                 <p class="text-[11px] text-gray-600 font-semibold">Bill To</p>
-                <p class="font-semibold">{{ $penawaran->to_company ?? $penawaran->customer_nama }}</p>
-                <p>{{ $penawaran->to_address ?? '-' }}</p>
+                <p class="font-semibold">{{ data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama) }}</p>
+                <p>{{ data_get($snapshot, 'customer_address', $penawaran->to_address ?? '-') }}</p>
             </div>
             <div class="text-right">
                 <p class="text-[11px] text-gray-600 font-semibold">No Invoice</p>
-                <p class="mt-1"><strong>{{ $invoice->nomor }}</strong></p>
-                <p><strong>Date:</strong> {{ \Illuminate\Support\Carbon::parse($invoice->tanggal)->translatedFormat('d F Y') }}</p>
+                <p class="mt-1"><strong>{{ data_get($snapshot, 'invoice_number', $invoice->nomor) }}</strong></p>
+                <p><strong>Date:</strong> {{ \Illuminate\Support\Carbon::parse(data_get($snapshot, 'invoice_date', $invoice->tanggal))->translatedFormat('d F Y') }}</p>
             </div>
         </div>
 
         @unless($isMitra)
             <div class="mt-3 mb-2 text-[11px]">
-                <p><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</p>
-                <p><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</p>
+                <p><strong>Nomor PO:</strong> {{ data_get($snapshot, 'po_number', $invoice->purchasingOrder->nomor_po ?? '-') }}</p>
+                <p><strong>Tanggal PO:</strong> {{ data_get($snapshot, 'po_date', $invoice->purchasingOrder->tanggal_po) ? \Illuminate\Support\Carbon::parse(data_get($snapshot, 'po_date', $invoice->purchasingOrder->tanggal_po))->translatedFormat('d F Y') : '-' }}</p>
             </div>
         @endunless
 
@@ -79,19 +81,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($penawaran->items as $item)
+                    @foreach (data_get($snapshot, 'items', $penawaran->items) as $item)
                         <tr>
                             <td class="border px-3 py-2 text-center">{{ $loop->iteration }}</td>
                             <td class="border px-3 py-2 text-left">
-                                <div>{{ $item->nama }}</div>
-                                @if (!empty($item->rincian))
-                                    <div class="text-[11px] text-gray-600 whitespace-pre-line mt-1">{!! e($item->rincian) !!}</div>
+                                <div>{{ data_get($item, 'nama') }}</div>
+                                @if (!empty(data_get($item, 'rincian')))
+                                    <div class="text-[11px] text-gray-600 whitespace-pre-line mt-1">{!! e(data_get($item, 'rincian')) !!}</div>
                                 @endif
                             </td>
-                            <td class="border px-3 py-2 text-center">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
-                            <td class="border px-3 py-2 text-center">{{ strtoupper($item->satuan) }}</td>
-                            <td class="border px-3 py-2 text-right">Rp {{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                            <td class="border px-3 py-2 text-right">Rp {{ number_format($item->amount, 2, ',', '.') }}</td>
+                            <td class="border px-3 py-2 text-center">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
+                            <td class="border px-3 py-2 text-center">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
+                            <td class="border px-3 py-2 text-right">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                            <td class="border px-3 py-2 text-right">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -101,11 +103,11 @@
         <div class="ml-auto mt-4 w-full max-w-sm">
             <div class="flex justify-between border-b py-2">
                 <span>Subtotal</span>
-                <span>Rp {{ number_format($penawaran->subtotal, 2, ',', '.') }}</span>
+                <span>Rp {{ number_format((float) data_get($snapshot, 'subtotal', $penawaran->subtotal), 2, ',', '.') }}</span>
             </div>
             <div class="flex justify-between border-b py-2">
-                <span>Tax ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</span>
-                <span>Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</span>
+                <span>Tax ({{ number_format($taxPercent, 2, ',', '.') }}%)</span>
+                <span>Rp {{ number_format((float) data_get($snapshot, 'tax_amount', $penawaran->tax_amount), 2, ',', '.') }}</span>
             </div>
             @if($isMitra)
                 <div class="flex justify-between border-b py-2">
@@ -115,7 +117,7 @@
             @endif
             <div class="flex justify-between py-2 font-semibold text-base">
                 <span>{{ $isMitra ? 'Amount' : 'Grand Total' }}</span>
-                <span>Rp {{ number_format($isMitra ? ($penawaran->total - $pph23) : $penawaran->total, 2, ',', '.') }}</span>
+                <span>Rp {{ number_format($isMitra ? ($baseTotal - $pph23) : $baseTotal, 2, ',', '.') }}</span>
             </div>
         </div>
 
@@ -133,8 +135,8 @@
                 <p>Hormat kami,</p>
                 <p class="font-semibold mt-1">{{ $issuerName }}</p>
                 <div class="h-20"></div>
-                <p class="font-semibold underline">{{ $penawaran->user->name ?? auth()->user()->name }}</p>
-                <p>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</p>
+                <p class="font-semibold underline">{{ data_get($snapshot, 'creator_name', $penawaran->user->name ?? auth()->user()->name) }}</p>
+                <p>{{ data_get($snapshot, 'signature_role', $penawaran->signature_role ?? 'Authorized Signature') }}</p>
             </div>
         </div>
         @if(!$mitraTemplate && $invoiceFooter)

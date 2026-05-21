@@ -8,6 +8,8 @@ use App\Http\Controllers\Concerns\ResolvesCompanyId;
 use App\Models\Customer;
 use App\Models\Mitra;
 use App\Models\Penawaran;
+use App\Services\DocumentSnapshotService;
+use App\Services\DocumentTemplateResolver;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -308,7 +310,8 @@ class PenawaranController extends Controller
         $penawaran->load('items');
 
         $fileName = 'penawaran-' . str_replace('/', '-', $penawaran->nomor) . '.pdf';
-        $pdf = Pdf::loadView('penawaran.pdf', compact('penawaran'))
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'penawaran', 'penawaran.pdf');
+        $pdf = Pdf::loadView($view, compact('penawaran'))
             ->setPaper('a4', 'portrait');
         $pdfData = $pdf->output();
 
@@ -362,6 +365,9 @@ class PenawaranController extends Controller
         });
 
         $this->loadPenawaranRelations($penawaran);
+        $penawaran->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
+        ]);
 
         return response()->json([
             'message' => 'Surat Penawaran berhasil dibuat.',
@@ -402,6 +408,9 @@ class PenawaranController extends Controller
         });
 
         $this->loadPenawaranRelations($penawaran);
+        $penawaran->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
+        ]);
 
         return response()->json([
             'message' => 'Surat Penawaran berhasil diperbarui.',
@@ -448,6 +457,7 @@ class PenawaranController extends Controller
             'invoice_sequence' => $penawaran->invoice_sequence,
             'approved_by' => $penawaran->approved_by,
             'approved_at' => $penawaran->approved_at,
+            'snapshot_data' => $penawaran->snapshot_data,
             'company' => $penawaran->relationLoaded('company') && $penawaran->company ? [
                 'id' => $penawaran->company->id,
                 'name' => $penawaran->company->name,

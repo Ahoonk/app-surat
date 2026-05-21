@@ -7,6 +7,9 @@ use App\Mail\BeritaAcaraMail;
 use App\Models\BeritaAcara;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Services\DocumentTemplateResolver;
+use App\Services\DocumentNumberService;
+use App\Services\DocumentSnapshotService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -101,7 +104,8 @@ class BeritaAcaraController extends Controller
         abort_if(!$beritaAcara->invoice?->penawaran || $beritaAcara->invoice->penawaran->company_id !== $companyId, 403);
 
         $fileName = 'berita-acara-' . str_replace('/', '-', $beritaAcara->nomor) . '.pdf';
-        $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara'))->setPaper('a4', 'portrait');
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'berita_acara', 'berita-acara.pdf');
+        $pdf = Pdf::loadView($view, compact('beritaAcara'))->setPaper('a4', 'portrait');
 
         if (request()->boolean('download')) {
             return $pdf->download($fileName);
@@ -131,7 +135,8 @@ class BeritaAcaraController extends Controller
         }
 
         $fileName = 'berita-acara-' . str_replace('/', '-', $beritaAcara->nomor) . '.pdf';
-        $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara'))->setPaper('a4', 'portrait');
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'berita_acara', 'berita-acara.pdf');
+        $pdf = Pdf::loadView($view, compact('beritaAcara'))->setPaper('a4', 'portrait');
         $pdfData = $pdf->output();
 
         try {
@@ -150,45 +155,25 @@ class BeritaAcaraController extends Controller
         })->with('penawaran.mitra')->get();
 
         foreach ($invoices as $invoice) {
-            $baseNumber = $this->buildBeritaAcaraNumber($invoice);
-            $nomor = $this->resolveUniqueBeritaAcaraNumber($invoice->id, $baseNumber);
+            if (BeritaAcara::where('invoice_id', $invoice->id)->exists()) {
+                continue;
+            }
 
-            BeritaAcara::updateOrCreate(
-                ['invoice_id' => $invoice->id],
-                [
-                    'nomor' => $nomor,
-                    'tanggal' => $invoice->tanggal,
-                    'created_by' => $invoice->created_by ?? auth()->id(),
-                ]
-            );
+            $mitra = $invoice->penawaran?->mitra;
+            $nomor = $mitra?->nomor_berita_acara ?: app(DocumentNumberService::class)->next($companyId, 'berita_acara', $invoice->tanggal);
+
+            $beritaAcara = BeritaAcara::create([
+                'company_id' => $companyId,
+                'invoice_id' => $invoice->id,
+                'nomor' => $nomor,
+                'tanggal' => $invoice->tanggal,
+                'created_by' => $invoice->created_by ?? auth()->id(),
+            ]);
+
+            $beritaAcara->update([
+                'snapshot_data' => app(DocumentSnapshotService::class)->forBeritaAcara($beritaAcara),
+            ]);
         }
     }
 
-    private function buildBeritaAcaraNumber(Invoice $invoice): string
-    {
-        $mitra = $invoice->penawaran?->mitra;
-
-        if (!empty($mitra?->nomor_berita_acara)) {
-            return $mitra->nomor_berita_acara;
-        }
-
-        return preg_replace('/^INV\//', 'BA/', $invoice->nomor);
-    }
-
-    private function resolveUniqueBeritaAcaraNumber(int $invoiceId, string $baseNumber): string
-    {
-        $candidate = $baseNumber;
-        $suffix = 2;
-
-        while (
-            BeritaAcara::where('nomor', $candidate)
-                ->where('invoice_id', '!=', $invoiceId)
-                ->exists()
-        ) {
-            $candidate = $baseNumber . '-' . $suffix;
-            $suffix++;
-        }
-
-        return $candidate;
-    }
 }

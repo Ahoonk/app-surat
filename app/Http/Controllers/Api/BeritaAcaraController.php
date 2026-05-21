@@ -8,6 +8,9 @@ use App\Mail\BeritaAcaraMail;
 use App\Models\Customer;
 use App\Models\BeritaAcara;
 use App\Models\Invoice;
+use App\Services\DocumentTemplateResolver;
+use App\Services\DocumentNumberService;
+use App\Services\DocumentSnapshotService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
@@ -23,17 +26,24 @@ class BeritaAcaraController extends Controller
         })->with('penawaran.mitra')->get();
 
         foreach ($invoices as $invoice) {
-            $baseNumber = $this->buildBeritaAcaraNumber($invoice);
-            $nomor = $this->resolveUniqueBeritaAcaraNumber($invoice->id, $baseNumber);
+            if (BeritaAcara::where('invoice_id', $invoice->id)->exists()) {
+                continue;
+            }
 
-            BeritaAcara::updateOrCreate(
-                ['invoice_id' => $invoice->id],
-                [
-                    'nomor' => $nomor,
-                    'tanggal' => $invoice->tanggal,
-                    'created_by' => $invoice->created_by ?? auth()->id(),
-                ]
-            );
+            $mitra = $invoice->penawaran?->mitra;
+            $nomor = $mitra?->nomor_berita_acara ?: app(DocumentNumberService::class)->next($companyId, 'berita_acara', $invoice->tanggal);
+
+            $beritaAcara = BeritaAcara::create([
+                'company_id' => $companyId,
+                'invoice_id' => $invoice->id,
+                'nomor' => $nomor,
+                'tanggal' => $invoice->tanggal,
+                'created_by' => $invoice->created_by ?? auth()->id(),
+            ]);
+
+            $beritaAcara->update([
+                'snapshot_data' => app(DocumentSnapshotService::class)->forBeritaAcara($beritaAcara),
+            ]);
         }
     }
 
@@ -102,7 +112,8 @@ class BeritaAcaraController extends Controller
         }
 
         $fileName = 'berita-acara-' . str_replace('/', '-', $beritaAcara->nomor) . '.pdf';
-        $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara'))->setPaper('a4', 'portrait');
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'berita_acara', 'berita-acara.pdf');
+        $pdf = Pdf::loadView($view, compact('beritaAcara'))->setPaper('a4', 'portrait');
         $pdfData = $pdf->output();
 
         try {
@@ -118,34 +129,6 @@ class BeritaAcaraController extends Controller
         ]);
     }
 
-    private function buildBeritaAcaraNumber(Invoice $invoice): string
-    {
-        $mitra = $invoice->penawaran?->mitra;
-
-        if (! empty($mitra?->nomor_berita_acara)) {
-            return $mitra->nomor_berita_acara;
-        }
-
-        return preg_replace('/^INV\//', 'BA/', $invoice->nomor);
-    }
-
-    private function resolveUniqueBeritaAcaraNumber(int $invoiceId, string $baseNumber): string
-    {
-        $candidate = $baseNumber;
-        $suffix = 2;
-
-        while (
-            BeritaAcara::where('nomor', $candidate)
-                ->where('invoice_id', '!=', $invoiceId)
-                ->exists()
-        ) {
-            $candidate = $baseNumber . '-' . $suffix;
-            $suffix++;
-        }
-
-        return $candidate;
-    }
-
     private function serializeBeritaAcara(BeritaAcara $beritaAcara, bool $includeInvoice = false): array
     {
         return [
@@ -157,6 +140,7 @@ class BeritaAcaraController extends Controller
             'keterangan_akhir' => $beritaAcara->keterangan_akhir,
             'kota_tanggal_manual' => $beritaAcara->kota_tanggal_manual,
             'created_by' => $beritaAcara->created_by,
+            'snapshot_data' => $beritaAcara->snapshot_data,
             'invoice' => $includeInvoice && $beritaAcara->relationLoaded('invoice') && $beritaAcara->invoice ? [
                 'id' => $beritaAcara->invoice->id,
                 'nomor' => $beritaAcara->invoice->nomor,
@@ -169,6 +153,7 @@ class BeritaAcaraController extends Controller
                     'to_company' => $beritaAcara->invoice->penawaran->to_company,
                     'status' => $beritaAcara->invoice->penawaran->status,
                     'total' => (float) $beritaAcara->invoice->penawaran->total,
+                    'snapshot_data' => $beritaAcara->invoice->penawaran->snapshot_data,
                 ] : null,
                 'purchasing_order' => $beritaAcara->invoice->relationLoaded('purchasingOrder') && $beritaAcara->invoice->purchasingOrder ? [
                     'id' => $beritaAcara->invoice->purchasingOrder->id,
