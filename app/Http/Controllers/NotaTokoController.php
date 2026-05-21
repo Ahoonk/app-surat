@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
 
 class NotaTokoController extends Controller
 {
@@ -30,7 +31,9 @@ class NotaTokoController extends Controller
 
         $notaTokos = $this->companyNotaTokos($companyId)->latest()->get();
 
-        return view('nota-toko.index', compact('notaTokos'));
+        return Inertia::render('NotaToko/Index', [
+            'notaTokos' => $notaTokos,
+        ]);
     }
 
     public function create()
@@ -46,7 +49,10 @@ class NotaTokoController extends Controller
             ->orderBy('nama')
             ->get();
 
-        return view('nota-toko.create', compact('nomorPreview', 'customers'));
+        return Inertia::render('NotaToko/Create', [
+            'nomorPreview' => $nomorPreview,
+            'customers' => $customers,
+        ]);
     }
 
     public function store(Request $request)
@@ -146,7 +152,9 @@ class NotaTokoController extends Controller
 
         $notaToko->load('items');
 
-        return view('nota-toko.show', compact('notaToko'));
+        return Inertia::render('NotaToko/Show', [
+            'notaToko' => $notaToko,
+        ]);
     }
 
     public function edit(NotaToko $notaToko)
@@ -163,7 +171,10 @@ class NotaTokoController extends Controller
             ->orderBy('nama')
             ->get();
 
-        return view('nota-toko.edit', compact('notaToko', 'customers'));
+        return Inertia::render('NotaToko/Edit', [
+            'notaToko' => $notaToko,
+            'customers' => $customers,
+        ]);
     }
 
     public function update(Request $request, NotaToko $notaToko)

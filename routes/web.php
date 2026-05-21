@@ -13,7 +13,14 @@ use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\TelegramBotController;
+use App\Models\BeritaAcara;
+use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Mitra;
+use App\Models\Penawaran;
+use App\Models\SuratJalan;
 use App\Services\DashboardDataService;
+use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,9 +30,21 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function (DashboardDataService $dashboardDataService) {
-    $companyId = auth()->user()->company_id;
+    $user = auth()->user()->load('company');
+    $companyId = $user->company_id;
+    $dashboard = $dashboardDataService->forCompany($companyId);
 
-    return view('dashboard', $dashboardDataService->forCompany($companyId));
+    return Inertia::render('Dashboard', [
+        'company' => [
+            'id' => $user->company?->id,
+            'name' => $user->company?->name,
+            'address' => $user->company?->address,
+            'logo' => $user->company?->logo,
+        ],
+        'customersCount' => Customer::where('company_id', $companyId)->count(),
+        'mitrasCount' => Mitra::where('company_id', $companyId)->count(),
+        ...$dashboard,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('telegram/webhook', [TelegramBotController::class, 'webhook'])->name('telegram.webhook');
@@ -39,6 +58,60 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('penawaran', function () {
+        return Inertia::render('Penawaran/Index');
+    });
+    Route::get('penawaran/create', function () {
+        return Inertia::render('Penawaran/Create');
+    });
+    Route::get('penawaran/{penawaran}', function (Penawaran $penawaran) {
+        return Inertia::render('Penawaran/Show', [
+            'penawaranId' => $penawaran->id,
+        ]);
+    });
+    Route::get('penawaran/{penawaran}/edit', function (Penawaran $penawaran) {
+        return Inertia::render('Penawaran/Edit', [
+            'penawaranId' => $penawaran->id,
+        ]);
+    });
+
+    Route::get('invoice', function () {
+        return Inertia::render('Invoice/Index');
+    });
+    Route::get('invoice/{invoice}', function (Invoice $invoice) {
+        return Inertia::render('Invoice/Show', [
+            'invoiceId' => $invoice->id,
+        ]);
+    });
+
+    Route::get('surat-jalan', function () {
+        return Inertia::render('SuratJalan/Index');
+    });
+    Route::get('surat-jalan/{suratJalan}', function (SuratJalan $suratJalan) {
+        return Inertia::render('SuratJalan/Show', [
+            'suratJalanId' => $suratJalan->id,
+        ]);
+    });
+
+    Route::get('berita-acara', function () {
+        return Inertia::render('BeritaAcara/Index');
+    });
+    Route::get('berita-acara/{beritaAcara}', function (BeritaAcara $beritaAcara) {
+        return Inertia::render('BeritaAcara/Show', [
+            'beritaAcaraId' => $beritaAcara->id,
+        ]);
+    });
+
+    Route::get('customers', function () {
+        return Inertia::render('Customers/Index');
+    });
+    Route::get('mitra', function () {
+        return Inertia::render('Mitras/Index');
+    });
+    Route::get('mitras', function () {
+        return redirect()->route('mitra.index');
+    });
+
     Route::get('penawaran/{penawaran}/pdf', [PenawaranController::class, 'pdf'])->name('penawaran.pdf');
     Route::post('penawaran/{penawaran}/send', [PenawaranController::class, 'send'])->name('penawaran.send');
     Route::get('penawaran-mitra/create', [PenawaranController::class, 'createMitra'])->name('penawaran.mitra.create');

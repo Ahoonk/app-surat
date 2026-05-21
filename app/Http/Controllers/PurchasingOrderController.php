@@ -9,6 +9,7 @@ use App\Models\PurchasingOrder;
 use App\Models\SuratJalan;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Inertia\Inertia;
 
 class PurchasingOrderController extends Controller
 {
@@ -52,7 +53,11 @@ class PurchasingOrderController extends Controller
             ->latest()
             ->get();
 
-        return view('purchasing-order.index', compact('approvedSatuan', 'approvedKontrak', 'existingData'));
+        return Inertia::render('PurchasingOrder/Index', [
+            'approvedSatuan' => $approvedSatuan,
+            'approvedKontrak' => $approvedKontrak,
+            'existingData' => $existingData,
+        ]);
     }
 
     public function store(Request $request)
