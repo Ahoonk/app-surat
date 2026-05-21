@@ -9,7 +9,7 @@
         </div>
 
         <div class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-            <section class="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/80 shadow-2xl shadow-slate-950/30 backdrop-blur" data-aos="fade-up">
+            <section class="overflow-hidden rounded-[2rem] border border-white/10 bg-red-500 shadow-2xl shadow-slate-950/30 backdrop-blur" data-aos="fade-up">
                 <div class="grid gap-6 p-6 lg:grid-cols-[1.2fr_0.8fr] lg:p-8">
                     <div class="space-y-5">
                         <p class="text-xs uppercase tracking-[0.35em] text-cyan-200/70">Ringkasan Operasional</p>
