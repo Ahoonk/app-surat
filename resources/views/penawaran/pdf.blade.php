@@ -36,17 +36,37 @@
 </head>
 <body>
     @php
-        $toDataUri = function ($path) {
-            if (!file_exists($path)) {
+    $toDataUri = function ($path) {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if ($ext === 'pdf') {
+            if (!class_exists(\Imagick::class)) {
                 return null;
             }
 
-            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $mime = match ($ext) {
-                'png' => 'image/png',
-                'jpg', 'jpeg' => 'image/jpeg',
-                'gif' => 'image/gif',
-                'webp' => 'image/webp',
+            try {
+                $imagick = new \Imagick();
+                $imagick->setResolution(150, 150);
+                $imagick->readImage($path . '[0]');
+                $imagick->setImageFormat('png');
+
+                return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
+            } catch (\Throwable $e) {
+                report($e);
+
+                return null;
+            }
+        }
+
+        $mime = match ($ext) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
                 default => null,
             };
 

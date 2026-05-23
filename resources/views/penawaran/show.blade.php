@@ -13,21 +13,59 @@
     </div>
 
     @php
+        $toDataUri = static function (string $path): ?string {
+            if (!file_exists($path)) {
+                return null;
+            }
+
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+            if ($ext === 'pdf') {
+                if (!class_exists(\Imagick::class)) {
+                    return null;
+                }
+
+                try {
+                    $imagick = new \Imagick();
+                    $imagick->setResolution(150, 150);
+                    $imagick->readImage($path . '[0]');
+                    $imagick->setImageFormat('png');
+
+                    return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
+                } catch (\Throwable $e) {
+                    report($e);
+
+                    return null;
+                }
+            }
+
+            $mime = match ($ext) {
+                'png' => 'image/png',
+                'jpg', 'jpeg' => 'image/jpeg',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                default => null,
+            };
+
+            if (!$mime) {
+                return null;
+            }
+
+            return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+        };
         $mitra = $penawaran->mitra;
         $mitraTemplatePath = $mitra?->template_penawaran_path
             ? public_path('storage/' . $mitra->template_penawaran_path)
             : null;
-        $mitraTemplateExt = $mitraTemplatePath ? strtolower(pathinfo($mitraTemplatePath, PATHINFO_EXTENSION)) : null;
-        $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath) && in_array($mitraTemplateExt, ['png', 'jpg', 'jpeg', 'gif', 'webp'], true)
-            ? asset('storage/' . $mitra->template_penawaran_path) . '?v=' . filemtime($mitraTemplatePath)
-            : null;
+        $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
         $bgPrimary = public_path('storage/logos/background-template.png');
         $bgFallback = public_path('storage/logos/background-tempplate.png');
-        $bgAsset = file_exists($bgPrimary)
-            ? asset('storage/logos/background-template.png')
-            : (file_exists($bgFallback) ? asset('storage/logos/background-tempplate.png') : null);
-        $kopAtasAsset = file_exists(public_path('storage/logos/kopatas-penawaran.png')) ? asset('storage/logos/kopatas-penawaran.png') : null;
-        $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah-penawaran.png')) ? asset('storage/logos/kopbawah-penawaran.png') : null;
+        $bgAssetPath = file_exists($bgPrimary)
+            ? $bgPrimary
+            : (file_exists($bgFallback) ? $bgFallback : null);
+        $bgAsset = $bgAssetPath ? $toDataUri($bgAssetPath) : null;
+        $kopAtasAsset = $toDataUri(public_path('storage/logos/kopatas-penawaran.png'));
+        $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah-penawaran.png'));
         $snapshot = $penawaran->snapshot_data ?? [];
     @endphp
 

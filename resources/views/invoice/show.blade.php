@@ -23,27 +23,64 @@
     $pph23 = $isMitra && $divisor > 0
         ? ($baseTotal / $divisor) * 0.02
         : 0;
-        $mitraTemplatePath = $mitra?->template_invoice_path
-            ? public_path('storage/' . $mitra->template_invoice_path)
-            : null;
-        $mitraTemplateExt = $mitraTemplatePath ? strtolower(pathinfo($mitraTemplatePath, PATHINFO_EXTENSION)) : null;
-        $mitraTemplate = $mitraTemplatePath && file_exists($mitraTemplatePath) && in_array($mitraTemplateExt, ['png', 'jpg', 'jpeg', 'gif', 'webp'], true)
-            ? asset('storage/' . $mitra->template_invoice_path) . '?v=' . filemtime($mitraTemplatePath)
-            : null;
-        $invoiceTemplatePath = public_path('storage/logos/template-invoice.png');
-        $invoiceFooterPath = public_path('storage/logos/kopbawah-invoice.png');
-        $invoiceTemplate = file_exists($invoiceTemplatePath)
-            ? asset('storage/logos/template-invoice.png') . '?v=' . filemtime($invoiceTemplatePath)
-            : null;
-        $invoiceFooter = file_exists($invoiceFooterPath)
-            ? asset('storage/logos/kopbawah-invoice.png') . '?v=' . filemtime($invoiceFooterPath)
-            : null;
-        $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 18mm 6mm 10mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center;';
-        if ($mitraTemplate) {
-            $previewStyle .= " background-image: url('{$mitraTemplate}'); background-size: 100% 100%; background-position: top center;";
-        } elseif ($invoiceTemplate) {
-            $previewStyle .= " background-image: url('{$invoiceTemplate}'); transform: translateX(6mm);";
+    $toDataUri = static function (string $path): ?string {
+        if (!file_exists($path)) {
+            return null;
         }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if ($ext === 'pdf') {
+            if (!class_exists(\Imagick::class)) {
+                return null;
+            }
+
+            try {
+                $imagick = new \Imagick();
+                $imagick->setResolution(150, 150);
+                $imagick->readImage($path . '[0]');
+                $imagick->setImageFormat('png');
+
+                return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
+            } catch (\Throwable $e) {
+                report($e);
+
+                return null;
+            }
+        }
+
+        $mime = match ($ext) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => null,
+        };
+
+        if (!$mime) {
+            return null;
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+    };
+    $mitraTemplatePath = $mitra?->template_invoice_path
+        ? public_path('storage/' . $mitra->template_invoice_path)
+        : null;
+    $mitraTemplate = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $invoiceTemplatePath = public_path('storage/logos/template-invoice.png');
+    $invoiceFooterPath = public_path('storage/logos/kopbawah-invoice.png');
+    $invoiceTemplate = file_exists($invoiceTemplatePath)
+        ? asset('storage/logos/template-invoice.png') . '?v=' . filemtime($invoiceTemplatePath)
+        : null;
+    $invoiceFooter = file_exists($invoiceFooterPath)
+        ? asset('storage/logos/kopbawah-invoice.png') . '?v=' . filemtime($invoiceFooterPath)
+        : null;
+    $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 18mm 6mm 10mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center;';
+    if ($mitraTemplate) {
+        $previewStyle .= " background-image: url('{$mitraTemplate}'); background-size: 100% 100%; background-position: top center;";
+    } elseif ($invoiceTemplate) {
+        $previewStyle .= " background-image: url('{$invoiceTemplate}'); transform: translateX(6mm);";
+    }
     @endphp
 
     <div class="bg-white rounded-2xl shadow-xl mx-auto text-[11px] leading-6 bg-no-repeat relative overflow-hidden"

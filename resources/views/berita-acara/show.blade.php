@@ -2,6 +2,46 @@
 
 @section('content')
 @php
+    $toDataUri = static function (string $path): ?string {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if ($ext === 'pdf') {
+            if (!class_exists(\Imagick::class)) {
+                return null;
+            }
+
+            try {
+                $imagick = new \Imagick();
+                $imagick->setResolution(150, 150);
+                $imagick->readImage($path . '[0]');
+                $imagick->setImageFormat('png');
+
+                return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
+            } catch (\Throwable $e) {
+                report($e);
+
+                return null;
+            }
+        }
+
+        $mime = match ($ext) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => null,
+        };
+
+        if (!$mime) {
+            return null;
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+    };
     $snapshot = $beritaAcara->snapshot_data ?? [];
     $invoice = $beritaAcara->invoice;
     $penawaran = $invoice?->penawaran;
@@ -10,18 +50,16 @@
     $mitraTemplatePath = $mitra?->template_berita_acara_path
         ? public_path('storage/' . $mitra->template_berita_acara_path)
         : null;
-    $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
-        ? asset('storage/' . $mitra->template_berita_acara_path) . '?v=' . filemtime($mitraTemplatePath)
-        : null;
-    $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? asset('storage/logos/kopatas.png') : null;
-    $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah.png')) ? asset('storage/logos/kopbawah.png') : null;
+    $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? $toDataUri(public_path('storage/logos/kopatas.png')) : null;
+    $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah.png')) ? $toDataUri(public_path('storage/logos/kopbawah.png')) : null;
     $bgPrimaryPath = public_path('storage/logos/backgroud-template.png');
     $bgFallbackPath = public_path('storage/logos/background-template.png');
     $bgAsset = null;
     if (file_exists($bgPrimaryPath)) {
-        $bgAsset = asset('storage/logos/backgroud-template.png') . '?v=' . filemtime($bgPrimaryPath);
+        $bgAsset = $toDataUri($bgPrimaryPath);
     } elseif (file_exists($bgFallbackPath)) {
-        $bgAsset = asset('storage/logos/background-template.png') . '?v=' . filemtime($bgFallbackPath);
+        $bgAsset = $toDataUri($bgFallbackPath);
     }
     $previewPaperStyle = 'width:100%;max-width:794px;min-height:1123px;';
     $previewContentStyle = 'padding:170px 15mm 110px 15mm;position:relative;z-index:2;';
