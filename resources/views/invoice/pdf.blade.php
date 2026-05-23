@@ -6,7 +6,7 @@
     <style>
         @page { size: A4 portrait; margin: 0; }
         body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; }
-        .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 18mm 6mm 10mm; box-sizing: border-box; }
+        .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 22mm 6mm 6mm; box-sizing: border-box; }
         .bg-layer { position: fixed; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; background-position: top center; z-index: 0; opacity: 1; }
         .head { display: table; width: 100%; border-bottom: 1px solid #000; padding-bottom: 12px; }
         .block-90 { width: 94%; margin-left: auto; margin-right: auto; }
