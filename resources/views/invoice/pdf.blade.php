@@ -15,18 +15,18 @@
         .inv-meta { font-size: 11px; line-height: 1.35; }
         .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
-        .main-table { width: 94%; margin-left: auto; margin-right: auto; }
+        .main-table { width: 90%; margin-left: 0; margin-right: auto; }
         th, td { border: 1px solid #000; padding: 6px 8px; }
         th { text-align: center; }
         .center { text-align: center; }
         .right-text { text-align: right; }
         .nowrap { white-space: nowrap; }
-        .summary-wrap { width: 94%; margin: 12px auto 0; }
+        .summary-wrap { width: 90%; margin: 12px 0 0 0; }
         .summary { width: 40%; margin-left: auto; margin-top: 0; }
         .summary td { border-left: 0; border-right: 0; }
         .summary tr:last-child td { font-weight: 700; font-size: 11px; }
         .notes { margin-top: 28px; }
-        .po-meta { width: 94%; margin: 10px auto 6px; }
+        .po-meta { width: 90%; margin: 10px 0 6px 0; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
         .footer-layer { position: fixed; left: 0; right: 0; bottom: 0; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; z-index: 1; }
     </style>
