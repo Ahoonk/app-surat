@@ -44,9 +44,42 @@
                 return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
             } catch (\Throwable $e) {
                 report($e);
-
-                return null;
             }
+
+            $gsBinary = trim((string) shell_exec('command -v gs 2>/dev/null'));
+            if ($gsBinary !== '') {
+                $tmpDir = storage_path('app/template-previews');
+                if (!is_dir($tmpDir)) {
+                    @mkdir($tmpDir, 0775, true);
+                }
+
+                $prefix = tempnam($tmpDir, 'pdf-');
+                if ($prefix !== false) {
+                    $pngPath = $prefix . '.png';
+                    @unlink($prefix);
+
+                    $cmd = escapeshellarg($gsBinary)
+                        . ' -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pngalpha -r150 -dFirstPage=1 -dLastPage=1 -sOutputFile='
+                        . escapeshellarg($pngPath) . ' ' . escapeshellarg($path) . ' 2>&1';
+
+                    $output = [];
+                    $exitCode = 0;
+                    @exec($cmd, $output, $exitCode);
+
+                    if ($exitCode === 0 && file_exists($pngPath)) {
+                        $binary = file_get_contents($pngPath);
+                        @unlink($pngPath);
+
+                        if ($binary !== false) {
+                            return 'data:image/png;base64,' . base64_encode($binary);
+                        }
+                    }
+
+                    @unlink($pngPath);
+                }
+            }
+
+            return null;
         }
 
         $mime = match ($ext) {
