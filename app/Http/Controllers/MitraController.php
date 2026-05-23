@@ -174,15 +174,19 @@ class MitraController extends Controller
 
         if ($ext === 'pdf') {
             if (class_exists(\Imagick::class)) {
-                $imagick = new \Imagick();
-                $imagick->setResolution(150, 150);
-                $imagick->readImage($file->getRealPath() . '[0]');
-                $imagick->setImageFormat('png');
-                $pngData = $imagick->getImagesBlob();
-                $filename = $label . '-template-' . time() . '.png';
-                Storage::disk('public')->put($directory . '/' . $filename, $pngData);
+                try {
+                    $imagick = new \Imagick();
+                    $imagick->setResolution(150, 150);
+                    $imagick->readImage($file->getRealPath() . '[0]');
+                    $imagick->setImageFormat('png');
+                    $pngData = $imagick->getImagesBlob();
+                    $filename = $label . '-template-' . time() . '.png';
+                    Storage::disk('public')->put($directory . '/' . $filename, $pngData);
 
-                return $directory . '/' . $filename;
+                    return $directory . '/' . $filename;
+                } catch (\Throwable $e) {
+                    report($e);
+                }
             }
 
             $filename = $label . '-template-' . time() . '.pdf';
