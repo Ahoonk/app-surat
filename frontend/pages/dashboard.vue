@@ -17,16 +17,27 @@
         </div>
 
         <div class="rounded-[22px] bg-gradient-to-br from-slate-950 to-cyan-900 p-5 text-white">
-          <p class="text-xs uppercase tracking-[0.3em] text-cyan-200/70">Company</p>
-          <h3 class="mt-3 text-2xl font-semibold">{{ session?.company?.name ?? '-' }}</h3>
-          <p class="mt-2 text-sm leading-6 text-slate-200/80">{{ session?.company?.address ?? '-' }}</p>
+          <div class="flex items-start gap-4">
+            <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.1rem] bg-white/95 p-2 shadow-lg shadow-black/10 ring-1 ring-white/60">
+              <img
+                :src="companyLogo"
+                :alt="`${session?.company?.name ?? 'Company'} logo`"
+                class="h-full w-full object-contain"
+              >
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-xs uppercase tracking-[0.3em] text-cyan-200/70">Company</p>
+              <h3 class="mt-2 truncate text-2xl font-semibold">{{ session?.company?.name ?? '-' }}</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-200/80">{{ session?.company?.address ?? '-' }}</p>
+            </div>
+          </div>
 
           <div class="mt-5 grid grid-cols-2 gap-3">
-            <div class="rounded-2xl bg-white/10 p-4">
+            <div class="rounded-2xl border border-white/10 bg-white/10 p-4 shadow-inner shadow-black/5">
               <p class="text-xs uppercase tracking-[0.25em] text-cyan-100/70">Customer</p>
               <p class="mt-2 text-xl font-semibold">{{ session?.lookups?.customers?.length ?? 0 }}</p>
             </div>
-            <div class="rounded-2xl bg-white/10 p-4">
+            <div class="rounded-2xl border border-white/10 bg-white/10 p-4 shadow-inner shadow-black/5">
               <p class="text-xs uppercase tracking-[0.25em] text-cyan-100/70">Mitra</p>
               <p class="mt-2 text-xl font-semibold">{{ session?.lookups?.mitras?.length ?? 0 }}</p>
             </div>
@@ -138,6 +149,7 @@ await useAsyncData('dashboard-bootstrap', () => ensure())
 
 const dashboard = computed<DashboardResponse | null>(() => session.value?.dashboard ?? null)
 const backendBase = useRuntimeConfig().public.apiBase
+const companyLogo = computed(() => resolveCompanyLogo(session.value?.company?.logo))
 
 const metricCards = computed(() => [
   {
@@ -244,4 +256,24 @@ const attentionItems = computed(() => [
     to: '/invoice',
   },
 ])
+
+function resolveCompanyLogo(logo: string | null | undefined) {
+  const fallback = '/storage/logos/aldera.png'
+
+  if (!logo) {
+    return fallback
+  }
+
+  if (logo.startsWith('http://') || logo.startsWith('https://')) {
+    return logo
+  }
+
+  const normalized = logo.replace(/^\/+/, '')
+
+  if (normalized.startsWith('storage/')) {
+    return `/${normalized}`
+  }
+
+  return `/storage/${normalized}`
+}
 </script>
