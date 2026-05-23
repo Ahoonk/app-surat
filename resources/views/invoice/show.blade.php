@@ -148,28 +148,28 @@
             <table class="w-full border-collapse">
                 <thead>
                     <tr>
-                        <th class="border px-3 py-2 text-center">No</th>
-                        <th class="border px-3 py-2 text-center">Description</th>
-                        <th class="border px-3 py-2 text-center">Qty</th>
-                        <th class="border px-3 py-2 text-center">Unit</th>
-                        <th class="border px-3 py-2 text-center">Unit Price</th>
-                        <th class="border px-3 py-2 text-center">Total</th>
+                        <th class="border px-3 py-2 text-center" style="width:5%;">No</th>
+                        <th class="border px-3 py-2 text-center" style="width:32%;">Description</th>
+                        <th class="border px-3 py-2 text-center" style="width:6%;">Qty</th>
+                        <th class="border px-3 py-2 text-center" style="width:8%;">Unit</th>
+                        <th class="border px-3 py-2 text-center" style="width:18%;">Unit Price</th>
+                        <th class="border px-3 py-2 text-center" style="width:31%;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (data_get($snapshot, 'items', $penawaran->items) as $item)
                         <tr>
-                            <td class="border px-3 py-2 text-center">{{ $loop->iteration }}</td>
-                            <td class="border px-3 py-2 text-left">
+                            <td class="border px-3 py-2 text-center" style="width:5%;">{{ $loop->iteration }}</td>
+                            <td class="border px-3 py-2 text-left" style="width:32%;">
                                 <div>{{ data_get($item, 'nama') }}</div>
                                 @if (!empty(data_get($item, 'rincian')))
                                     <div class="text-[11px] text-gray-600 whitespace-pre-line mt-1">{!! e(data_get($item, 'rincian')) !!}</div>
                                 @endif
                             </td>
-                            <td class="border px-3 py-2 text-center">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
-                            <td class="border px-3 py-2 text-center">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
-                            <td class="border px-3 py-2 text-right">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
-                            <td class="border px-3 py-2 text-right">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
+                            <td class="border px-3 py-2 text-center" style="width:6%;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
+                            <td class="border px-3 py-2 text-center" style="width:8%;">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
+                            <td class="border px-3 py-2 text-right" style="width:18%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                            <td class="border px-3 py-2 text-right" style="width:31%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
