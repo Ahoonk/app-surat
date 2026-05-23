@@ -37,7 +37,7 @@
 
             try {
                 $imagick = new \Imagick();
-                $imagick->setResolution(150, 150);
+                $imagick->setResolution(300, 300);
                 $imagick->readImage($path . '[0]');
                 $imagick->setImageFormat('png');
 
@@ -59,7 +59,7 @@
                     @unlink($prefix);
 
                     $cmd = escapeshellarg($gsBinary)
-                        . ' -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pngalpha -r150 -dFirstPage=1 -dLastPage=1 -sOutputFile='
+                        . ' -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pngalpha -r300 -dFirstPage=1 -dLastPage=1 -sOutputFile='
                         . escapeshellarg($pngPath) . ' ' . escapeshellarg($path) . ' 2>&1';
 
                     $output = [];

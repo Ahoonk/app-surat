@@ -176,7 +176,7 @@ class MitraController extends Controller
             if (class_exists(\Imagick::class)) {
                 try {
                     $imagick = new \Imagick();
-                    $imagick->setResolution(150, 150);
+                    $imagick->setResolution(300, 300);
                     $imagick->readImage($file->getRealPath() . '[0]');
                     $imagick->setImageFormat('png');
                     $pngData = $imagick->getImagesBlob();
