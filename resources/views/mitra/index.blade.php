@@ -31,7 +31,7 @@
 
     <section class="panel p-6">
         <h2 class="text-lg font-semibold text-slate-900">Tambah Mitra</h2>
-        <p class="mt-1 text-sm text-slate-500">Template PDF atau gambar tetap didukung seperti sebelumnya.</p>
+        <p class="mt-1 text-sm text-slate-500">Template PDF atau gambar tetap bisa diupload. Jika PDF belum dirender di server, file tetap disimpan sebagai sumber template.</p>
 
         <form action="{{ route('mitra.store') }}" method="POST" enctype="multipart/form-data" class="mt-6 grid gap-4 lg:grid-cols-2">
             @csrf
@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-700">
-                    Template PDF membutuhkan ekstensi <strong>php-imagick</strong> agar bisa dipakai sebagai background.
+                    PDF akan disimpan sebagai template sumber. Agar bisa tampil sebagai background, server perlu dukungan rendering PDF.
                 </div>
             </div>
 

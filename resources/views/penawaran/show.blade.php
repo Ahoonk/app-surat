@@ -17,7 +17,8 @@
         $mitraTemplatePath = $mitra?->template_penawaran_path
             ? public_path('storage/' . $mitra->template_penawaran_path)
             : null;
-        $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
+        $mitraTemplateExt = $mitraTemplatePath ? strtolower(pathinfo($mitraTemplatePath, PATHINFO_EXTENSION)) : null;
+        $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath) && in_array($mitraTemplateExt, ['png', 'jpg', 'jpeg', 'gif', 'webp'], true)
             ? asset('storage/' . $mitra->template_penawaran_path) . '?v=' . filemtime($mitraTemplatePath)
             : null;
         $bgPrimary = public_path('storage/logos/background-template.png');

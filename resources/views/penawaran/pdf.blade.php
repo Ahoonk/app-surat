@@ -43,11 +43,16 @@
 
             $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
             $mime = match ($ext) {
+                'png' => 'image/png',
                 'jpg', 'jpeg' => 'image/jpeg',
                 'gif' => 'image/gif',
                 'webp' => 'image/webp',
-                default => 'image/png',
+                default => null,
             };
+
+            if (!$mime) {
+                return null;
+            }
 
             $data = base64_encode(file_get_contents($path));
 

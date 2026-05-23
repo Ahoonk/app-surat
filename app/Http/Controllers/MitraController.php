@@ -6,7 +6,6 @@ use App\Http\Controllers\Concerns\ResolvesCompanyId;
 use App\Models\Mitra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 
 class MitraController extends Controller
 {
@@ -44,8 +43,6 @@ class MitraController extends Controller
         if (!is_int($companyId)) {
             return $companyId;
         }
-
-        $this->ensurePdfSupport($request);
 
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
@@ -89,8 +86,6 @@ class MitraController extends Controller
         }
 
         abort_if($mitra->company_id !== $companyId, 403);
-
-        $this->ensurePdfSupport($request);
 
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
@@ -178,47 +173,25 @@ class MitraController extends Controller
         $directory = 'mitra-templates/' . $mitra->id;
 
         if ($ext === 'pdf') {
-            $imagick = new \Imagick();
-            $imagick->setResolution(150, 150);
-            $imagick->readImage($file->getRealPath() . '[0]');
-            $imagick->setImageFormat('png');
-            $pngData = $imagick->getImagesBlob();
-            $filename = $label . '-template-' . time() . '.png';
-            Storage::disk('public')->put($directory . '/' . $filename, $pngData);
+            if (class_exists(\Imagick::class)) {
+                $imagick = new \Imagick();
+                $imagick->setResolution(150, 150);
+                $imagick->readImage($file->getRealPath() . '[0]');
+                $imagick->setImageFormat('png');
+                $pngData = $imagick->getImagesBlob();
+                $filename = $label . '-template-' . time() . '.png';
+                Storage::disk('public')->put($directory . '/' . $filename, $pngData);
 
-            return $directory . '/' . $filename;
+                return $directory . '/' . $filename;
+            }
+
+            $filename = $label . '-template-' . time() . '.pdf';
+
+            return $file->storeAs($directory, $filename, 'public');
         }
 
         $filename = $label . '-template-' . time() . '.' . $ext;
 
         return $file->storeAs($directory, $filename, 'public');
-    }
-
-    private function ensurePdfSupport(Request $request): void
-    {
-        if (class_exists(\Imagick::class)) {
-            return;
-        }
-
-        $fields = [
-            'template_penawaran',
-            'template_invoice',
-            'template_surat_jalan',
-            'template_berita_acara',
-        ];
-
-        foreach ($fields as $field) {
-            $file = $request->file($field);
-            if (!$file) {
-                continue;
-            }
-
-            $ext = strtolower($file->getClientOriginalExtension());
-            if ($ext === 'pdf') {
-                throw ValidationException::withMessages([
-                    $field => 'Template PDF membutuhkan ekstensi php-imagick. Upload PNG/JPG atau aktifkan imagick di server.',
-                ]);
-            }
-        }
     }
 }

@@ -9,7 +9,8 @@
     $mitraTemplatePath = $mitra?->template_surat_jalan_path
         ? public_path('storage/' . $mitra->template_surat_jalan_path)
         : null;
-    $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
+    $mitraTemplateExt = $mitraTemplatePath ? strtolower(pathinfo($mitraTemplatePath, PATHINFO_EXTENSION)) : null;
+    $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath) && in_array($mitraTemplateExt, ['png', 'jpg', 'jpeg', 'gif', 'webp'], true)
         ? asset('storage/' . $mitra->template_surat_jalan_path) . '?v=' . filemtime($mitraTemplatePath)
         : null;
     $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? asset('storage/logos/kopatas.png') : null;

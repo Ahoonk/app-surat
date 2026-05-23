@@ -88,6 +88,10 @@
                         <p class="mt-2 text-xs text-slate-500">Saat ini: {{ $mitra->template_berita_acara_path ? 'Ada' : '-' }}</p>
                     </label>
                 </div>
+
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-700">
+                    PDF akan disimpan sebagai template sumber. Agar bisa tampil sebagai background, server perlu dukungan rendering PDF.
+                </div>
             </div>
 
             <div class="lg:col-span-2 flex justify-end gap-3">

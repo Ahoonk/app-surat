@@ -26,7 +26,8 @@
         $mitraTemplatePath = $mitra?->template_invoice_path
             ? public_path('storage/' . $mitra->template_invoice_path)
             : null;
-        $mitraTemplate = $mitraTemplatePath && file_exists($mitraTemplatePath)
+        $mitraTemplateExt = $mitraTemplatePath ? strtolower(pathinfo($mitraTemplatePath, PATHINFO_EXTENSION)) : null;
+        $mitraTemplate = $mitraTemplatePath && file_exists($mitraTemplatePath) && in_array($mitraTemplateExt, ['png', 'jpg', 'jpeg', 'gif', 'webp'], true)
             ? asset('storage/' . $mitra->template_invoice_path) . '?v=' . filemtime($mitraTemplatePath)
             : null;
         $invoiceTemplatePath = public_path('storage/logos/template-invoice.png');
