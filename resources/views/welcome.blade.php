@@ -74,18 +74,6 @@
                                 class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
                             LOGIN
                         </button>
-
-                        <!-- REGISTER BUTTON -->
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}"
-                               class="block w-full text-center mt-3 
-                                      border border-blue-600 
-                                      text-blue-600 py-2 rounded-md 
-                                      hover:bg-blue-50 transition">
-                                REGISTER
-                            </a>
-                        @endif
-
                     </form>
 
                 </div>

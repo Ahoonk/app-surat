@@ -4,7 +4,7 @@
       <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-700">Masuk</p>
       <h1 class="mt-3 text-3xl font-semibold text-slate-900">Login ke workspace</h1>
       <p class="mt-3 text-sm leading-6 text-slate-600">
-        Gunakan akun PT ASKARYA yang sudah tersambung ke company. Session akan dipakai untuk mengakses API dan halaman frontend ini.
+        Akses hanya untuk pengguna internal PT ASKARYA yang sudah terdaftar. Session dipakai untuk mengakses API dan halaman frontend ini.
       </p>
     </div>
 
@@ -20,11 +20,6 @@
     <label class="block">
       <span class="mb-2 block text-sm font-medium text-slate-700">Password</span>
       <input v-model="form.password" type="password" autocomplete="current-password" class="input" placeholder="********" />
-    </label>
-
-    <label class="flex items-center gap-3 text-sm text-slate-600">
-      <input v-model="form.remember" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500" />
-      Ingat saya
     </label>
 
     <button type="submit" class="button-primary w-full" :disabled="pending">
@@ -48,7 +43,6 @@ const errorMessage = ref('')
 const form = reactive({
   email: '',
   password: '',
-  remember: true,
 })
 
 async function submit() {

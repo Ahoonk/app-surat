@@ -50,7 +50,7 @@
                                     {{ $appName }}
                                 </h2>
                                 <p class="mt-2 text-sm text-slate-500">
-                                    Masuk untuk mengelola surat, invoice, dan dokumen transaksi.
+                                    Akses hanya untuk pengguna internal PT ASKARYA yang berwenang mengelola surat, invoice, dan dokumen transaksi.
                                 </p>
                             </div>
 
@@ -92,34 +92,10 @@
                                            class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15">
                                 </div>
 
-                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <label class="inline-flex items-center gap-2 text-sm text-slate-600">
-                                        <input type="checkbox"
-                                               name="remember"
-                                               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                        <span>Ingat saya</span>
-                                    </label>
-
-                                    @if (Route::has('password.request'))
-                                        <a href="{{ route('password.request') }}" class="text-sm font-medium text-blue-700 hover:text-blue-800">
-                                            Lupa password?
-                                        </a>
-                                    @endif
-                                </div>
-
                                 <button type="submit"
                                         class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700">
                                     LOGIN
                                 </button>
-
-                                @if (Route::has('register'))
-                                    <p class="text-center text-sm text-slate-500">
-                                        Belum punya akun?
-                                        <a href="{{ route('register') }}" class="font-semibold text-blue-700 hover:text-blue-800">
-                                            Daftar di sini
-                                        </a>
-                                    </p>
-                                @endif
                             </form>
                         </div>
                     </section>
