@@ -198,7 +198,7 @@ const companyName = computed(() => props.company?.name || appName.value)
 const companyAddress = computed(() => props.company?.address || '')
 const companyLogo = computed(() => resolveCompanyLogo(props.company?.logo))
 
-function resolveCompanyLogo(logo: string | null | undefined) {
+function resolveCompanyLogo(logo) {
     const fallback = '/storage/logos/aldera.png'
 
     if (!logo) {
