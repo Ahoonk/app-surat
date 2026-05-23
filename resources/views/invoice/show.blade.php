@@ -118,6 +118,9 @@
 
     <div class="bg-white rounded-2xl shadow-xl mx-auto text-[11px] leading-6 bg-no-repeat relative overflow-hidden"
          style="{{ $previewStyle }}">
+        @if ($mitraTemplate)
+            <img src="{{ $mitraTemplate }}" alt="Template Mitra" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;">
+        @endif
         <div style="position: relative; left: 0; width: calc(100% + 10mm); box-sizing: border-box;">
         <div class="flex justify-between items-start border-b pb-4">
             <div>

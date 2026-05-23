@@ -9,6 +9,7 @@
         body { font-family: Arial, sans-serif; font-size: 12px; color: #000; margin: 0; }
         .paper { width: 100%; max-width: 180mm; margin: 0 auto; position: relative; z-index: 2; }
         .bg-layer { position: fixed; inset: 0; background-size: 50% auto; background-repeat: no-repeat; background-position: center; z-index: 0; opacity: .2; }
+        .template-layer { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0; opacity: 1; }
         .head-layer { position: fixed; top: 0; left: 0; right: 0; z-index: 1; }
         .foot-layer { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1; }
         .kop-top { width: 100%; height: auto; display: block; }
@@ -128,7 +129,7 @@
     @endphp
 
     @if ($mitraTemplateAsset)
-        <div class="bg-layer" style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: top center; opacity: 1;"></div>
+        <img src="{{ $mitraTemplateAsset }}" alt="Template Mitra" class="template-layer">
     @else
         @if ($bgAsset)
             <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
