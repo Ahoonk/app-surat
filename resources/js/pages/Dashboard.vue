@@ -14,10 +14,10 @@
                     <div class="space-y-5">
                         <p class="text-xs uppercase tracking-[0.35em] text-cyan-200/70">Ringkasan Operasional</p>
                         <h1 class="max-w-3xl text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
-                            Dashboard operasional untuk memantau alur surat, invoice, pajak, dan nota toko.
+                            Dashboard Operasional Administrasi Dokumen Perusahaan
                         </h1>
                         <p class="max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                            Halaman ini menjadi titik awal migrasi ke Inertia + Vue. Alur bisnis lama tetap dipakai, sementara tampilannya mulai disusun ulang lebih modern dan konsisten.
+                            Aplikasi Operasional untuk Memantau Alur Dokumen, Invoice, Pajak, dan Nota Toko.
                         </p>
 
                         <div class="flex flex-wrap gap-3 pt-2">
