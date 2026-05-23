@@ -191,18 +191,18 @@
         <thead>
         <tr>
             <th style="width:5%;">No</th>
-            <th style="width:32%;">Description</th>
+            <th style="width:35%;">Description</th>
             <th style="width:6%;">Qty</th>
             <th style="width:8%;">Unit</th>
-            <th style="width:18%;">Unit Price</th>
-            <th style="width:31%;">Total</th>
+            <th style="width:22%;">Unit Price</th>
+            <th style="width:24%;">Total</th>
         </tr>
         </thead>
         <tbody>
         @foreach ($invoiceItems as $item)
             <tr>
                 <td class="center" style="width:5%;">{{ $loop->iteration }}</td>
-                <td style="text-align:left; width:32%;">
+                <td style="text-align:left; width:35%;">
                     <div>{{ data_get($item, 'nama') }}</div>
                     @if (!empty(data_get($item, 'rincian')))
                         <div style="font-size:11px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
@@ -210,8 +210,8 @@
                 </td>
                 <td class="center" style="width:6%;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
                 <td class="center" style="width:8%;">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
-                <td class="right-text nowrap" style="font-size:11px; width:18%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
-                <td class="right-text nowrap" style="font-size:11px; width:31%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
+                <td class="center nowrap" style="font-size:11px; width:22%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                <td class="right-text nowrap" style="font-size:11px; width:24%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
             </tr>
         @endforeach
         </tbody>
