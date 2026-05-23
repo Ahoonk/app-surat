@@ -22,13 +22,7 @@
 
                         <div class="flex flex-wrap gap-3 pt-2">
                             <a href="/penawaran" class="inline-flex items-center rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
-                                Buka Penawaran
-                            </a>
-                            <a href="/invoice" class="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-                                Lihat Invoice
-                            </a>
-                            <a href="/surat-jalan" class="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
-                                Surat Jalan
+                                Menu
                             </a>
                         </div>
                     </div>

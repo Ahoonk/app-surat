@@ -10,14 +10,8 @@
           </p>
 
           <div class="mt-6 flex flex-wrap gap-3">
-            <NuxtLink to="/penawaran/create" class="button-primary">
-              + Penawaran Baru
-            </NuxtLink>
-            <NuxtLink to="/invoice" class="button-ghost">
-              Kelola Invoice
-            </NuxtLink>
-            <NuxtLink to="/surat-jalan" class="button-ghost">
-              Surat Jalan
+            <NuxtLink to="/penawaran" class="button-primary">
+              Menu
             </NuxtLink>
           </div>
         </div>
