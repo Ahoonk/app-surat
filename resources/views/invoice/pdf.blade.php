@@ -8,7 +8,6 @@
         body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; }
         .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 18mm 6mm 10mm; box-sizing: border-box; }
         .bg-layer { position: fixed; inset: -4mm 0 0 0; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center; transform: translateX(7mm); z-index: 0; opacity: 1; }
-        .template-layer { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0; opacity: 1; }
         .head { display: table; width: 100%; border-bottom: 1px solid #000; padding-bottom: 12px; }
         .block-90 { width: 90%; margin-left: auto; margin-right: auto; }
         .left, .right { display: table-cell; vertical-align: top; }
@@ -149,7 +148,7 @@
 @endif
 
 @if ($mitraTemplateInvoice)
-    <img src="{{ $mitraTemplateInvoice }}" alt="Template Mitra" class="template-layer">
+    <div class="bg-layer" style="background-image: url('{{ $mitraTemplateInvoice }}'); background-size: 100% 100%; background-position: top center; opacity: 1;"></div>
 @else
     @if ($templateInvoice)
         <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>

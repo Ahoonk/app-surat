@@ -108,9 +108,6 @@
          @elseif($bgAsset)
              style="background-image: url('{{ $bgAsset }}'); background-size: 50% auto;"
          @endif>
-        @if($mitraTemplateAsset)
-            <img src="{{ $mitraTemplateAsset }}" alt="Template Mitra" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;">
-        @endif
         @if (!$mitraTemplateAsset && $kopAtasAsset)
             <div class="mb-4 -mx-10">
                 <img src="{{ $kopAtasAsset }}" alt="Kop Atas" class="w-full h-auto block">
