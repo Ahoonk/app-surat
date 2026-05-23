@@ -39,9 +39,12 @@
                             <div class="min-w-0 flex-1">
                                 <p class="text-xs uppercase tracking-[0.3em] text-cyan-200/60">Company</p>
                                 <h2 class="mt-2 truncate text-2xl font-bold">{{ companyName }}</h2>
-                                <p class="mt-2 text-sm leading-6 text-slate-300">{{ companyAddress || 'Alamat perusahaan belum diisi.' }}</p>
                             </div>
                         </div>
+
+                        <p class="mt-3 text-sm leading-6 text-slate-300">
+                            {{ companyAddress || 'Alamat perusahaan belum diisi.' }}
+                        </p>
 
                         <div class="mt-5 grid grid-cols-2 gap-3">
                             <div class="rounded-2xl border border-white/10 bg-white/10 p-4 shadow-inner shadow-black/5">
