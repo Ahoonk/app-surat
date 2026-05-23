@@ -100,6 +100,11 @@
         ? public_path('storage/' . $mitra->template_invoice_path)
         : null;
     $mitraTemplate = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran->company_id, 'invoice');
+    $companyTemplate = $companyTemplatePath
+        ? $toDataUri(public_path('storage/' . $companyTemplatePath))
+        : null;
+    $documentTemplate = $mitraTemplate ?: $companyTemplate;
     $invoiceTemplatePath = public_path('storage/logos/template-invoice.png');
     $invoiceFooterPath = public_path('storage/logos/kopbawah-invoice.png');
     $invoiceTemplate = file_exists($invoiceTemplatePath)
@@ -109,8 +114,8 @@
         ? asset('storage/logos/kopbawah-invoice.png') . '?v=' . filemtime($invoiceFooterPath)
         : null;
     $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 18mm 6mm 10mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center;';
-    if ($mitraTemplate) {
-        $previewStyle .= " background-image: url('{$mitraTemplate}'); background-size: 100% 100%; background-position: top center;";
+    if ($documentTemplate) {
+        $previewStyle .= " background-image: url('{$documentTemplate}'); background-size: 100% 100%; background-position: top center;";
     } elseif ($invoiceTemplate) {
         $previewStyle .= " background-image: url('{$invoiceTemplate}'); transform: translateX(6mm);";
     }
@@ -210,7 +215,7 @@
                 <p>{{ data_get($snapshot, 'signature_role', $penawaran->signature_role ?? 'Authorized Signature') }}</p>
             </div>
         </div>
-        @if(!$mitraTemplate && $invoiceFooter)
+        @if(!$documentTemplate && $invoiceFooter)
             <img src="{{ $invoiceFooter }}" alt="Footer Invoice" style="position:absolute; left:0; right:0; bottom:-140mm; width:100%; height:34mm; object-fit:fill; transform:translateX(-0.5mm);">
         @endif
         </div>

@@ -96,13 +96,18 @@
         ? public_path('storage/' . $mitra->template_surat_jalan_path)
         : null;
     $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran->company_id, 'surat_jalan');
+    $companyTemplateAsset = $companyTemplatePath
+        ? $toDataUri(public_path('storage/' . $companyTemplatePath))
+        : null;
+    $documentTemplateAsset = $mitraTemplateAsset ?: $companyTemplateAsset;
     $kopAtasAsset = $toDataUri(public_path('storage/logos/kopatas.png'));
     $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah.png'));
     $bgAsset = $toDataUri(public_path('storage/logos/backgroud-template.png'))
         ?: $toDataUri(public_path('storage/logos/background-template.png'));
 @endphp
-    @if ($mitraTemplateAsset)
-        <img src="{{ $mitraTemplateAsset }}" alt="Template Mitra" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
+    @if ($documentTemplateAsset)
+        <img src="{{ $documentTemplateAsset }}" alt="Template Dokumen" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
     @else
         @if ($bgAsset)
             <div style="position: fixed; inset: 0; background-image: url('{{ $bgAsset }}'); background-repeat: no-repeat; background-position: center 36%; background-size: 50% auto; z-index: 0;"></div>

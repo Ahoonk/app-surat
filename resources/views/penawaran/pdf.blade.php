@@ -118,6 +118,11 @@
             ? public_path('storage/' . $mitra->template_penawaran_path)
             : null;
         $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+        $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran->company_id, 'penawaran');
+        $companyTemplateAsset = $companyTemplatePath
+            ? $toDataUri(public_path('storage/' . $companyTemplatePath))
+            : null;
+        $documentTemplateAsset = $mitraTemplateAsset ?: $companyTemplateAsset;
 
         $bgPrimary = public_path('storage/logos/background-template.png');
         $bgFallback = public_path('storage/logos/background-tempplate.png');
@@ -127,8 +132,8 @@
         $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah-penawaran.png'));
     @endphp
 
-    @if ($mitraTemplateAsset)
-        <img src="{{ $mitraTemplateAsset }}" alt="Template Mitra" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
+    @if ($documentTemplateAsset)
+        <img src="{{ $documentTemplateAsset }}" alt="Template Dokumen" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
     @else
         @if ($bgAsset)
             <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>

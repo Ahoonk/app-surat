@@ -130,6 +130,11 @@
         ? public_path('storage/' . $mitra->template_invoice_path)
         : null;
     $mitraTemplateInvoice = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran->company_id, 'invoice');
+    $companyTemplateInvoice = $companyTemplatePath
+        ? $toDataUri(public_path('storage/' . $companyTemplatePath))
+        : null;
+    $documentTemplateInvoice = $mitraTemplateInvoice ?: $companyTemplateInvoice;
 
     $templatePath = public_path('storage/logos/template-invoice.png');
     $footerPath = public_path('storage/logos/kopbawah-invoice.png');
@@ -147,8 +152,8 @@
     </style>
 @endif
 
-@if ($mitraTemplateInvoice)
-    <img src="{{ $mitraTemplateInvoice }}" alt="Template Mitra" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
+@if ($documentTemplateInvoice)
+    <img src="{{ $documentTemplateInvoice }}" alt="Template Dokumen" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
 @else
     @if ($templateInvoice)
         <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>

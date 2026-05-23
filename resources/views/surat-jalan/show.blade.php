@@ -83,6 +83,11 @@
         ? public_path('storage/' . $mitra->template_surat_jalan_path)
         : null;
     $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran->company_id, 'surat_jalan');
+    $companyTemplateAsset = $companyTemplatePath
+        ? $toDataUri(public_path('storage/' . $companyTemplatePath))
+        : null;
+    $documentTemplateAsset = $mitraTemplateAsset ?: $companyTemplateAsset;
     $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? $toDataUri(public_path('storage/logos/kopatas.png')) : null;
     $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah.png')) ? $toDataUri(public_path('storage/logos/kopbawah.png')) : null;
     $bgPrimaryPath = public_path('storage/logos/backgroud-template.png');
@@ -117,8 +122,8 @@
     </div>
 
     <div class="mx-auto bg-white rounded-2xl shadow-xl relative overflow-hidden" style="{{ $previewPaperStyle }}">
-        @if ($mitraTemplateAsset)
-            <div style="position:absolute;inset:0;background-image:url('{{ $mitraTemplateAsset }}');background-repeat:no-repeat;background-position:top center;background-size:100% 100%;z-index:0;"></div>
+        @if ($documentTemplateAsset)
+            <div style="position:absolute;inset:0;background-image:url('{{ $documentTemplateAsset }}');background-repeat:no-repeat;background-position:top center;background-size:100% 100%;z-index:0;"></div>
         @else
             @if ($bgAsset)
                 <div style="position:absolute;inset:0;background-image:url('{{ $bgAsset }}');background-repeat:no-repeat;background-position:center 36%;background-size:50% auto;z-index:0;"></div>

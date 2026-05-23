@@ -5,27 +5,29 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ResolvesCompanyId;
 use App\Models\DocumentTemplate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentTemplateController extends Controller
 {
     use ResolvesCompanyId;
 
     private const DOCUMENT_TYPES = [
-        'penawaran' => 'Surat Penawaran',
-        'invoice' => 'Invoice',
-        'surat_jalan' => 'Surat Jalan',
-        'berita_acara' => 'Berita Acara',
-        'nota_toko' => 'Nota Toko',
-    ];
-
-    private const DEFAULT_VIEWS = [
-        'penawaran' => 'penawaran.pdf',
-        'invoice' => 'invoice.pdf',
-        'surat_jalan' => 'surat-jalan.pdf',
-        'berita_acara' => 'berita-acara.pdf',
-        'nota_toko' => 'nota-toko.pdf',
+        'penawaran' => [
+            'label' => 'Surat Penawaran',
+            'field' => 'template_penawaran',
+        ],
+        'invoice' => [
+            'label' => 'Invoice',
+            'field' => 'template_invoice',
+        ],
+        'surat_jalan' => [
+            'label' => 'Surat Jalan',
+            'field' => 'template_surat_jalan',
+        ],
+        'berita_acara' => [
+            'label' => 'Berita Acara',
+            'field' => 'template_berita_acara',
+        ],
     ];
 
     public function index()
@@ -35,17 +37,13 @@ class DocumentTemplateController extends Controller
             return $companyId;
         }
 
-        $templates = DocumentTemplate::where('company_id', $companyId)
-            ->orderBy('document_type')
-            ->orderByDesc('is_default')
-            ->orderBy('name')
-            ->get();
+        $templatePaths = collect(self::DOCUMENT_TYPES)->mapWithKeys(function (array $meta, string $documentType) use ($companyId) {
+            return [$documentType => app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($companyId, $documentType)];
+        });
 
         return view('document-templates.index', [
-            'templates' => $templates,
+            'templatePaths' => $templatePaths,
             'documentTypes' => self::DOCUMENT_TYPES,
-            'defaultViews' => self::DEFAULT_VIEWS,
-            'availableViews' => $this->availableViews(),
         ]);
     }
 
@@ -56,19 +54,28 @@ class DocumentTemplateController extends Controller
             return $companyId;
         }
 
-        $validated = $this->validatePayload($request);
+        $this->validatePayload($request);
+        $uploaded = false;
 
-        $template = DocumentTemplate::create([
-            'company_id' => $companyId,
-            'document_type' => $validated['document_type'],
-            'name' => $validated['name'],
-            'file_path' => $validated['file_path'],
-            'is_default' => (bool) ($validated['is_default'] ?? false),
-        ]);
+        foreach (self::DOCUMENT_TYPES as $documentType => $meta) {
+            $field = $meta['field'];
+            $file = $request->file($field);
 
-        $this->syncDefault($template);
+            if (!$file) {
+                continue;
+            }
 
-        return back()->with('success', 'Template dokumen berhasil ditambahkan.');
+            $uploaded = true;
+            $this->storeTemplate($companyId, $documentType, $meta['label'], $file);
+        }
+
+        if (!$uploaded) {
+            return back()
+                ->withErrors(['template_penawaran' => 'Pilih minimal satu file template untuk diunggah.'])
+                ->withInput();
+        }
+
+        return back()->with('success', 'Template dokumen berhasil diperbarui.');
     }
 
     public function update(Request $request, DocumentTemplate $documentTemplate)
@@ -80,16 +87,18 @@ class DocumentTemplateController extends Controller
 
         abort_if($documentTemplate->company_id !== $companyId, 403);
 
-        $validated = $this->validatePayload($request);
-
-        $documentTemplate->update([
-            'document_type' => $validated['document_type'],
-            'name' => $validated['name'],
-            'file_path' => $validated['file_path'],
-            'is_default' => (bool) ($validated['is_default'] ?? false),
+        $field = self::DOCUMENT_TYPES[$documentTemplate->document_type]['field'] ?? 'template';
+        $validated = $request->validate([
+            $field => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
-        $this->syncDefault($documentTemplate);
+        $this->storeTemplate(
+            $companyId,
+            $documentTemplate->document_type,
+            self::DOCUMENT_TYPES[$documentTemplate->document_type]['label'] ?? $documentTemplate->name,
+            $request->file($field),
+            $documentTemplate
+        );
 
         return back()->with('success', 'Template dokumen berhasil diperbarui.');
     }
@@ -103,6 +112,7 @@ class DocumentTemplateController extends Controller
 
         abort_if($documentTemplate->company_id !== $companyId, 403);
 
+        $this->deleteTemplate($documentTemplate->file_path);
         $documentTemplate->delete();
 
         return back()->with('success', 'Template dokumen berhasil dihapus.');
@@ -110,32 +120,65 @@ class DocumentTemplateController extends Controller
 
     private function validatePayload(Request $request): array
     {
-        $documentTypes = array_keys(self::DOCUMENT_TYPES);
+        $rules = [];
 
-        return $request->validate([
-            'document_type' => ['required', Rule::in($documentTypes)],
-            'name' => ['required', 'string', 'max:255'],
-            'file_path' => ['required', 'string', 'max:255'],
-            'is_default' => ['nullable', 'boolean'],
-        ]);
+        foreach (self::DOCUMENT_TYPES as $meta) {
+            $rules[$meta['field']] = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'];
+        }
+
+        return $request->validate($rules);
     }
 
-    private function syncDefault(DocumentTemplate $template): void
+    private function storeTemplate(int $companyId, string $documentType, string $label, $file, ?DocumentTemplate $existingTemplate = null): ?DocumentTemplate
     {
-        if (! $template->is_default) {
+        if (!$file) {
+            return null;
+        }
+
+        $template = $existingTemplate ?: DocumentTemplate::query()
+            ->where('company_id', $companyId)
+            ->where('document_type', $documentType)
+            ->where('is_default', true)
+            ->first();
+
+        if (!$template) {
+            $template = new DocumentTemplate();
+            $template->company_id = $companyId;
+            $template->document_type = $documentType;
+        }
+
+        $oldPath = $template->file_path;
+        $path = $this->storeUploadedFile($file, $companyId, $documentType);
+
+        $template->fill([
+            'name' => $label,
+            'file_path' => $path,
+            'is_default' => true,
+        ]);
+        $template->save();
+
+        if ($oldPath && $oldPath !== $path) {
+            $this->deleteTemplate($oldPath);
+        }
+
+        return $template;
+    }
+
+    private function storeUploadedFile($file, int $companyId, string $documentType): string
+    {
+        $ext = strtolower($file->getClientOriginalExtension());
+        $directory = 'document-templates/' . $companyId . '/' . $documentType;
+        $filename = $documentType . '-template-' . uniqid() . '.' . $ext;
+
+        return $file->storeAs($directory, $filename, 'public');
+    }
+
+    private function deleteTemplate(?string $path): void
+    {
+        if (!$path) {
             return;
         }
 
-        DocumentTemplate::where('company_id', $template->company_id)
-            ->where('document_type', $template->document_type)
-            ->where('id', '!=', $template->id)
-            ->update(['is_default' => false]);
-    }
-
-    private function availableViews(): array
-    {
-        $candidates = array_values(self::DEFAULT_VIEWS);
-
-        return array_values(array_filter($candidates, fn (string $view) => View::exists($view)));
+        Storage::disk('public')->delete($path);
     }
 }
