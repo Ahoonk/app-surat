@@ -10,7 +10,6 @@
             <nav class="flex-1 p-4 space-y-2">
                 <a v-for="link in links" :key="link.to" :href="link.to" class="nav-link">
                     <span>{{ link.label }}</span>
-                    <span class="text-xs text-slate-400">{{ link.hint }}</span>
                 </a>
             </nav>
 
@@ -65,15 +64,15 @@ const userRole = computed(() => user.value?.role ?? 'user')
 const companyName = computed(() => page.props.company?.name ?? 'Company')
 
 const links = [
-    { label: 'Dashboard', to: '/dashboard', hint: 'Ringkasan' },
-    { label: 'Surat Penawaran', to: '/penawaran', hint: 'Proposal' },
-    { label: 'Purchasing Order', to: '/purchasing-order', hint: 'PO' },
-    { label: 'Invoice', to: '/invoice', hint: 'Penagihan' },
-    { label: 'Nota Toko', to: '/nota-toko', hint: 'Retail' },
-    { label: 'Surat Jalan', to: '/surat-jalan', hint: 'Delivery' },
-    { label: 'Berita Acara', to: '/berita-acara', hint: 'BA' },
-    { label: 'Customer', to: '/customers', hint: 'Master' },
-    { label: 'Mitra', to: '/mitra', hint: 'Partner' },
+    { label: 'Dashboard', to: '/dashboard' },
+    { label: 'Surat Penawaran', to: '/penawaran' },
+    { label: 'Purchasing Order', to: '/purchasing-order' },
+    { label: 'Invoice', to: '/invoice' },
+    { label: 'Nota Toko', to: '/nota-toko' },
+    { label: 'Surat Jalan', to: '/surat-jalan' },
+    { label: 'Berita Acara', to: '/berita-acara' },
+    { label: 'Customer', to: '/customers' },
+    { label: 'Mitra', to: '/mitra' },
 ]
 
 const currentTitle = computed(() => {

@@ -7,8 +7,8 @@
         $isActive = request()->routeIs(...$patterns);
 
         return $isActive
-            ? 'flex items-center justify-between gap-3 rounded-2xl border border-cyan-400/30 bg-white/10 px-4 py-3 text-white shadow-lg shadow-cyan-950/20'
-            : 'flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-slate-200 transition hover:bg-white/10 hover:text-white';
+            ? 'flex items-center gap-3 rounded-2xl border border-cyan-400/30 bg-white/10 px-4 py-3 text-white shadow-lg shadow-cyan-950/20'
+            : 'flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-200 transition hover:bg-white/10 hover:text-white';
     };
 @endphp
 
@@ -33,7 +33,6 @@
             <p class="mb-3 px-2 text-[11px] uppercase tracking-[0.35em] text-slate-400">Overview</p>
             <a href="{{ route('dashboard') }}" class="{{ $menuClass('dashboard') }}">
                 <span>Dashboard</span>
-                <span class="text-xs text-slate-400">Ringkasan</span>
             </a>
         </div>
 
@@ -42,35 +41,27 @@
             <div class="space-y-2">
                 <a href="{{ route('penawaran.index') }}" class="{{ $menuClass('penawaran.*') }}">
                     <span>Surat Penawaran</span>
-                    <span class="text-xs text-slate-400">Proposal</span>
                 </a>
                 <a href="{{ route('purchasing-order.index') }}" class="{{ $menuClass('purchasing-order.*') }}">
                     <span>Purchasing Order</span>
-                    <span class="text-xs text-slate-400">PO</span>
                 </a>
                 <a href="{{ route('invoice.index') }}" class="{{ $menuClass('invoice.*') }}">
                     <span>Invoice</span>
-                    <span class="text-xs text-slate-400">Penagihan</span>
                 </a>
                 <a href="{{ route('faktur-pajak.index') }}" class="{{ $menuClass('faktur-pajak.*') }}">
                     <span>Faktur Pajak</span>
-                    <span class="text-xs text-slate-400">Pajak</span>
                 </a>
                 <a href="{{ route('surat-jalan.index') }}" class="{{ $menuClass('surat-jalan.*') }}">
                     <span>Surat Jalan</span>
-                    <span class="text-xs text-slate-400">Delivery</span>
                 </a>
                 <a href="{{ route('berita-acara.index') }}" class="{{ $menuClass('berita-acara.*') }}">
                     <span>Berita Acara</span>
-                    <span class="text-xs text-slate-400">BA</span>
                 </a>
                 <a href="{{ route('nota-toko.index') }}" class="{{ $menuClass('nota-toko.*') }}">
                     <span>Nota Toko</span>
-                    <span class="text-xs text-slate-400">Retail</span>
                 </a>
                 <a href="{{ route('simulasi-pembiayaan.index') }}" class="{{ $menuClass('simulasi-pembiayaan.*') }}">
                     <span>Simulasi Pembiayaan</span>
-                    <span class="text-xs text-slate-400">Calculator</span>
                 </a>
             </div>
         </div>
@@ -80,20 +71,16 @@
             <div class="space-y-2">
                 <a href="{{ route('customers.index') }}" class="{{ $menuClass('customers.*') }}">
                     <span>Customer</span>
-                    <span class="text-xs text-slate-400">Master</span>
                 </a>
                 <a href="{{ route('mitra.index') }}" class="{{ $menuClass('mitra.*') }}">
                     <span>Mitra</span>
-                    <span class="text-xs text-slate-400">Partner</span>
                 </a>
                 <a href="{{ route('document-templates.index') }}" class="{{ $menuClass('document-templates.*') }}">
                     <span>Template Dokumen</span>
-                    <span class="text-xs text-slate-400">PDF</span>
                 </a>
                 @if ($user?->isSuperAdmin())
                     <a href="{{ route('users.index') }}" class="{{ $menuClass('users.*') }}">
                         <span>Manajemen User</span>
-                        <span class="text-xs text-slate-400">Akses</span>
                     </a>
                 @endif
             </div>

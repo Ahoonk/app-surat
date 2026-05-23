@@ -10,7 +10,6 @@
       <nav class="flex-1 p-4 space-y-2">
         <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="nav-link">
           <span>{{ link.label }}</span>
-          <span class="text-xs text-slate-400">{{ link.hint }}</span>
         </NuxtLink>
       </nav>
 
@@ -58,13 +57,13 @@ const route = useRoute()
 const { session, logout } = useSession()
 
 const links = [
-  { label: 'Dashboard', to: '/dashboard', hint: 'Ringkasan' },
-  { label: 'Surat Penawaran', to: '/penawaran', hint: 'Proposal' },
-  { label: 'Invoice', to: '/invoice', hint: 'Penagihan' },
-  { label: 'Surat Jalan', to: '/surat-jalan', hint: 'Delivery' },
-  { label: 'Berita Acara', to: '/berita-acara', hint: 'BA' },
-  { label: 'Customer', to: '/customers', hint: 'Master' },
-  { label: 'Mitra', to: '/mitras', hint: 'Partner' },
+  { label: 'Dashboard', to: '/dashboard' },
+  { label: 'Surat Penawaran', to: '/penawaran' },
+  { label: 'Invoice', to: '/invoice' },
+  { label: 'Surat Jalan', to: '/surat-jalan' },
+  { label: 'Berita Acara', to: '/berita-acara' },
+  { label: 'Customer', to: '/customers' },
+  { label: 'Mitra', to: '/mitras' },
 ]
 
 const currentTitle = computed(() => {
