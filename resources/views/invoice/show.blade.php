@@ -113,17 +113,17 @@
     $invoiceFooter = file_exists($invoiceFooterPath)
         ? asset('storage/logos/kopbawah-invoice.png') . '?v=' . filemtime($invoiceFooterPath)
         : null;
-    $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 18mm 6mm 10mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center;';
+    $previewStyle = 'width: 100%; max-width: 794px; min-height: 1123px; padding: 50mm 15mm 6mm 15mm; background-size: 100% auto; background-repeat: no-repeat; background-position: top center;';
     if ($documentTemplate) {
         $previewStyle .= " background-image: url('{$documentTemplate}'); background-size: 100% 100%; background-position: top center;";
     } elseif ($invoiceTemplate) {
-        $previewStyle .= " background-image: url('{$invoiceTemplate}'); transform: translateX(6mm);";
+        $previewStyle .= " background-image: url('{$invoiceTemplate}');";
     }
     @endphp
 
     <div class="bg-white rounded-2xl shadow-xl mx-auto text-[11px] leading-6 bg-no-repeat relative overflow-hidden"
          style="{{ $previewStyle }}">
-        <div style="position: relative; left: 0; width: calc(100% + 10mm); box-sizing: border-box;">
+        <div style="position: relative; width: 100%; box-sizing: border-box;">
         <div class="flex justify-between items-start border-b pb-4">
             <div>
                 <p class="text-[11px] text-gray-600 font-semibold">Bill To</p>

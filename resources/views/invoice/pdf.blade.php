@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <title>Invoice - {{ $invoice->nomor }}</title>
     <style>
-        @page { size: A4 portrait; margin: 4mm 16mm 4mm 4mm; }
+        @page { size: A4 portrait; margin: 0; }
         body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; }
-        .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 18mm 6mm 10mm; box-sizing: border-box; }
-        .bg-layer { position: fixed; inset: -4mm 0 0 0; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center; transform: translateX(7mm); z-index: 0; opacity: 1; }
+        .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 15mm 6mm 15mm; box-sizing: border-box; }
+        .bg-layer { position: fixed; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; background-position: top center; z-index: 0; opacity: 1; }
         .head { display: table; width: 100%; border-bottom: 1px solid #000; padding-bottom: 12px; }
         .block-90 { width: 90%; margin-left: auto; margin-right: auto; }
         .left, .right { display: table-cell; vertical-align: top; }
         .right { text-align: right; }
         .inv-meta { font-size: 11px; line-height: 1.35; }
-        .content-wrap { position: relative; left: -4mm; width: calc(100% + 4mm); box-sizing: border-box; }
+        .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
         .main-table { width: 90%; margin-left: auto; margin-right: auto; }
         th, td { border: 1px solid #000; padding: 6px 8px; }
@@ -28,7 +28,7 @@
         .notes { margin-top: 28px; }
         .po-meta { width: 90%; margin: 10px auto 6px; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
-        .footer-layer { position: fixed; left: 0; right: 0; bottom: -5mm; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; transform: translateX(7mm); z-index: 1; }
+        .footer-layer { position: fixed; left: 0; right: 0; bottom: 0; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; z-index: 1; }
     </style>
 </head>
 <body>
