@@ -137,7 +137,7 @@
 @endphp
 
     @if ($mitraTemplateAsset)
-    <div style="position: fixed; inset: 0; background-image: url('{{ $mitraTemplateAsset }}'); background-repeat: no-repeat; background-position: top center; background-size: 100% 100%; z-index: 0;"></div>
+    <img src="{{ $mitraTemplateAsset }}" alt="Template Mitra" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
     @else
     @if ($bgAsset)
         <div style="position: fixed; inset: 0; background-image: url('{{ $bgAsset }}'); background-repeat: no-repeat; background-position: center 36%; background-size: 50% auto; z-index: 0;"></div>

@@ -128,7 +128,7 @@
     @endphp
 
     @if ($mitraTemplateAsset)
-        <div class="bg-layer" style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: top center; opacity: 1;"></div>
+        <img src="{{ $mitraTemplateAsset }}" alt="Template Mitra" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
     @else
         @if ($bgAsset)
             <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
