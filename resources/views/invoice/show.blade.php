@@ -145,14 +145,14 @@
         @endunless
 
         <div class="mt-6 overflow-x-auto">
-            <table class="border-collapse" style="width: 92%; margin: 0;">
+            <table class="border-collapse" style="width: 94%; margin: 0 auto;">
                 <thead>
                     <tr>
                         <th class="border px-3 py-2 text-center" style="width:4%;">No</th>
                         <th class="border px-3 py-2 text-center" style="width:34%;">Description</th>
                         <th class="border px-3 py-2 text-center" style="width:6%;">Qty</th>
                         <th class="border px-3 py-2 text-center" style="width:8%;">Unit</th>
-                        <th class="border px-3 py-2 text-center" style="width:16%;">Unit Price</th>
+                        <th class="border px-3 py-2 text-center" style="width:14%;">Unit Price</th>
                         <th class="border px-3 py-2 text-center" style="width:14%;">Total</th>
                     </tr>
                 </thead>
@@ -168,7 +168,7 @@
                             </td>
                             <td class="border px-3 py-2 text-center" style="width:6%;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
                             <td class="border px-3 py-2 text-center" style="width:8%;">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
-                            <td class="border px-3 py-2 text-center" style="width:16%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                            <td class="border px-3 py-2 text-center" style="width:14%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
                             <td class="border px-3 py-2 text-right" style="width:14%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
@@ -176,7 +176,7 @@
             </table>
         </div>
 
-        <div class="mt-4" style="width: 92%; margin: 0;">
+        <div class="mt-4" style="width: 94%; margin: 0 auto;">
             <div class="flex justify-between border-b py-2">
                 <span>Subtotal</span>
                 <span>Rp {{ number_format((float) data_get($snapshot, 'subtotal', $penawaran->subtotal), 2, ',', '.') }}</span>
