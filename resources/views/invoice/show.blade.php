@@ -145,7 +145,7 @@
         @endunless
 
         <div class="mt-2 overflow-x-auto">
-            <table class="border-collapse" style="width: 92%; margin: 0 auto;">
+            <table class="border-collapse" style="width: 94%; margin: 0 auto;">
                 <thead>
                     <tr>
                         <th class="border px-3 py-2 text-center" style="width:4%;">No</th>
@@ -176,7 +176,7 @@
             </table>
         </div>
 
-        <div class="mt-4" style="width: 92%; margin: 0 auto;">
+        <div class="mt-4" style="width: 94%; margin: 0 auto;">
             <div class="flex justify-between border-b py-2">
                 <span>Subtotal</span>
                 <span>Rp {{ number_format((float) data_get($snapshot, 'subtotal', $penawaran->subtotal), 2, ',', '.') }}</span>
