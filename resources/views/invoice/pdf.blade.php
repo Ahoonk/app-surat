@@ -5,18 +5,18 @@
     <title>Invoice - {{ $invoice->nomor }}</title>
     <style>
         @page { size: A4 portrait; margin: 0; }
-        body { font-family: Arial, sans-serif; font-size: 10px; color: #000; margin: 0; }
+        body { font-family: Arial, sans-serif; font-size: 9px; color: #000; margin: 0; }
         .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 24mm 6mm 2mm; box-sizing: border-box; }
         .bg-layer { position: fixed; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; background-position: top center; z-index: 0; opacity: 1; }
         .head { display: table; width: 100%; border-bottom: 1px solid #000; padding-bottom: 12px; }
         .block-90 { width: 94%; margin-left: auto; margin-right: auto; }
         .left, .right { display: table-cell; vertical-align: top; }
         .right { text-align: right; }
-        .inv-meta { font-size: 10px; line-height: 1.35; }
+        .inv-meta { font-size: 9px; line-height: 1.35; }
         .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
         .main-table { width: 94%; margin: 18px auto 0; }
-        th, td { border: 1px solid #000; padding: 6px 8px; font-size: 10px; }
+        th, td { border: 1px solid #000; padding: 6px 8px; font-size: 9px; }
         th { text-align: center; }
         .center { text-align: center; }
         .right-text { text-align: right; }
@@ -24,7 +24,7 @@
         .summary-wrap { width: 94%; margin: 12px auto 0; }
         .summary { width: 36%; margin-left: auto; margin-top: 0; }
         .summary td { border-left: 0; border-right: 0; }
-        .summary tr:last-child td { font-weight: 700; font-size: 10px; }
+        .summary tr:last-child td { font-weight: 700; font-size: 9px; }
         .notes { margin-top: 28px; }
         .po-meta { width: 94%; margin: 10px auto 6px; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
@@ -205,13 +205,13 @@
                 <td style="text-align:left; width:36%;">
                     <div>{{ data_get($item, 'nama') }}</div>
                     @if (!empty(data_get($item, 'rincian')))
-                        <div style="font-size:10px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
+                        <div style="font-size:9px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
                     @endif
                 </td>
                 <td class="center" style="width:6%;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
                 <td class="center" style="width:8%;">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
-                <td class="center nowrap" style="font-size:10px; width:20%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
-                <td class="right-text nowrap" style="font-size:10px; width:16%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
+                <td class="center nowrap" style="font-size:9px; width:20%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                <td class="right-text nowrap" style="font-size:9px; width:16%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
             </tr>
         @endforeach
         </tbody>
