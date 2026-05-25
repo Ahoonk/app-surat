@@ -15,7 +15,7 @@
         .inv-meta { font-size: 10px; line-height: 1.35; }
         .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
-        .main-table { width: 92%; margin-left: auto; margin-right: auto; }
+        .main-table { width: 92%; margin: 6px auto 0; }
         th, td { border: 1px solid #000; padding: 6px 8px; font-size: 10px; }
         th { text-align: center; }
         .center { text-align: center; }
@@ -26,7 +26,7 @@
         .summary td { border-left: 0; border-right: 0; }
         .summary tr:last-child td { font-weight: 700; font-size: 10px; }
         .notes { margin-top: 28px; }
-        .po-meta { width: 92%; margin: 10px auto 6px; }
+        .po-meta { width: 92%; margin: 2px auto 2px; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
         .footer-layer { position: fixed; left: 0; right: 0; bottom: 0; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; z-index: 1; }
     </style>
