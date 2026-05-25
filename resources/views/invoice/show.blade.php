@@ -138,13 +138,13 @@
         </div>
 
         @unless($isMitra)
-            <div class="mt-1 mb-1 text-[10px]">
+            <div class="mt-3 mb-2 text-[10px]">
                 <p><strong>Nomor PO:</strong> {{ data_get($snapshot, 'po_number', $invoice->purchasingOrder->nomor_po ?? '-') }}</p>
                 <p><strong>Tanggal PO:</strong> {{ data_get($snapshot, 'po_date', $invoice->purchasingOrder->tanggal_po) ? \Illuminate\Support\Carbon::parse(data_get($snapshot, 'po_date', $invoice->purchasingOrder->tanggal_po))->translatedFormat('d F Y') : '-' }}</p>
             </div>
         @endunless
 
-        <div class="mt-2 overflow-x-auto">
+        <div class="mt-6 overflow-x-auto">
             <table class="border-collapse" style="width: 94%; margin: 0 auto;">
                 <thead>
                     <tr>
