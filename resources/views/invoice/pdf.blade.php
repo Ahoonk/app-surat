@@ -15,18 +15,18 @@
         .inv-meta { font-size: 11px; line-height: 1.35; }
         .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
-        .main-table { width: 90%; margin-left: 0; margin-right: auto; }
+        .main-table { width: 94%; margin-left: auto; margin-right: auto; }
         th, td { border: 1px solid #000; padding: 6px 8px; }
         th { text-align: center; }
         .center { text-align: center; }
         .right-text { text-align: right; }
         .nowrap { white-space: nowrap; }
-        .summary-wrap { width: 90%; margin: 12px 0 0 0; }
+        .summary-wrap { width: 94%; margin: 12px auto 0; }
         .summary { width: 40%; margin-left: auto; margin-top: 0; }
         .summary td { border-left: 0; border-right: 0; }
         .summary tr:last-child td { font-weight: 700; font-size: 11px; }
         .notes { margin-top: 28px; }
-        .po-meta { width: 90%; margin: 10px 0 6px 0; }
+        .po-meta { width: 94%; margin: 10px auto 6px; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
         .footer-layer { position: fixed; left: 0; right: 0; bottom: 0; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; z-index: 1; }
     </style>
@@ -191,18 +191,18 @@
         <thead>
         <tr>
             <th style="width:4%;">No</th>
-            <th style="width:36%;">Description</th>
+            <th style="width:34%;">Description</th>
             <th style="width:6%;">Qty</th>
             <th style="width:8%;">Unit</th>
-            <th style="width:20%;">Unit Price</th>
-            <th style="width:16%;">Total</th>
+            <th style="width:18%;">Unit Price</th>
+            <th style="width:14%;">Total</th>
         </tr>
         </thead>
         <tbody>
         @foreach ($invoiceItems as $item)
             <tr>
                 <td class="center" style="width:4%;">{{ $loop->iteration }}</td>
-                <td style="text-align:left; width:36%;">
+                <td style="text-align:left; width:34%;">
                     <div>{{ data_get($item, 'nama') }}</div>
                     @if (!empty(data_get($item, 'rincian')))
                         <div style="font-size:11px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
@@ -210,8 +210,8 @@
                 </td>
                 <td class="center" style="width:6%;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
                 <td class="center" style="width:8%;">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
-                <td class="center nowrap" style="font-size:11px; width:20%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
-                <td class="right-text nowrap" style="font-size:11px; width:16%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
+                <td class="center nowrap" style="font-size:11px; width:18%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                <td class="right-text nowrap" style="font-size:11px; width:14%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
             </tr>
         @endforeach
         </tbody>
