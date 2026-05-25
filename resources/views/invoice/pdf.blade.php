@@ -5,18 +5,18 @@
     <title>Invoice - {{ $invoice->nomor }}</title>
     <style>
         @page { size: A4 portrait; margin: 0; }
-        body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; }
+        body { font-family: Arial, sans-serif; font-size: 10px; color: #000; margin: 0; }
         .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 24mm 6mm 2mm; box-sizing: border-box; }
         .bg-layer { position: fixed; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; background-position: top center; z-index: 0; opacity: 1; }
         .head { display: table; width: 100%; border-bottom: 1px solid #000; padding-bottom: 12px; }
         .block-90 { width: 94%; margin-left: auto; margin-right: auto; }
         .left, .right { display: table-cell; vertical-align: top; }
         .right { text-align: right; }
-        .inv-meta { font-size: 11px; line-height: 1.35; }
+        .inv-meta { font-size: 10px; line-height: 1.35; }
         .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
         .main-table { width: 94%; margin-left: 0; margin-right: auto; }
-        th, td { border: 1px solid #000; padding: 6px 8px; }
+        th, td { border: 1px solid #000; padding: 6px 8px; font-size: 10px; }
         th { text-align: center; }
         .center { text-align: center; }
         .right-text { text-align: right; }
@@ -24,7 +24,7 @@
         .summary-wrap { width: 94%; margin: 12px 0 0 0; }
         .summary { width: 40%; margin-left: auto; margin-top: 0; }
         .summary td { border-left: 0; border-right: 0; }
-        .summary tr:last-child td { font-weight: 700; font-size: 11px; }
+        .summary tr:last-child td { font-weight: 700; font-size: 10px; }
         .notes { margin-top: 28px; }
         .po-meta { width: 94%; margin: 10px 0 6px 0; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
@@ -191,27 +191,27 @@
         <thead>
         <tr>
             <th style="width:4%;">No</th>
-            <th style="width:34%;">Description</th>
+            <th style="width:36%;">Description</th>
             <th style="width:6%;">Qty</th>
             <th style="width:8%;">Unit</th>
-            <th style="width:14%;">Unit Price</th>
-            <th style="width:14%;">Total</th>
+            <th style="width:20%;">Unit Price</th>
+            <th style="width:16%;">Total</th>
         </tr>
         </thead>
         <tbody>
         @foreach ($invoiceItems as $item)
             <tr>
                 <td class="center" style="width:4%;">{{ $loop->iteration }}</td>
-                <td style="text-align:left; width:34%;">
+                <td style="text-align:left; width:36%;">
                     <div>{{ data_get($item, 'nama') }}</div>
                     @if (!empty(data_get($item, 'rincian')))
-                        <div style="font-size:11px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
+                        <div style="font-size:10px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
                     @endif
                 </td>
                 <td class="center" style="width:6%;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
                 <td class="center" style="width:8%;">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
-                <td class="center nowrap" style="font-size:11px; width:14%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
-                <td class="right-text nowrap" style="font-size:11px; width:14%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
+                <td class="center nowrap" style="font-size:10px; width:20%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                <td class="right-text nowrap" style="font-size:10px; width:16%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
             </tr>
         @endforeach
         </tbody>
