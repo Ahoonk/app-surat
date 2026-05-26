@@ -9,24 +9,24 @@
         .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 24mm 6mm 2mm; box-sizing: border-box; }
         .bg-layer { position: fixed; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; background-position: top center; z-index: 0; opacity: 1; }
         .head { display: table; width: 100%; border-bottom: 1px solid #000; padding-bottom: 12px; }
-        .block-90 { width: 94%; margin-left: auto; margin-right: auto; }
+        .block-90 { width: 92%; margin-left: 3%; margin-right: auto; }
         .left, .right { display: table-cell; vertical-align: top; }
         .right { text-align: right; }
         .inv-meta { font-size: 10px; line-height: 1.35; }
         .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
-        .main-table { width: 94%; margin: 18px auto 0; }
+        .main-table { width: 92%; margin: 18px auto 0 3%; }
         th, td { border: 1px solid #000; padding: 6px 8px; font-size: 10px; }
         th { text-align: center; }
         .center { text-align: center; }
         .right-text { text-align: right; }
         .nowrap { white-space: nowrap; }
-        .summary-wrap { width: 94%; margin: 12px auto 0; }
+        .summary-wrap { width: 92%; margin: 12px auto 0 3%; }
         .summary { width: 36%; margin-left: auto; margin-top: 0; }
         .summary td { border-left: 0; border-right: 0; }
         .summary tr:last-child td { font-weight: 700; font-size: 10px; }
         .notes { margin-top: 28px; }
-        .po-meta { width: 94%; margin: 10px auto 6px; }
+        .po-meta { width: 92%; margin: 10px auto 6px 3%; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
         .footer-layer { position: fixed; left: 0; right: 0; bottom: 0; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; z-index: 1; }
     </style>
