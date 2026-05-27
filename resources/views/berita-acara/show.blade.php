@@ -184,7 +184,7 @@
 
             <div class="mt-4 ml-8">
                 <p><span class="inline-block w-10 align-top">II.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">PT Aldera Saddatech Karya</span></p>
-                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">Link. Acing Baru RT 001 RW 007, Kelurahan Masigit, Kecamatan Jombang, Kota Cilegon, Provinsi Banten.</span></p>
+                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">Link. Acing Baru RT/RW 001/007, Kelurahan Masigit, Kecamatan Jombang<br>Kota Cilegon Provinsi Banten - 42414</span></p>
                 <p class="mt-1">Yang selanjutnya disebut <strong>PIHAK KEDUA</strong></p>
             </div>
 

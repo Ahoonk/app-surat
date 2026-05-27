@@ -179,7 +179,7 @@
 
     <div style="margin-left: 22px; margin-top: 12px;">
         <div><span class="w-no">II.</span><span class="w-label">Nama</span><span class="w-colon">:</span><span class="w-value">PT Aldera Saddatech Karya</span></div>
-        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">Link. Acing Baru RT 001 RW 007, Kelurahan Masigit, Kecamatan Jombang, Kota Cilegon, Provinsi Banten.</span></div>
+        <div><span class="w-no"></span><span class="w-label">Alamat</span><span class="w-colon">:</span><span class="w-value">Link. Acing Baru RT/RW 001/007, Kelurahan Masigit, Kecamatan Jombang<br>Kota Cilegon Provinsi Banten - 42414</span></div>
         <div style="margin-top: 4px;">Yang selanjutnya disebut <strong>PIHAK KEDUA</strong></div>
     </div>
 
