@@ -156,6 +156,7 @@ class PurchasingOrderController extends Controller
             'invoice_sequence' => $sequence,
             'invoice_number' => $invoiceNumber,
         ]);
+        app(DocumentSnapshotService::class)->refreshPenawaranAndRelatedDocuments($penawaran);
 
         return redirect()->route('invoice.pdf', ['invoice' => $invoice, 'download' => 1]);
     }
@@ -219,6 +220,7 @@ class PurchasingOrderController extends Controller
             'invoice_date' => $validated['invoice_date'],
             'invoice_number' => $invoiceNumber,
         ]);
+        app(DocumentSnapshotService::class)->refreshPenawaranAndRelatedDocuments($penawaran);
 
         return redirect()->route('invoice.pdf', ['invoice' => $invoice, 'download' => 1]);
     }

@@ -295,10 +295,7 @@ class PenawaranController extends Controller
             return $penawaran;
         });
 
-        $penawaran->load('company', 'mitra', 'items', 'user');
-        $penawaran->update([
-            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
-        ]);
+        app(DocumentSnapshotService::class)->refreshPenawaranAndRelatedDocuments($penawaran);
 
         return redirect()->route('penawaran.show', $penawaran)
             ->with('success', 'Surat Penawaran berhasil dibuat.');
@@ -409,10 +406,7 @@ class PenawaranController extends Controller
             $penawaran->items()->createMany($items);
         });
 
-        $penawaran->load('company', 'mitra', 'items', 'user');
-        $penawaran->update([
-            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
-        ]);
+        app(DocumentSnapshotService::class)->refreshPenawaranAndRelatedDocuments($penawaran);
 
         return redirect()->route('penawaran.index')
             ->with('success', 'Surat Penawaran berhasil diperbarui.');
@@ -448,10 +442,7 @@ class PenawaranController extends Controller
             'approved_at' => now(),
         ]);
 
-        $penawaran->load('company', 'mitra', 'items', 'user');
-        $penawaran->update([
-            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
-        ]);
+        app(DocumentSnapshotService::class)->refreshPenawaranAndRelatedDocuments($penawaran);
 
         return redirect()->route('purchasing-order.index')
             ->with('success', 'Penawaran disetujui. Lanjutkan upload dokumen di menu Purchasing Order.');

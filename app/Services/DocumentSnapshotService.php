@@ -10,6 +10,45 @@ use App\Models\SuratJalan;
 
 class DocumentSnapshotService
 {
+    public function refreshPenawaranAndRelatedDocuments(Penawaran $penawaran): void
+    {
+        $penawaran->load([
+            'company',
+            'mitra',
+            'items',
+            'user',
+            'invoices.purchasingOrder',
+            'invoices.suratJalan',
+            'invoices.beritaAcara',
+        ]);
+
+        $penawaran->update([
+            'snapshot_data' => $this->forPenawaran($penawaran),
+        ]);
+
+        foreach ($penawaran->invoices as $invoice) {
+            $invoice->setRelation('penawaran', $penawaran);
+            $invoice->update([
+                'total' => $penawaran->total,
+                'snapshot_data' => $this->forInvoice($invoice),
+            ]);
+
+            if ($invoice->suratJalan) {
+                $invoice->suratJalan->setRelation('invoice', $invoice);
+                $invoice->suratJalan->update([
+                    'snapshot_data' => $this->forSuratJalan($invoice->suratJalan),
+                ]);
+            }
+
+            if ($invoice->beritaAcara) {
+                $invoice->beritaAcara->setRelation('invoice', $invoice);
+                $invoice->beritaAcara->update([
+                    'snapshot_data' => $this->forBeritaAcara($invoice->beritaAcara),
+                ]);
+            }
+        }
+    }
+
     public function forPenawaran(Penawaran $penawaran): array
     {
         $penawaran->loadMissing([
