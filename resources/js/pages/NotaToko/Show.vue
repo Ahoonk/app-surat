@@ -11,16 +11,16 @@
             <p class="mt-2 text-sm text-slate-600">{{ formatDate(notaToko.tanggal) }}</p>
           </div>
 
-          <div class="flex flex-wrap gap-3">
-            <a :href="pdfLink" target="_blank" class="button-primary">Export PDF</a>
-            <a href="/nota-toko" class="button-ghost">Kembali</a>
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <a :href="pdfLink" target="_blank" class="button-primary w-full sm:w-auto">Export PDF</a>
+            <a href="/nota-toko" class="button-ghost w-full sm:w-auto">Kembali</a>
           </div>
         </div>
       </section>
 
       <section class="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <article class="panel p-6">
-          <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 class="text-lg font-semibold text-slate-900">Status Pembayaran</h3>
               <p class="mt-1 text-sm text-slate-500">Status ini bisa diverifikasi oleh admin atau superadmin.</p>
@@ -36,7 +36,7 @@
         </article>
 
         <article class="panel p-6">
-          <div class="flex items-start justify-between gap-4">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h3 class="text-lg font-semibold text-slate-900">Aksi Cepat</h3>
               <p class="mt-1 text-sm text-slate-500">Edit, kirim email, atau verifikasi pembayaran dari sini.</p>
@@ -45,18 +45,18 @@
             <button
               v-if="canVerify && notaToko.payment_status !== 'paid'"
               type="button"
-              class="button-primary"
+              class="button-primary w-full sm:w-auto"
               @click="openVerify"
             >
               Verifikasi Bayar
             </button>
           </div>
 
-          <div class="mt-5 flex flex-wrap gap-3">
-            <a :href="`/nota-toko/${notaToko.id}/edit`" class="button-ghost">Edit</a>
-            <form :action="`/nota-toko/${notaToko.id}/send`" method="POST" @submit="confirmSend">
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
+            <a :href="`/nota-toko/${notaToko.id}/edit`" class="button-ghost w-full">Edit</a>
+            <form :action="`/nota-toko/${notaToko.id}/send`" method="POST" class="w-full" @submit="confirmSend">
               <input type="hidden" name="_token" :value="csrfToken" />
-              <button type="submit" class="button-ghost">Kirim Email</button>
+              <button type="submit" class="button-ghost w-full">Kirim Email</button>
             </form>
           </div>
         </article>
@@ -64,7 +64,7 @@
 
       <section class="panel p-6">
         <h3 class="text-lg font-semibold text-slate-900">Detail Transaksi</h3>
-        <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
           <div class="rounded-2xl bg-slate-50 p-4">
             <p class="text-sm text-slate-500">Customer</p>
             <p class="mt-1 font-medium text-slate-900">{{ notaToko.customer_nama }}</p>
@@ -86,7 +86,7 @@
 
       <section class="panel p-6">
         <h3 class="text-lg font-semibold text-slate-900">Item Nota</h3>
-        <div class="mt-4 overflow-x-auto">
+        <div class="mt-4 hidden md:block overflow-x-auto">
           <table class="w-full min-w-[900px] border-collapse text-sm">
             <thead class="bg-slate-50 text-left text-slate-500">
               <tr>
@@ -109,6 +109,36 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="mt-4 grid gap-4 md:hidden">
+          <article
+            v-for="(item, index) in notaToko.items ?? []"
+            :key="item.id ?? `${item.nama}-${item.qty}`"
+            class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-[11px] uppercase tracking-[0.28em] text-slate-500">Item {{ index + 1 }}</p>
+                <h4 class="mt-1 break-words text-base font-semibold text-slate-900">{{ item.nama }}</h4>
+                <p class="mt-1 text-xs text-slate-500">{{ item.satuan }}</p>
+              </div>
+              <div class="shrink-0 rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                {{ formatCurrency(item.amount) }}
+              </div>
+            </div>
+
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Qty</dt>
+                <dd class="mt-1 font-medium text-slate-900">{{ formatQty(item.qty) }}</dd>
+              </div>
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Unit Price</dt>
+                <dd class="mt-1 font-medium text-slate-900">{{ formatCurrency(item.unit_price) }}</dd>
+              </div>
+            </dl>
+          </article>
         </div>
       </section>
     </div>
