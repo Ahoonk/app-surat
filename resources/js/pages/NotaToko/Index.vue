@@ -12,7 +12,7 @@
               Daftar nota toko, status pembayaran, dan aksi kirim atau verifikasi pembayaran.
             </p>
           </div>
-          <a href="/nota-toko/create" class="button-primary">+ Buat Nota Toko</a>
+          <a href="/nota-toko/create" class="button-primary w-full sm:w-auto">+ Buat Nota Toko</a>
         </div>
       </section>
 
@@ -29,7 +29,7 @@
       </section>
 
       <section class="panel overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full min-w-[1100px] border-collapse text-sm">
             <thead class="bg-slate-50 text-left text-slate-500">
               <tr>
@@ -84,6 +84,68 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="grid gap-4 p-4 md:hidden">
+          <article
+            v-for="item in notaTokos"
+            :key="item.id"
+            class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-[11px] uppercase tracking-[0.28em] text-slate-500">Nota Toko</p>
+                <h3 class="mt-1 truncate text-base font-semibold text-slate-900">{{ item.nomor }}</h3>
+                <p class="mt-1 text-xs text-slate-500">{{ formatDate(item.tanggal) }}</p>
+              </div>
+              <div
+                class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold"
+                :class="item.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'"
+              >
+                {{ item.payment_status === 'paid' ? 'Sudah Dibayar' : 'Belum Dibayar' }}
+              </div>
+            </div>
+
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Customer</dt>
+                <dd class="mt-1 font-medium text-slate-900">{{ item.customer_nama }}</dd>
+              </div>
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Total</dt>
+                <dd class="mt-1 font-medium text-slate-900">{{ formatCurrency(item.total) }}</dd>
+              </div>
+            </dl>
+
+            <div v-if="item.payment_date" class="mt-3 text-xs text-slate-500">
+              Dibayar: {{ formatDate(item.payment_date) }}
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-2">
+              <a :href="`/nota-toko/${item.id}`" class="button-ghost w-full px-3 py-2 text-sm">Preview</a>
+              <a :href="`/nota-toko/${item.id}/edit`" class="button-ghost w-full px-3 py-2 text-sm">Edit</a>
+
+              <form :action="`/nota-toko/${item.id}/send`" method="POST" class="w-full" @submit="confirmSubmit($event, 'Kirim nota toko ke email customer?')">
+                <input type="hidden" name="_token" :value="csrfToken" />
+                <button type="submit" class="button-ghost w-full px-3 py-2 text-sm">Kirim</button>
+              </form>
+
+              <form :action="`/nota-toko/${item.id}`" method="POST" class="col-span-2 w-full" @submit="confirmSubmit($event, 'Hapus nota toko ini?')">
+                <input type="hidden" name="_token" :value="csrfToken" />
+                <input type="hidden" name="_method" value="DELETE" />
+                <button type="submit" class="button-ghost w-full px-3 py-2 text-sm text-red-600">Hapus</button>
+              </form>
+            </div>
+
+            <button
+              v-if="canVerify && item.payment_status !== 'paid'"
+              type="button"
+              class="button-primary mt-3 w-full px-3 py-2 text-sm"
+              @click="openVerify(item)"
+            >
+              Verifikasi
+            </button>
+          </article>
         </div>
       </section>
     </div>
