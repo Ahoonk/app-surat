@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Berita Acara - {{ $beritaAcara->nomor }}</title>
     <style>
-        @page { size: A4 portrait; margin: 15mm; }
-        body { font-family: Arial, sans-serif; font-size: 12px; color: #000; line-height: 1.7; }
+        @page { size: A4 portrait; margin: 0; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #000; line-height: 1.7; margin: 0; }
+        .paper { padding: 145px 15mm 110px 15mm; position: relative; z-index: 2; box-sizing: border-box; }
         .center { text-align: center; }
         .w-no { display: inline-block; width: 28px; vertical-align: top; }
         .w-label { display: inline-block; width: 62px; vertical-align: top; }
@@ -149,7 +150,7 @@
     @endif
 
     @if ($kopAtasAsset)
-        <div style="position: fixed; top: -15mm; left: 0; right: 0; z-index: 1;">
+        <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 1;">
             <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="width: 112%; margin-left: -6%; height: auto; display: block;">
         </div>
     @endif
@@ -161,7 +162,7 @@
     @endif
 @endif
 
-<div style="padding-top: 145px; padding-bottom: 110px; position: relative; z-index: 2;">
+<div class="paper">
     <div class="center" style="margin-bottom: 30px;">
         <h2 style="margin: 0 0 4px; text-decoration: underline;">Berita Acara</h2>
         <div>Nomor : {{ $beritaAcara->nomor }}</div>

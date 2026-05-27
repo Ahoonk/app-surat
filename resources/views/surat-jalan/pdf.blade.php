@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Surat Jalan - {{ $suratJalan->nomor }}</title>
     <style>
-        @page { size: A4 portrait; margin: 15mm; }
-        body { font-family: Arial, sans-serif; font-size: 12px; color: #000; }
+        @page { size: A4 portrait; margin: 0; }
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #000; margin: 0; }
+        .paper { padding: 145px 15mm 110px 15mm; position: relative; z-index: 2; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #000; padding: 6px 8px; }
         th { text-align: center; }
@@ -114,7 +115,7 @@
         @endif
 
         @if ($kopAtasAsset)
-            <div style="position: fixed; top: -15mm; left: 0; right: 0; z-index: 1;">
+            <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 1;">
                 <img src="{{ $kopAtasAsset }}" alt="Kop Atas" style="width: 112%; margin-left: -6%; height: auto; display: block;">
             </div>
         @endif
@@ -126,7 +127,7 @@
         @endif
     @endif
 
-    <div style="padding-top: 145px; padding-bottom: 110px; position: relative; z-index: 2;">
+    <div class="paper">
     <div style="text-align:center;">
         <h2 style="margin:0;">SURAT JALAN</h2>
         <div style="margin-top:6px;">No: {{ $suratJalan->nomor }}</div>
