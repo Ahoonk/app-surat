@@ -73,14 +73,14 @@
               <input name="tanggal_po" type="date" class="input" required />
             </label>
 
-            <div class="flex flex-wrap items-end gap-2">
-              <button type="submit" class="button-primary">Upload</button>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <button type="submit" class="button-primary w-full sm:w-auto">Upload</button>
               <button
                 type="submit"
                 :formaction="`/purchasing-order/${penawaran.id}/cancel`"
                 formmethod="POST"
                 formnovalidate
-                class="button-ghost"
+                class="button-ghost w-full sm:w-auto"
                 @click="confirmAction($event, 'Batalkan approval dan kembalikan ke submitted?')"
               >
                 Cancel
@@ -96,7 +96,7 @@
           <p class="mt-1 text-sm text-slate-500">Dokumen yang sudah diupload ditampilkan di sini bersama invoice terakhirnya.</p>
         </div>
 
-        <div class="mt-6 overflow-x-auto">
+        <div class="hidden lg:block mt-6 overflow-x-auto">
           <table class="w-full min-w-[1100px] border-collapse text-sm">
             <thead class="bg-slate-50 text-left text-slate-500">
               <tr>
@@ -150,6 +150,81 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="mt-6 grid gap-4 lg:hidden">
+          <article
+            v-for="penawaran in existingData"
+            :key="penawaran.id"
+            class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-[11px] uppercase tracking-[0.28em] text-slate-500">Nomor Penawaran</p>
+                <h4 class="mt-1 break-words text-base font-semibold text-slate-900">{{ penawaran.nomor }}</h4>
+                <p class="mt-1 text-sm text-slate-500">{{ penawaran.jenis_kontrak }}</p>
+              </div>
+              <div class="shrink-0 rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                {{ latestInvoice(penawaran) ? 'Ada Invoice' : 'Belum' }}
+              </div>
+            </div>
+
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">PO</dt>
+                <dd class="mt-1 break-words font-medium text-slate-900">
+                  {{ penawaran.purchasingOrder?.nomor_po ?? '-' }}
+                </dd>
+              </div>
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Tanggal</dt>
+                <dd class="mt-1 font-medium text-slate-900">
+                  {{ formatDate(penawaran.purchasingOrder?.tanggal_po) }}
+                </dd>
+              </div>
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Dokumen</dt>
+                <dd class="mt-1 font-medium text-slate-900">
+                  <a
+                    v-if="penawaran.purchasingOrder?.dokumen_path"
+                    :href="storageLink(penawaran.purchasingOrder.dokumen_path)"
+                    target="_blank"
+                    class="text-cyan-700"
+                  >
+                    {{ penawaran.purchasingOrder.dokumen_name }}
+                  </a>
+                  <span v-else>-</span>
+                </dd>
+              </div>
+              <div class="rounded-2xl bg-slate-50 p-3">
+                <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Invoice</dt>
+                <dd class="mt-1 font-medium text-slate-900">
+                  <template v-if="latestInvoice(penawaran)">
+                    <div class="break-words">{{ latestInvoice(penawaran).nomor }}</div>
+                    <div class="text-xs text-slate-500">{{ formatDate(latestInvoice(penawaran).tanggal) }}</div>
+                  </template>
+                  <span v-else>-</span>
+                </dd>
+              </div>
+            </dl>
+
+            <div class="mt-4">
+              <template v-if="!latestInvoice(penawaran)">
+                <form :action="`/purchasing-order/${penawaran.id}/create-invoice`" method="POST" class="w-full">
+                  <input type="hidden" name="_token" :value="csrfToken" />
+                  <button type="submit" class="button-ghost w-full px-3 py-2 text-sm">Cetak Invoice</button>
+                </form>
+              </template>
+              <template v-else-if="penawaran.jenis_kontrak === 'kontrak'">
+                <button type="button" class="button-ghost w-full px-3 py-2 text-sm" @click="openNextInvoice(penawaran)">
+                  Cetak Invoice Berikutnya
+                </button>
+              </template>
+              <span v-else class="block rounded-2xl bg-emerald-50 px-4 py-3 text-center text-sm font-medium text-emerald-700">
+                Selesai
+              </span>
+            </div>
+          </article>
         </div>
       </section>
     </div>
