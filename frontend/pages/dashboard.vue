@@ -31,8 +31,8 @@
             </div>
           </div>
 
-          <p class="mt-3 text-sm leading-6 text-slate-200/80">
-            {{ session?.company?.address ?? '-' }}
+          <p class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-200/80">
+            {{ companyAddress }}
           </p>
 
           <div class="mt-5 grid grid-cols-2 gap-3">
@@ -140,6 +140,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { formatCurrency } from '~/utils/format'
 import type { DashboardResponse } from '~/types/api'
 
@@ -279,4 +280,12 @@ function resolveCompanyLogo(logo: string | null | undefined) {
 
   return `/storage/${normalized}`
 }
+
+const companyAddress = computed(() => {
+  if (session.value?.company?.name === 'PT Aldera Saddatech Karya') {
+    return 'Link. Acing Baru RT/RW 001/007, Kelurahan Masigit, Kecamatan Jombang\nKota Cilegon Provinsi Banten - 42414'
+  }
+
+  return session.value?.company?.address ?? '-'
+})
 </script>

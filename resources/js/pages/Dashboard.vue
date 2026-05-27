@@ -42,7 +42,7 @@
                             </div>
                         </div>
 
-                        <p class="mt-3 text-sm leading-6 text-slate-300">
+                        <p class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-300">
                             {{ companyAddress || 'Alamat perusahaan belum diisi.' }}
                         </p>
 
@@ -198,7 +198,13 @@ const page = usePage()
 const appName = computed(() => page.props.appName || 'PT ASKARYA')
 const pageTitle = computed(() => `Dashboard | ${appName.value}`)
 const companyName = computed(() => props.company?.name || appName.value)
-const companyAddress = computed(() => props.company?.address || '')
+const companyAddress = computed(() => {
+    if (props.company?.name === 'PT Aldera Saddatech Karya') {
+        return 'Link. Acing Baru RT/RW 001/007, Kelurahan Masigit, Kecamatan Jombang\nKota Cilegon Provinsi Banten - 42414'
+    }
+
+    return props.company?.address || ''
+})
 const companyLogo = computed(() => resolveCompanyLogo(props.company?.logo))
 
 function resolveCompanyLogo(logo) {
