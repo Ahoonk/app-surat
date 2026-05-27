@@ -364,10 +364,8 @@ class PenawaranController extends Controller
             return $penawaran;
         });
 
+        app(DocumentSnapshotService::class)->refreshPenawaranAndRelatedDocuments($penawaran);
         $this->loadPenawaranRelations($penawaran);
-        $penawaran->update([
-            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
-        ]);
 
         return response()->json([
             'message' => 'Surat Penawaran berhasil dibuat.',
@@ -407,10 +405,8 @@ class PenawaranController extends Controller
             $penawaran->items()->createMany($calculated['items']);
         });
 
+        app(DocumentSnapshotService::class)->refreshPenawaranAndRelatedDocuments($penawaran);
         $this->loadPenawaranRelations($penawaran);
-        $penawaran->update([
-            'snapshot_data' => app(DocumentSnapshotService::class)->forPenawaran($penawaran),
-        ]);
 
         return response()->json([
             'message' => 'Surat Penawaran berhasil diperbarui.',
