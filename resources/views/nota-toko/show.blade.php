@@ -2,6 +2,7 @@
 
 @section('content')
 @php
+    $snapshot = $notaToko->snapshot_data ?? [];
     $terbilang = function (int $angka) use (&$terbilang): string {
         $angka = abs($angka);
         $huruf = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
@@ -17,11 +18,13 @@
         if ($angka < 1000000000000000) return $terbilang(intdiv($angka, 1000000000000)) . ' Triliun' . ($angka % 1000000000000 ? ' ' . $terbilang($angka % 1000000000000) : '');
         return (string) $angka;
     };
-    $totalValue = (float) $notaToko->total;
+    $totalValue = (float) data_get($snapshot, 'total', $notaToko->total);
     $totalInt = (int) floor($totalValue);
     $totalSen = (int) round(($totalValue - $totalInt) * 100);
     $terbilangTotal = trim($terbilang($totalInt)) ?: 'Nol';
     $terbilangTotal = $terbilangTotal . ' Rupiah' . ($totalSen > 0 ? ' ' . $terbilang($totalSen) . ' Sen' : '');
+    $paymentStatus = data_get($snapshot, 'payment_status', $notaToko->payment_status ?? 'unpaid');
+    $paymentDate = data_get($snapshot, 'payment_date', $notaToko->payment_date);
     $templateNotaPath = public_path('storage/logos/template-nota.png');
     $templateNotaAsset = file_exists($templateNotaPath)
         ? asset('storage/logos/template-nota.png') . '?v=' . filemtime($templateNotaPath)
@@ -44,16 +47,16 @@
     <div class="mb-4 rounded-xl border bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
             <p class="text-sm text-gray-500">Status Pembayaran</p>
-            @if (($notaToko->payment_status ?? 'unpaid') === 'paid')
+            @if ($paymentStatus === 'paid')
                 <p class="font-semibold text-emerald-600">Sudah Dibayar</p>
                 <p class="text-xs text-gray-500">
-                    {{ $notaToko->payment_date ? \Illuminate\Support\Carbon::parse($notaToko->payment_date)->translatedFormat('d F Y') : '-' }}
+                    {{ $paymentDate ? \Illuminate\Support\Carbon::parse($paymentDate)->translatedFormat('d F Y') : '-' }}
                 </p>
             @else
                 <p class="font-semibold text-amber-600">Belum Dibayar</p>
             @endif
         </div>
-        @if (($notaToko->payment_status ?? 'unpaid') !== 'paid' && in_array(auth()->user()?->role, ['admin', 'superadmin'], true))
+        @if ($paymentStatus !== 'paid' && in_array(auth()->user()?->role, ['admin', 'superadmin'], true))
             <button type="button"
                     title="Verifikasi Pembayaran"
                     class="verify-nota-btn px-4 py-2 bg-emerald-600 text-white rounded-lg"
@@ -70,18 +73,18 @@
         @endif
         <div class="relative z-10 px-6 pb-6 pt-32 sm:px-8 sm:pb-8 sm:pt-36">
         <div class="text-center mb-3 text-sm leading-4">
-            <p>{{ $notaToko->nomor }}</p>
-            <p>{{ \Illuminate\Support\Carbon::parse($notaToko->tanggal)->translatedFormat('d F Y') }}</p>
+            <p>{{ data_get($snapshot, 'nomor', $notaToko->nomor) }}</p>
+            <p>{{ \Illuminate\Support\Carbon::parse(data_get($snapshot, 'date', $notaToko->tanggal))->translatedFormat('d F Y') }}</p>
         </div>
 
         <div class="mb-3 text-sm leading-4">
             <div class="grid grid-cols-[5.5rem_0.5rem_1fr] gap-x-2">
                 <div class="font-semibold">Customer</div>
                 <div>:</div>
-                <div>{{ $notaToko->customer_nama }}</div>
+                <div>{{ data_get($snapshot, 'customer_name', $notaToko->customer_nama) }}</div>
                 <div class="font-semibold">Alamat</div>
                 <div>:</div>
-                <div>{{ $notaToko->alamat }}</div>
+                <div>{{ data_get($snapshot, 'address', $notaToko->alamat) }}</div>
                 <div class="font-semibold">Payment</div>
                 <div>:</div>
                 <div>2950701709 (BCA) - Aldera Saddatech Karya</div>
@@ -101,14 +104,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($notaToko->items as $item)
+                    @foreach (data_get($snapshot, 'items', $notaToko->items) as $item)
                         <tr>
                             <td class="border px-3 py-2 text-center">{{ $loop->iteration }}</td>
-                            <td class="border px-3 py-2 break-words">{{ $item->nama }}</td>
-                            <td class="border px-3 py-2 text-center">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
-                            <td class="border px-3 py-2 text-center">{{ $item->satuan }}</td>
-                            <td class="border px-3 py-2 text-right">Rp {{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                            <td class="border px-3 py-2 text-right">Rp {{ number_format($item->amount, 2, ',', '.') }}</td>
+                            <td class="border px-3 py-2 break-words">{{ data_get($item, 'nama') }}</td>
+                            <td class="border px-3 py-2 text-center">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
+                            <td class="border px-3 py-2 text-center">{{ data_get($item, 'satuan') }}</td>
+                            <td class="border px-3 py-2 text-right">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                            <td class="border px-3 py-2 text-right">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -132,19 +135,19 @@
                             <div class="italic mt-1 break-words">{{ $terbilangTotal }}</div>
                             <div class="mt-3">
                                 <p><strong>Keterangan:</strong></p>
-                                <p class="whitespace-pre-line break-words">{{ $notaToko->keterangan ?: '-' }}</p>
+                                <p class="whitespace-pre-line break-words">{{ data_get($snapshot, 'notes', $notaToko->keterangan ?: '-') }}</p>
                             </div>
                         </td>
                         <td></td>
                         <td></td>
                         <td class="px-2 py-0 text-sm border-b border-gray-200">Subtotal</td>
-                        <td class="px-2 py-0 text-sm text-right tabular-nums border-b border-gray-200">Rp {{ number_format($notaToko->subtotal, 2, ',', '.') }}</td>
+                        <td class="px-2 py-0 text-sm text-right tabular-nums border-b border-gray-200">Rp {{ number_format((float) data_get($snapshot, 'subtotal', $notaToko->subtotal), 2, ',', '.') }}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td></td>
                         <td class="px-2 py-0 text-sm font-semibold">Total</td>
-                        <td class="px-2 py-0 text-sm font-semibold text-right tabular-nums">Rp {{ number_format($notaToko->total, 2, ',', '.') }}</td>
+                        <td class="px-2 py-0 text-sm font-semibold text-right tabular-nums">Rp {{ number_format((float) data_get($snapshot, 'total', $notaToko->total), 2, ',', '.') }}</td>
                     </tr>
                 </tbody>
             </table>

@@ -2,6 +2,80 @@
 
 @section('content')
 @php
+    $toDataUri = static function (string $path): ?string {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if ($ext === 'pdf') {
+            if (!class_exists(\Imagick::class)) {
+                return null;
+            }
+
+            try {
+                $imagick = new \Imagick();
+                $imagick->setResolution(300, 300);
+                $imagick->readImage($path . '[0]');
+                $imagick->setImageFormat('png');
+
+                return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            $gsBinary = trim((string) shell_exec('command -v gs 2>/dev/null'));
+            if ($gsBinary !== '') {
+                $tmpDir = storage_path('app/template-previews');
+                if (!is_dir($tmpDir)) {
+                    @mkdir($tmpDir, 0775, true);
+                }
+
+                $prefix = tempnam($tmpDir, 'pdf-');
+                if ($prefix !== false) {
+                    $pngPath = $prefix . '.png';
+                    @unlink($prefix);
+
+                    $cmd = escapeshellarg($gsBinary)
+                        . ' -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pngalpha -r300 -dFirstPage=1 -dLastPage=1 -sOutputFile='
+                        . escapeshellarg($pngPath) . ' ' . escapeshellarg($path) . ' 2>&1';
+
+                    $output = [];
+                    $exitCode = 0;
+                    @exec($cmd, $output, $exitCode);
+
+                    if ($exitCode === 0 && file_exists($pngPath)) {
+                        $binary = file_get_contents($pngPath);
+                        @unlink($pngPath);
+
+                        if ($binary !== false) {
+                            return 'data:image/png;base64,' . base64_encode($binary);
+                        }
+                    }
+
+                    @unlink($pngPath);
+                }
+            }
+
+            return null;
+        }
+
+        $mime = match ($ext) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => null,
+        };
+
+        if (!$mime) {
+            return null;
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+    };
+    $snapshot = $beritaAcara->snapshot_data ?? [];
     $invoice = $beritaAcara->invoice;
     $penawaran = $invoice?->penawaran;
     $po = $invoice?->purchasingOrder;
@@ -9,22 +83,25 @@
     $mitraTemplatePath = $mitra?->template_berita_acara_path
         ? public_path('storage/' . $mitra->template_berita_acara_path)
         : null;
-    $mitraTemplateAsset = $mitraTemplatePath && file_exists($mitraTemplatePath)
-        ? asset('storage/' . $mitra->template_berita_acara_path) . '?v=' . filemtime($mitraTemplatePath)
+    $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran?->company_id, 'berita_acara');
+    $companyTemplateAsset = $companyTemplatePath
+        ? $toDataUri(public_path('storage/' . $companyTemplatePath))
         : null;
-    $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? asset('storage/logos/kopatas.png') : null;
-    $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah.png')) ? asset('storage/logos/kopbawah.png') : null;
+    $documentTemplateAsset = $mitraTemplateAsset ?: $companyTemplateAsset;
+    $kopAtasAsset = file_exists(public_path('storage/logos/kopatas.png')) ? $toDataUri(public_path('storage/logos/kopatas.png')) : null;
+    $kopBawahAsset = file_exists(public_path('storage/logos/kopbawah.png')) ? $toDataUri(public_path('storage/logos/kopbawah.png')) : null;
     $bgPrimaryPath = public_path('storage/logos/backgroud-template.png');
     $bgFallbackPath = public_path('storage/logos/background-template.png');
     $bgAsset = null;
     if (file_exists($bgPrimaryPath)) {
-        $bgAsset = asset('storage/logos/backgroud-template.png') . '?v=' . filemtime($bgPrimaryPath);
+        $bgAsset = $toDataUri($bgPrimaryPath);
     } elseif (file_exists($bgFallbackPath)) {
-        $bgAsset = asset('storage/logos/background-template.png') . '?v=' . filemtime($bgFallbackPath);
+        $bgAsset = $toDataUri($bgFallbackPath);
     }
     $previewPaperStyle = 'width:100%;max-width:794px;min-height:1123px;';
     $previewContentStyle = 'padding:170px 15mm 110px 15mm;position:relative;z-index:2;';
-    $tanggalSource = $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
+    $tanggalSource = data_get($snapshot, 'city_date_manual') ?: $beritaAcara->kota_tanggal_manual ?: $beritaAcara->tanggal;
     $tanggalObj = \Illuminate\Support\Carbon::parse($tanggalSource);
     $hariMap = [
         'Monday' => 'Senin',
@@ -75,8 +152,8 @@
     </div>
 
     <div class="mx-auto bg-white rounded-2xl shadow-xl relative overflow-hidden" style="{{ $previewPaperStyle }}">
-        @if ($mitraTemplateAsset)
-            <div style="position:absolute;inset:0;background-image:url('{{ $mitraTemplateAsset }}');background-repeat:no-repeat;background-position:top center;background-size:100% 100%;z-index:0;"></div>
+        @if ($documentTemplateAsset)
+            <div style="position:absolute;inset:0;background-image:url('{{ $documentTemplateAsset }}');background-repeat:no-repeat;background-position:top center;background-size:100% 100%;z-index:0;"></div>
         @else
             @if ($bgAsset)
                 <div style="position:absolute;inset:0;background-image:url('{{ $bgAsset }}');background-repeat:no-repeat;background-position:center 36%;background-size:50% auto;z-index:0;"></div>
@@ -93,15 +170,15 @@
         <div class="max-w-4xl mx-auto text-[16px] leading-7">
             <div class="text-center mb-10">
                 <h2 class="text-2xl font-bold underline mb-1">Berita Acara</h2>
-                <p>Nomor : {{ $beritaAcara->nomor }}</p>
-                <p>Perihal : {{ $beritaAcara->perihal ?: '-' }}</p>
+                <p>Nomor : {{ data_get($snapshot, 'nomor', $beritaAcara->nomor) }}</p>
+                <p>Perihal : {{ data_get($snapshot, 'subject', $beritaAcara->perihal ?: '-') }}</p>
             </div>
 
             <p>Pada hari ini, {{ $tanggalDeskriptif }},&nbsp;&nbsp;yang bertanda tangan dibawah ini</p>
 
             <div class="mt-4 ml-8">
-                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-' }}</span></p>
-                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ $penawaran?->to_address ?? '-' }}</span></p>
+                <p><span class="inline-block w-10 align-top">I.</span><span class="inline-block w-20 align-top">Nama</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ data_get($snapshot, 'customer_name', $penawaran?->to_company ?? $penawaran?->customer_nama ?? '-') }}</span></p>
+                <p><span class="inline-block w-10 align-top"></span><span class="inline-block w-20 align-top">Alamat</span><span class="inline-block w-3 align-top">:</span><span class="inline-block align-top w-[calc(100%-8.5rem)]">{{ data_get($snapshot, 'customer_address', $penawaran?->to_address ?? '-') }}</span></p>
                 <p class="mt-1">Yang selanjutnya disebut <strong>PIHAK PERTAMA</strong></p>
             </div>
 
@@ -112,8 +189,8 @@
             </div>
 
             <p class="mt-6">
-                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ $po?->nomor_po ?? '-' }}, PIHAK KEDUA telah
-                melaksanakan pekerjaan untuk PIHAK PERTAMA {{ $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.' }}
+                Berdasarkan Surat Perjanjian Kerjasama Nomor : {{ data_get($snapshot, 'po_number', $po?->nomor_po ?? '-') }}, PIHAK KEDUA telah
+                melaksanakan pekerjaan untuk PIHAK PERTAMA {{ data_get($snapshot, 'closing_note', $beritaAcara->keterangan_akhir ?: 'sesuai kesepakatan para pihak.') }}
             </p>
 
             <p class="mt-3">Demikian Berita Acara ini dibuat dan dapat digunakan sebagai mana mestinya.</p>

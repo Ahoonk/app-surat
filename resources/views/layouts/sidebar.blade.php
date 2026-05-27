@@ -1,147 +1,98 @@
-<div class="w-64 bg-gradient-to-b from-blue-950 via-blue-900 to-blue-800 
-            text-blue-100 h-full min-h-screen lg:min-h-0 flex flex-col shadow-2xl">
 @php
+    $appName = config('app.name', 'PT ASKARYA');
+    $user = auth()->user();
+    $brandLogo = asset('storage/logos/aldera.png');
+
     $menuClass = function (string ...$patterns) {
         $isActive = request()->routeIs(...$patterns);
+
         return $isActive
-            ? 'flex items-center px-4 py-2 rounded-lg bg-white/15 text-white font-medium border-l-4 border-blue-400'
-            : 'flex items-center px-4 py-2 rounded-lg hover:bg-white/10 transition-all duration-300 hover:translate-x-1';
+            ? 'flex items-center gap-3 rounded-2xl border border-cyan-400/30 bg-white/10 px-4 py-3 text-white shadow-lg shadow-cyan-950/20'
+            : 'flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-200 transition hover:bg-white/10 hover:text-white';
     };
 @endphp
 
-   <!-- COMPANY HEADER -->
-<div class="p-6 border-b border-blue-700/40">
-
-    <div class="flex items-center gap-4">
-
-        <!-- LOGO BULAT -->
-       <div class="w-16 h-16 flex items-center justify-center 
-            bg-white rounded-full shadow-md shrink-0">
-    <img src="{{ asset('storage/logos/aldera.png') }}"
-         class="h-11 w-11 object-contain"
-         alt="Logo">
-</div>
-
-        <!-- TEXT -->
-        <div class="leading-tight">
-            <div class="text-base font-semibold text-white">
-                PT Aldera Saddatech Karya
+<div class="flex h-full min-h-screen flex-col bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800 text-slate-100 shadow-2xl">
+    <div class="border-b border-white/10 p-6">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-lg">
+                <img src="{{ $brandLogo }}" class="h-10 w-10 object-contain" alt="Logo PT ASKARYA">
             </div>
 
-            <div class="text-sm text-blue-200 mt-1">
-                {{ auth()->user()->name }}
-            </div>
-            <div class="text-xs text-blue-300/80 mt-1 capitalize">
-                {{ auth()->user()->role ?? 'admin' }}
+            <div class="min-w-0">
+                <p class="text-[11px] uppercase tracking-[0.35em] text-cyan-200/70">Admin Workspace</p>
+                <h2 class="mt-1 truncate text-lg font-semibold text-white">{{ $appName }}</h2>
+                <p class="truncate text-sm text-slate-300">{{ $user?->name ?? 'Guest' }}</p>
+                <p class="mt-1 text-xs uppercase tracking-[0.25em] text-cyan-200/60">{{ $user?->role ?? 'admin' }}</p>
             </div>
         </div>
-
     </div>
 
-</div>
-
-    <!-- MENU -->
-    <div class="flex-1 overflow-y-auto px-4 py-8 space-y-8 text-sm">
-
-        <!-- DASHBOARD -->
+    <nav class="flex-1 space-y-8 overflow-y-auto px-4 py-6 text-sm">
         <div>
-            <a href="{{ route('dashboard') }}"
-               class="{{ $menuClass('dashboard') }}">
-                Dashboard
+            <p class="mb-3 px-2 text-[11px] uppercase tracking-[0.35em] text-slate-400">Overview</p>
+            <a href="{{ route('dashboard') }}" class="{{ $menuClass('dashboard') }}">
+                <span>Dashboard</span>
             </a>
         </div>
 
-        <!-- TRANSAKSI -->
         <div>
-            <div class="text-xs uppercase text-blue-300/70 mb-3 tracking-widest">
-                Transaksi
-            </div>
-
+            <p class="mb-3 px-2 text-[11px] uppercase tracking-[0.35em] text-slate-400">Transaksi</p>
             <div class="space-y-2">
-
-                <a href="{{ route('penawaran.index') }}"
-                   class="{{ $menuClass('penawaran.*') }}">
-                    Surat Penawaran
+                <a href="{{ route('penawaran.index') }}" class="{{ $menuClass('penawaran.*') }}">
+                    <span>Surat Penawaran</span>
                 </a>
-
-                <a href="{{ route('purchasing-order.index') }}"
-                   class="{{ $menuClass('purchasing-order.*') }}">
-                    Purchasing Order
+                <a href="{{ route('purchasing-order.index') }}" class="{{ $menuClass('purchasing-order.*') }}">
+                    <span>Purchasing Order</span>
                 </a>
-
-                <a href="{{ route('invoice.index') }}"
-                   class="{{ $menuClass('invoice.*') }}">
-                    Invoice
+                <a href="{{ route('invoice.index') }}" class="{{ $menuClass('invoice.*') }}">
+                    <span>Invoice</span>
                 </a>
-
-                <a href="{{ route('faktur-pajak.index') }}"
-                   class="{{ $menuClass('faktur-pajak.*') }}">
-                    Faktur Pajak
+                <a href="{{ route('faktur-pajak.index') }}" class="{{ $menuClass('faktur-pajak.*') }}">
+                    <span>Faktur Pajak</span>
                 </a>
-
-                <a href="{{ route('surat-jalan.index') }}"
-                   class="{{ $menuClass('surat-jalan.*') }}">
-                    Surat Jalan
+                <a href="{{ route('surat-jalan.index') }}" class="{{ $menuClass('surat-jalan.*') }}">
+                    <span>Surat Jalan</span>
                 </a>
-
-                <a href="{{ route('berita-acara.index') }}"
-                   class="{{ $menuClass('berita-acara.*') }}">
-                    Berita Acara
+                <a href="{{ route('berita-acara.index') }}" class="{{ $menuClass('berita-acara.*') }}">
+                    <span>Berita Acara</span>
                 </a>
-
-                <a href="{{ route('nota-toko.index') }}"
-                   class="{{ $menuClass('nota-toko.*') }}">
-                    Nota Toko
+                <a href="{{ route('nota-toko.index') }}" class="{{ $menuClass('nota-toko.*') }}">
+                    <span>Nota Toko</span>
                 </a>
-
-                <a href="{{ route('simulasi-pembiayaan.index') }}"
-                   class="{{ $menuClass('simulasi-pembiayaan.*') }}">
-                    Simulasi Pembiayaan
+                <a href="{{ route('simulasi-pembiayaan.index') }}" class="{{ $menuClass('simulasi-pembiayaan.*') }}">
+                    <span>Simulasi Pembiayaan</span>
                 </a>
-
             </div>
         </div>
 
-        <!-- MASTER -->
         <div>
-            <div class="text-xs uppercase text-blue-300/70 mb-3 tracking-widest">
-                Master Data
-            </div>
-
+            <p class="mb-3 px-2 text-[11px] uppercase tracking-[0.35em] text-slate-400">Master Data</p>
             <div class="space-y-2">
-
-                <a href="{{ route('customers.index') }}"
-                   class="{{ $menuClass('customers.*') }}">
-                    Customer
+                <a href="{{ route('customers.index') }}" class="{{ $menuClass('customers.*') }}">
+                    <span>Customer</span>
                 </a>
-
-                <a href="{{ route('mitra.index') }}"
-                   class="{{ $menuClass('mitra.*') }}">
-                    Daftar Mitra
+                <a href="{{ route('mitra.index') }}" class="{{ $menuClass('mitra.*') }}">
+                    <span>Mitra</span>
                 </a>
-
-                @if(auth()->user()?->isSuperAdmin())
-                    <a href="{{ route('users.index') }}"
-                       class="{{ $menuClass('users.*') }}">
-                        Manajemen User
+                <a href="{{ route('document-templates.index') }}" class="{{ $menuClass('document-templates.*') }}">
+                    <span>Template Dokumen</span>
+                </a>
+                @if ($user?->isSuperAdmin())
+                    <a href="{{ route('users.index') }}" class="{{ $menuClass('users.*') }}">
+                        <span>Manajemen User</span>
                     </a>
                 @endif
-
             </div>
         </div>
+    </nav>
 
-    </div>
-
-    <!-- LOGOUT -->
-    <div class="p-5 border-t border-blue-700/40">
+    <div class="border-t border-white/10 p-5">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button class="w-full text-left px-4 py-2 rounded-lg
-                           hover:bg-red-500 hover:text-white
-                           transition-all duration-300">
+            <button class="button-ghost w-full justify-center border-white/10 bg-white/5 text-white hover:bg-white/10">
                 Logout
             </button>
         </form>
     </div>
-
 </div>

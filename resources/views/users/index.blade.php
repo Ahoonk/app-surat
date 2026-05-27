@@ -2,123 +2,125 @@
 
 @section('content')
 <div class="space-y-6">
-    @if (session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {{ session('success') }}
+    <section class="panel p-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Admin</p>
+                <h1 class="section-title mt-2">Manajemen User</h1>
+                <p class="mt-3 text-sm text-slate-600">Khusus superadmin untuk membuat, mengubah role, dan menghapus akun.</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                <div class="text-xs uppercase tracking-[0.25em] text-slate-400">Total User</div>
+                <div class="mt-1 text-lg font-semibold text-slate-900">{{ $users->count() }}</div>
+            </div>
         </div>
-    @endif
-    @if (session('status'))
-        <div class="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
-            {{ session('status') }}
-        </div>
+    </section>
+
+    @if ($errors->any())
+        <section class="panel p-6">
+            <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div class="font-semibold">Ada data yang belum valid.</div>
+                <ul class="mt-2 list-disc space-y-1 pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </section>
     @endif
 
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-800">Manajemen User</h1>
-        <p class="text-sm text-gray-500 mt-1">Khusus superadmin.</p>
-    </div>
+    <section class="panel p-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900">Tambah User</h2>
+                <p class="mt-1 text-sm text-slate-500">Form ini langsung tersambung ke controller lama, hanya tampilannya yang baru.</p>
+            </div>
+        </div>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Tambah User</h2>
-        <form action="{{ route('users.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+        <form action="{{ route('users.store') }}" method="POST" class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             @csrf
-            <div>
-                <label class="block text-sm mb-1">Nama</label>
-                <input type="text" name="name" required class="w-full border rounded-lg px-3 py-2">
-            </div>
-            <div>
-                <label class="block text-sm mb-1">Email</label>
-                <input type="email" name="email" required class="w-full border rounded-lg px-3 py-2">
-            </div>
-            <div>
-                <label class="block text-sm mb-1">Password</label>
-                <input type="password" name="password" required class="w-full border rounded-lg px-3 py-2">
-            </div>
-            <div>
-                <label class="block text-sm mb-1">Role</label>
-                <select name="role" class="w-full border rounded-lg px-3 py-2">
-                    <option value="admin">Admin</option>
-                    <option value="superadmin">Superadmin</option>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Nama</span>
+                <input type="text" name="name" value="{{ old('name') }}" required class="input">
+            </label>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Email</span>
+                <input type="email" name="email" value="{{ old('email') }}" required class="input">
+            </label>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Password</span>
+                <input type="password" name="password" required class="input">
+            </label>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Role</span>
+                <select name="role" class="input">
+                    <option value="admin" @selected(old('role', 'admin') === 'admin')>Admin</option>
+                    <option value="superadmin" @selected(old('role') === 'superadmin')>Superadmin</option>
                 </select>
-            </div>
-            <div>
-                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan</button>
+            </label>
+            <div class="flex items-end">
+                <button type="submit" class="button-primary w-full">Simpan User</button>
             </div>
         </form>
-    </div>
+    </section>
 
-    <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
-        <h2 class="text-lg font-semibold mb-4">Daftar User</h2>
-        <div class="space-y-3 md:hidden">
-            @foreach ($users as $user)
-                <div class="border rounded-lg p-4 text-sm">
-                    <div class="font-semibold">{{ $user->name }}</div>
-                    <div class="text-gray-600">{{ $user->email }}</div>
-                    <div class="capitalize mt-1">Role: {{ $user->role }}</div>
-                    <form action="{{ route('users.update', $user) }}" method="POST" class="mt-3 space-y-2">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="name" value="{{ $user->name }}">
-                        <input type="hidden" name="email" value="{{ $user->email }}">
-                        <select name="role" class="w-full border rounded-lg px-3 py-2">
-                            <option value="admin" @selected($user->role === 'admin')>Admin</option>
-                            <option value="superadmin" @selected($user->role === 'superadmin')>Superadmin</option>
-                        </select>
-                        <input type="password" name="password" placeholder="Password baru (opsional)" class="w-full border rounded-lg px-3 py-2">
-                        <button type="submit" title="Ubah" class="action-icon action-icon-emerald text-white" style="background-color:#059669;color:#fff;">✏️</button>
-                    </form>
-                    <form action="{{ route('users.destroy', $user) }}" method="POST" class="mt-2" onsubmit="return confirm('Hapus user ini?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" title="Hapus" class="action-icon action-icon-red">🗑️</button>
-                    </form>
+    <section class="grid gap-4 xl:grid-cols-2">
+        @forelse ($users as $user)
+            <article class="panel p-6">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Akun</p>
+                        <h3 class="mt-2 text-xl font-semibold text-slate-900">{{ $user->name }}</h3>
+                        <p class="mt-1 text-sm text-slate-500">{{ $user->email }}</p>
+                    </div>
+                    <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+                        <div class="text-xs uppercase tracking-[0.25em] text-slate-400">Role</div>
+                        <div class="mt-1 font-semibold capitalize text-slate-900">{{ $user->role }}</div>
+                    </div>
                 </div>
-            @endforeach
-        </div>
 
-        <table class="hidden md:table w-full text-sm">
-            <thead>
-                <tr class="border-b">
-                    <th class="py-3 pr-4 text-left">Nama</th>
-                    <th class="py-3 pr-4 text-left">Email</th>
-                    <th class="py-3 pr-4 text-left">Role</th>
-                    <th class="py-3 pr-4 text-left">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($users as $user)
-                    <tr class="border-b">
-                        <form action="{{ route('users.update', $user) }}" method="POST">
-                            @csrf
-                            @method('PUT')
-                            <td class="py-3 pr-4">
-                                <input type="text" name="name" value="{{ $user->name }}" required class="w-full border rounded-lg px-3 py-2">
-                            </td>
-                            <td class="py-3 pr-4">
-                                <input type="email" name="email" value="{{ $user->email }}" required class="w-full border rounded-lg px-3 py-2">
-                            </td>
-                            <td class="py-3 pr-4">
-                                <select name="role" class="w-full border rounded-lg px-3 py-2">
-                                    <option value="admin" @selected($user->role === 'admin')>Admin</option>
-                                    <option value="superadmin" @selected($user->role === 'superadmin')>Superadmin</option>
-                                </select>
-                            </td>
-                            <td class="py-3 pr-4">
-                                <div class="flex gap-2 items-center">
-                                    <input type="password" name="password" placeholder="Password baru (opsional)" class="w-44 border rounded-lg px-3 py-2">
-                                    <button type="submit" title="Ubah" class="action-icon action-icon-emerald text-white" style="background-color:#059669;color:#fff;">✏️</button>
-                                </div>
-                        </form>
-                                <form action="{{ route('users.destroy', $user) }}" method="POST" class="mt-2" onsubmit="return confirm('Hapus user ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" title="Hapus" class="action-icon action-icon-red">🗑️</button>
-                                </form>
-                            </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+                <form action="{{ route('users.update', $user) }}" method="POST" class="mt-6 space-y-4">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <label class="block">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Nama</span>
+                            <input type="text" name="name" value="{{ $user->name }}" required class="input">
+                        </label>
+                        <label class="block">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Email</span>
+                            <input type="email" name="email" value="{{ $user->email }}" required class="input">
+                        </label>
+                        <label class="block">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Role</span>
+                            <select name="role" class="input">
+                                <option value="admin" @selected($user->role === 'admin')>Admin</option>
+                                <option value="superadmin" @selected($user->role === 'superadmin')>Superadmin</option>
+                            </select>
+                        </label>
+                        <label class="block">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Password Baru</span>
+                            <input type="password" name="password" placeholder="Opsional" class="input">
+                        </label>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button type="submit" class="button-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+
+                <form action="{{ route('users.destroy', $user) }}" method="POST" class="mt-3" onsubmit="return confirm('Hapus user ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="button-danger">Hapus User</button>
+                </form>
+            </article>
+        @empty
+            <section class="panel p-6">
+                <p class="text-sm text-slate-500">Belum ada user yang terdaftar.</p>
+            </section>
+        @endforelse
+    </section>
 </div>
 @endsection

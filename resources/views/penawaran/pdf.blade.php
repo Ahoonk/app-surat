@@ -36,29 +36,93 @@
 </head>
 <body>
     @php
-        $toDataUri = function ($path) {
-            if (!file_exists($path)) {
+    $toDataUri = function ($path) {
+        if (!file_exists($path)) {
+            return null;
+        }
+
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if ($ext === 'pdf') {
+            if (!class_exists(\Imagick::class)) {
                 return null;
             }
 
-            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-            $mime = match ($ext) {
-                'jpg', 'jpeg' => 'image/jpeg',
-                'gif' => 'image/gif',
-                'webp' => 'image/webp',
-                default => 'image/png',
+            try {
+                $imagick = new \Imagick();
+                $imagick->setResolution(300, 300);
+                $imagick->readImage($path . '[0]');
+                $imagick->setImageFormat('png');
+
+                return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            $gsBinary = trim((string) shell_exec('command -v gs 2>/dev/null'));
+            if ($gsBinary !== '') {
+                $tmpDir = storage_path('app/template-previews');
+                if (!is_dir($tmpDir)) {
+                    @mkdir($tmpDir, 0775, true);
+                }
+
+                $prefix = tempnam($tmpDir, 'pdf-');
+                if ($prefix !== false) {
+                    $pngPath = $prefix . '.png';
+                    @unlink($prefix);
+
+                    $cmd = escapeshellarg($gsBinary)
+                        . ' -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pngalpha -r300 -dFirstPage=1 -dLastPage=1 -sOutputFile='
+                        . escapeshellarg($pngPath) . ' ' . escapeshellarg($path) . ' 2>&1';
+
+                    $output = [];
+                    $exitCode = 0;
+                    @exec($cmd, $output, $exitCode);
+
+                    if ($exitCode === 0 && file_exists($pngPath)) {
+                        $binary = file_get_contents($pngPath);
+                        @unlink($pngPath);
+
+                        if ($binary !== false) {
+                            return 'data:image/png;base64,' . base64_encode($binary);
+                        }
+                    }
+
+                    @unlink($pngPath);
+                }
+            }
+
+            return null;
+        }
+
+        $mime = match ($ext) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+                default => null,
             };
+
+            if (!$mime) {
+                return null;
+            }
 
             $data = base64_encode(file_get_contents($path));
 
             return 'data:' . $mime . ';base64,' . $data;
         };
 
+        $snapshot = $penawaran->snapshot_data ?? [];
         $mitra = $penawaran->mitra;
         $mitraTemplatePath = $mitra?->template_penawaran_path
             ? public_path('storage/' . $mitra->template_penawaran_path)
             : null;
         $mitraTemplateAsset = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+        $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran->company_id, 'penawaran');
+        $companyTemplateAsset = $companyTemplatePath
+            ? $toDataUri(public_path('storage/' . $companyTemplatePath))
+            : null;
+        $documentTemplateAsset = $mitraTemplateAsset ?: $companyTemplateAsset;
 
         $bgPrimary = public_path('storage/logos/background-template.png');
         $bgFallback = public_path('storage/logos/background-tempplate.png');
@@ -68,8 +132,8 @@
         $kopBawahAsset = $toDataUri(public_path('storage/logos/kopbawah-penawaran.png'));
     @endphp
 
-    @if ($mitraTemplateAsset)
-        <div class="bg-layer" style="background-image: url('{{ $mitraTemplateAsset }}'); background-size: 100% 100%; background-position: top center; opacity: 1;"></div>
+    @if ($documentTemplateAsset)
+        <img src="{{ $documentTemplateAsset }}" alt="Template Dokumen" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
     @else
         @if ($bgAsset)
             <div class="bg-layer" style="background-image: url('{{ $bgAsset }}');"></div>
@@ -91,16 +155,16 @@
     <div class="paper content-space">
         <div class="center">
             <div class="title">Surat Penawaran</div>
-            <div class="mt-1">No: {{ $penawaran->nomor }}</div>
+            <div class="mt-1">No: {{ data_get($snapshot, 'nomor', $penawaran->nomor) }}</div>
         </div>
 
         <div class="mt-4 between">
             <div>
-                <div class="mt-1"><strong>To:</strong> <strong>{{ $penawaran->to_company ?? $penawaran->customer_nama }}</strong></div>
-                <div class="mt-1"><strong>At:</strong> {{ $penawaran->to_address ?? '-' }}</div>
+                <div class="mt-1"><strong>To:</strong> <strong>{{ data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama) }}</strong></div>
+                <div class="mt-1"><strong>At:</strong> {{ data_get($snapshot, 'customer_address', $penawaran->to_address ?? '-') }}</div>
             </div>
             <div class="text-right">
-                <div><strong>Tanggal:</strong> {{ \Illuminate\Support\Carbon::parse($penawaran->tanggal)->translatedFormat('d F Y') }}</div>
+                <div><strong>Tanggal:</strong> {{ \Illuminate\Support\Carbon::parse(data_get($snapshot, 'tanggal', $penawaran->tanggal))->translatedFormat('d F Y') }}</div>
             </div>
         </div>
 
@@ -117,19 +181,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($penawaran->items as $item)
+                    @foreach (data_get($snapshot, 'items', $penawaran->items) as $item)
                         <tr>
                             <td style="text-align:center;">{{ $loop->iteration }}</td>
                             <td style="text-align:left;">
-                                <div>{{ $item->nama }}</div>
-                                @if (!empty($item->rincian))
-                                    <div style="font-size:10px; margin-top:4px; white-space: pre-line;">{{ $item->rincian }}</div>
+                                <div>{{ data_get($item, 'nama') }}</div>
+                                @if (!empty(data_get($item, 'rincian')))
+                                    <div style="font-size:10px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
                                 @endif
                             </td>
-                            <td style="text-align:center;">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
-                            <td style="text-align:center;">{{ $item->satuan }}</td>
-                            <td style="text-align:center;">Rp {{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                            <td style="text-align:center;">Rp {{ number_format($item->amount, 2, ',', '.') }}</td>
+                            <td style="text-align:center;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
+                            <td style="text-align:center;">{{ data_get($item, 'satuan') }}</td>
+                            <td style="text-align:center;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                            <td style="text-align:center;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -137,22 +201,25 @@
         </div>
 
         @php
-            $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+            $taxPercent = (float) data_get($snapshot, 'tax_percent', $penawaran->tax_percent ?? 0);
             $divisor = 1 + ($taxPercent / 100);
+            $baseTotal = (float) data_get($snapshot, 'total', $penawaran->total);
             $pph23 = $penawaran->mitra_id
-                ? ($divisor > 0 ? ($penawaran->total / $divisor) * 0.02 : 0)
+                ? ($divisor > 0 ? ($baseTotal / $divisor) * 0.02 : 0)
                 : 0;
-            $netAmount = $penawaran->total - $pph23;
+            $netAmount = $baseTotal - $pph23;
+            $issuerName = data_get($snapshot, 'mitra.name', $penawaran->mitra?->nama ?? 'PT Aldera Saddatech Karya');
+            $creatorName = data_get($snapshot, 'creator_name', auth()->user()->name);
         @endphp
 
         <table class="summary mt-3">
             <tr>
                 <td>Subtotal</td>
-                <td class="right">Rp {{ number_format($penawaran->subtotal, 2, ',', '.') }}</td>
+                <td class="right">Rp {{ number_format((float) data_get($snapshot, 'subtotal', $penawaran->subtotal), 2, ',', '.') }}</td>
             </tr>
             <tr>
-                <td>Pajak ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</td>
-                <td class="right">Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</td>
+                <td>Pajak ({{ number_format($taxPercent, 2, ',', '.') }}%)</td>
+                <td class="right">Rp {{ number_format((float) data_get($snapshot, 'tax_amount', $penawaran->tax_amount), 2, ',', '.') }}</td>
             </tr>
             @if ($penawaran->mitra_id)
                 <tr>
@@ -162,25 +229,21 @@
             @endif
             <tr>
                 <td>{{ $penawaran->mitra_id ? 'Amount (Net)' : 'Total' }}</td>
-                <td class="right">Rp {{ number_format($penawaran->mitra_id ? $netAmount : $penawaran->total, 2, ',', '.') }}</td>
+                <td class="right">Rp {{ number_format($penawaran->mitra_id ? $netAmount : $baseTotal, 2, ',', '.') }}</td>
             </tr>
         </table>
 
         <div class="mt-4">
             <strong>Keterangan:</strong>
-            <div class="mt-1" style="white-space: pre-line;">{{ $penawaran->keterangan ?: '-' }}</div>
+            <div class="mt-1" style="white-space: pre-line;">{{ data_get($snapshot, 'keterangan', $penawaran->keterangan ?: '-') }}</div>
         </div>
-
-        @php
-            $issuerName = $penawaran->mitra?->nama ?? 'PT Aldera Saddatech Karya';
-        @endphp
 
         <div class="ttd-wrap mt-6">
             <div>Hormat kami,</div>
             <div class="mt-1"><strong>{{ $issuerName }}</strong></div>
             <div style="height:70px;"></div>
-            <div style="margin-top:2px;"><strong><u>{{ auth()->user()->name }}</u></strong></div>
-            <div>{{ $penawaran->signature_role ?? 'Authorized Signature' }}</div>
+            <div style="margin-top:2px;"><strong><u>{{ $creatorName }}</u></strong></div>
+            <div>{{ data_get($snapshot, 'signature_role', $penawaran->signature_role ?? 'Authorized Signature') }}</div>
         </div>
     </div>
 </body>

@@ -2,184 +2,115 @@
 
 @section('content')
 <div class="space-y-6">
-    @if (session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {{ session('success') }}
+    <section class="panel p-6">
+        <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Master Data</p>
+                <h1 class="section-title mt-2">Customer</h1>
+                <p class="mt-3 text-sm text-slate-600">Master data customer yang dipakai penawaran dan nota toko.</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+                <div class="text-xs uppercase tracking-[0.25em] text-slate-400">Total Customer</div>
+                <div class="mt-1 text-lg font-semibold text-slate-900">{{ $customers->count() }}</div>
+            </div>
         </div>
+    </section>
+
+    @if ($errors->any())
+        <section class="panel p-6">
+            <div class="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div class="font-semibold">Ada data yang belum valid.</div>
+                <ul class="mt-2 list-disc space-y-1 pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </section>
     @endif
 
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-800">Customer</h1>
-        <p class="text-sm text-gray-500 mt-1">Master data customer.</p>
-    </div>
+    <section class="panel p-6">
+        <h2 class="text-lg font-semibold text-slate-900">Tambah Customer</h2>
+        <p class="mt-1 text-sm text-slate-500">Data baru langsung dipakai oleh alur transaksi yang sudah ada.</p>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Tambah Customer</h2>
-        <form action="{{ route('customers.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+        <form action="{{ route('customers.store') }}" method="POST" class="mt-6 grid gap-4 xl:grid-cols-5">
             @csrf
-            <div>
-                <label class="block text-sm mb-1">Nama Customer</label>
-                <input type="text" name="nama" required class="w-full border rounded-lg px-3 py-2">
-            </div>
-            <div>
-                <label class="block text-sm mb-1">Alamat Customer</label>
-                <input type="text" name="alamat" required class="w-full border rounded-lg px-3 py-2">
-            </div>
-            <div>
-                <label class="block text-sm mb-1">Nomor Handphone</label>
-                <input type="text" name="no_hp" required class="w-full border rounded-lg px-3 py-2">
-            </div>
-            <div>
-                <label class="block text-sm mb-1">Email Customer</label>
-                <input type="email" name="email" required class="w-full border rounded-lg px-3 py-2">
-            </div>
-            <div>
-                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg">Simpan</button>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Nama Customer</span>
+                <input type="text" name="nama" value="{{ old('nama') }}" required class="input">
+            </label>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Alamat Customer</span>
+                <input type="text" name="alamat" value="{{ old('alamat') }}" required class="input">
+            </label>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Nomor Handphone</span>
+                <input type="text" name="no_hp" value="{{ old('no_hp') }}" required class="input">
+            </label>
+            <label class="block">
+                <span class="mb-2 block text-sm font-medium text-slate-700">Email Customer</span>
+                <input type="email" name="email" value="{{ old('email') }}" required class="input">
+            </label>
+            <div class="flex items-end">
+                <button type="submit" class="button-primary w-full">Simpan Customer</button>
             </div>
         </form>
-    </div>
+    </section>
 
-    <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
-        <h2 class="text-lg font-semibold mb-4">Daftar Customer</h2>
-        @if ($customers->isEmpty())
-            <p class="text-sm text-gray-500">Belum ada customer.</p>
-        @else
-            <div class="space-y-3 md:hidden">
-                @foreach ($customers as $customer)
-                    <div class="border rounded-lg p-4 text-sm space-y-2" data-customer-row>
-                        <div class="font-semibold">{{ $customer->nama }}</div>
-                        <div>{{ $customer->alamat }}</div>
-                        <div>{{ $customer->no_hp }}</div>
-                        <div>{{ $customer->email }}</div>
-                        <form id="customer-update-mobile-{{ $customer->id }}" action="{{ route('customers.update', $customer) }}" method="POST" class="space-y-2 customer-update-form">
-                            @csrf
-                            @method('PUT')
-                            <input type="text" name="nama" value="{{ $customer->nama }}" data-original="{{ $customer->nama }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled>
-                            <input type="text" name="alamat" value="{{ $customer->alamat }}" data-original="{{ $customer->alamat }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled>
-                            <input type="text" name="no_hp" value="{{ $customer->no_hp }}" data-original="{{ $customer->no_hp }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled>
-                            <input type="email" name="email" value="{{ $customer->email }}" data-original="{{ $customer->email }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled>
-                        </form>
-                        <div class="action-buttons justify-start gap-2">
-                            <button type="button" title="Edit" class="action-icon action-icon-emerald edit-customer" style="background-color:#059669;color:#fff;">&#9998;</button>
-                            <button type="submit" title="Simpan" class="action-icon action-icon-blue save-customer hidden" form="customer-update-mobile-{{ $customer->id }}">&#128190;</button>
-                            <button type="button" title="Batal" class="action-icon action-icon-gray cancel-customer hidden">&#10006;</button>
-                            <form action="{{ route('customers.destroy', $customer) }}" method="POST" onsubmit="return confirm('Hapus customer ini?')" class="inline-flex">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" title="Hapus" class="action-icon action-icon-red">&#128465;</button>
-                            </form>
-                        </div>
+    <section class="grid gap-4 lg:grid-cols-2">
+        @forelse ($customers as $customer)
+            <article class="panel p-6">
+                <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Customer</p>
+                        <h3 class="mt-2 text-xl font-semibold text-slate-900">{{ $customer->nama }}</h3>
+                        <p class="mt-1 text-sm text-slate-500">{{ $customer->email }}</p>
                     </div>
-                @endforeach
-            </div>
+                    <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                        <div class="text-xs uppercase tracking-[0.25em] text-slate-400">HP</div>
+                        <div class="mt-1 font-semibold text-slate-900">{{ $customer->no_hp }}</div>
+                    </div>
+                </div>
 
-            <table class="hidden md:table w-full text-sm">
-                <thead>
-                    <tr class="border-b">
-                        <th class="py-3 pr-4">Nama</th>
-                        <th class="py-3 pr-4">Alamat</th>
-                        <th class="py-3 pr-4">No. HP</th>
-                        <th class="py-3 pr-4">Email</th>
-                        <th class="py-3 pr-4">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($customers as $customer)
-                        <tr class="border-b" data-customer-row>
-                            <td class="py-3 pr-4">
-                                <input type="text" name="nama" value="{{ $customer->nama }}" data-original="{{ $customer->nama }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled form="customer-update-{{ $customer->id }}">
-                            </td>
-                            <td class="py-3 pr-4">
-                                <input type="text" name="alamat" value="{{ $customer->alamat }}" data-original="{{ $customer->alamat }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled form="customer-update-{{ $customer->id }}">
-                            </td>
-                            <td class="py-3 pr-4">
-                                <input type="text" name="no_hp" value="{{ $customer->no_hp }}" data-original="{{ $customer->no_hp }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled form="customer-update-{{ $customer->id }}">
-                            </td>
-                            <td class="py-3 pr-4">
-                                <input type="email" name="email" value="{{ $customer->email }}" data-original="{{ $customer->email }}" required class="w-full border rounded-lg px-3 py-2 customer-input bg-gray-100 cursor-not-allowed" disabled form="customer-update-{{ $customer->id }}">
-                            </td>
-                            <td class="py-3 pr-4">
-                                <div class="action-buttons justify-start gap-2">
-                                    <button type="button" title="Edit" class="action-icon action-icon-emerald edit-customer" style="background-color:#059669;color:#fff;">&#9998;</button>
-                                    <button type="submit" title="Simpan" class="action-icon action-icon-blue save-customer hidden" form="customer-update-{{ $customer->id }}">&#128190;</button>
-                                    <button type="button" title="Batal" class="action-icon action-icon-gray cancel-customer hidden">&#10006;</button>
-                                    <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline-flex" onsubmit="return confirm('Hapus customer ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" title="Hapus" class="action-icon action-icon-red">&#128465;</button>
-                                    </form>
-                                </div>
-                                <form id="customer-update-{{ $customer->id }}" action="{{ route('customers.update', $customer) }}" method="POST" class="hidden">
-                                    @csrf
-                                    @method('PUT')
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    </div>
+                <form action="{{ route('customers.update', $customer) }}" method="POST" class="mt-6 space-y-4">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <label class="block md:col-span-2">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Nama</span>
+                            <input type="text" name="nama" value="{{ $customer->nama }}" required class="input">
+                        </label>
+                        <label class="block md:col-span-2">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Alamat</span>
+                            <input type="text" name="alamat" value="{{ $customer->alamat }}" required class="input">
+                        </label>
+                        <label class="block">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Nomor Handphone</span>
+                            <input type="text" name="no_hp" value="{{ $customer->no_hp }}" required class="input">
+                        </label>
+                        <label class="block">
+                            <span class="mb-2 block text-sm font-medium text-slate-700">Email</span>
+                            <input type="email" name="email" value="{{ $customer->email }}" required class="input">
+                        </label>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button type="submit" class="button-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+
+                <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="mt-3" onsubmit="return confirm('Hapus customer ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="button-danger">Hapus Customer</button>
+                </form>
+            </article>
+        @empty
+            <section class="panel p-6">
+                <p class="text-sm text-slate-500">Belum ada customer.</p>
+            </section>
+        @endforelse
+    </section>
 </div>
-
-<script>
-    document.querySelectorAll('[data-customer-row]').forEach((row) => {
-        const editButton = row.querySelector('.edit-customer');
-        const saveButton = row.querySelector('.save-customer');
-        const cancelButton = row.querySelector('.cancel-customer');
-        const inputs = row.querySelectorAll('.customer-input');
-        let isEditing = false;
-
-        if (!editButton || !saveButton || !cancelButton || inputs.length === 0) {
-            return;
-        }
-
-        const hasChanges = () => Array.from(inputs).some((input) => {
-            return (input.value ?? '') !== (input.dataset.original ?? '');
-        });
-
-        const updateActionState = () => {
-            if (!isEditing) {
-                saveButton.classList.add('hidden');
-                cancelButton.classList.add('hidden');
-                return;
-            }
-
-            const changed = hasChanges();
-            saveButton.classList.toggle('hidden', !changed);
-            cancelButton.classList.toggle('hidden', !changed);
-        };
-
-        const setEditing = (editing) => {
-            isEditing = editing;
-            inputs.forEach((input) => {
-                input.disabled = !editing;
-                input.classList.toggle('bg-gray-100', !isEditing);
-                input.classList.toggle('cursor-not-allowed', !isEditing);
-            });
-            updateActionState();
-        };
-
-        editButton.addEventListener('click', () => {
-            if (isEditing && !hasChanges()) {
-                setEditing(false);
-                return;
-            }
-            setEditing(true);
-        });
-
-        cancelButton.addEventListener('click', () => {
-            inputs.forEach((input) => {
-                input.value = input.dataset.original || '';
-            });
-            setEditing(false);
-        });
-
-        inputs.forEach((input) => {
-            input.addEventListener('input', updateActionState);
-        });
-
-        updateActionState();
-    });
-</script>
 @endsection

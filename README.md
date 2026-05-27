@@ -21,6 +21,47 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Frontend Terpisah
+
+Repo ini sekarang juga punya scaffold frontend terpisah di folder [`frontend/`](frontend/).
+Backend Laravel tetap berjalan seperti semula, sementara frontend baru bisa dipakai bertahap sebagai consumer API.
+
+Untuk menjalankan frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Deploy VPS
+
+Jalankan dari root repo di server, misalnya `/var/www/app-surat`:
+
+```bash
+cd /var/www/app-surat
+bash deploy.sh
+```
+
+Script deploy akan:
+
+- `git pull origin main`
+- memperbaiki permission `storage/` dan `bootstrap/cache/`
+- menjalankan `composer install --no-dev --optimize-autoloader`
+- build asset Laravel Vite di root
+- build frontend Nuxt di `frontend/` bila folder itu ada
+- menjalankan `optimize`, `config:cache`, `route:cache`, dan `view:cache`
+
+Kalau server belum punya folder `frontend/`, langkah build frontend akan otomatis dilewati.
+Kalau `.env` masih memakai `DB_CONNECTION=sqlite`, script juga akan membuat `database/database.sqlite` jika belum ada.
+
+Kalau kamu pernah menjalankan deploy dengan ownership `www-data` di folder runtime, jalankan sekali:
+
+```bash
+sudo chown -R aldera.saddatech:www-data storage bootstrap/cache
+sudo chown -R aldera.saddatech:aldera.saddatech .git .
+```
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.

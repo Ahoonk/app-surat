@@ -90,25 +90,14 @@
             </div>
 
             <div class="mb-8">
-                <div class="flex items-center justify-between mb-3">
-                    <h2 class="text-lg font-semibold text-gray-800">Item Penawaran</h2>
-                    <button type="button" id="add-item" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">+ Tambah Item</button>
+                <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-800">Item Penawaran</h2>
+                        <p class="text-sm text-gray-500">Tampilan kartu agar nyaman di mobile.</p>
+                    </div>
+                    <button type="button" id="add-item" class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white shadow-sm transition hover:bg-blue-700">+ Tambah Item</button>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm" id="items-table">
-                        <thead>
-                            <tr class="border-b text-left">
-                                <th class="py-3 pr-3">Item</th>
-                                <th class="py-3 pr-3 w-28">Qty</th>
-                                <th class="py-3 pr-3 w-32">Satuan</th>
-                                <th class="py-3 pr-3 w-48">Unit Price (Rp)</th>
-                                <th class="py-3 pr-3 w-48">Amount (Rp)</th>
-                                <th class="py-3 pr-0 w-20">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="item-rows"></tbody>
-                    </table>
-                </div>
+                <div id="item-rows" class="space-y-4"></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -124,17 +113,27 @@
                         <label class="block text-sm font-medium mb-2">Pajak (%)</label>
                         <input type="number" min="0" max="100" step="0.01" name="tax_percent" id="tax-percent" value="{{ old('tax_percent', 11) }}" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-sm">
-                        <div class="p-3 bg-gray-50 rounded-lg border">Subtotal</div>
-                        <div class="p-3 bg-gray-50 rounded-lg border text-right" id="subtotal-display">Rp 0</div>
-                        <div class="p-3 bg-gray-50 rounded-lg border">Pajak</div>
-                        <div class="p-3 bg-gray-50 rounded-lg border text-right" id="tax-display">Rp 0</div>
-                        <div class="p-3 bg-gray-50 rounded-lg border">PPh23 (2%)</div>
-                        <div class="p-3 bg-gray-50 rounded-lg border text-right" id="pph23-display">Rp 0</div>
-                        <div class="p-3 bg-blue-50 rounded-lg border font-semibold">Total</div>
-                        <div class="p-3 bg-blue-50 rounded-lg border text-right font-semibold" id="total-display">Rp 0</div>
-                        <div class="p-3 bg-blue-50 rounded-lg border font-semibold">Amount (Net)</div>
-                        <div class="p-3 bg-blue-50 rounded-lg border text-right font-semibold" id="net-display">Rp 0</div>
+                    <div class="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                        <div class="flex items-center justify-between rounded-lg border bg-gray-50 p-3">
+                            <span>Subtotal</span>
+                            <span id="subtotal-display" class="font-medium">Rp 0</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-lg border bg-gray-50 p-3">
+                            <span>Pajak</span>
+                            <span id="tax-display" class="font-medium">Rp 0</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-lg border bg-gray-50 p-3">
+                            <span>PPh23 (2%)</span>
+                            <span id="pph23-display" class="font-medium">Rp 0</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-lg border bg-blue-50 p-3 font-semibold">
+                            <span>Total</span>
+                            <span id="total-display">Rp 0</span>
+                        </div>
+                        <div class="flex items-center justify-between rounded-lg border bg-blue-50 p-3 font-semibold sm:col-span-2">
+                            <span>Amount (Net)</span>
+                            <span id="net-display">Rp 0</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -166,34 +165,49 @@
 
     function rowTemplate(index) {
         return `
-            <tr class="border-b item-row">
-                <td class="py-2 pr-3">
-                    <input type="text" name="items[${index}][nama]" required class="w-full border rounded-lg px-3 py-2">
-                    <textarea name="items[${index}][rincian]" rows="2"
-                              placeholder="Rincian item (opsional)"
-                              class="w-full border rounded-lg px-3 py-2 mt-2"></textarea>
-                </td>
-                <td class="py-2 pr-3">
-                    <input type="number" name="items[${index}][qty]" step="0.01" min="0.01" value="1" required class="w-full border rounded-lg px-3 py-2 qty-input">
-                </td>
-                <td class="py-2 pr-3">
-                    <select name="items[${index}][satuan]" class="w-full border rounded-lg px-3 py-2">
-                        <option value="month">month</option>
-                        <option value="pcs">pcs</option>
-                        <option value="item">item</option>
-                        <option value="unit">unit</option>
-                    </select>
-                </td>
-                <td class="py-2 pr-3">
-                    <input type="number" name="items[${index}][unit_price]" step="0.01" min="0" value="0" required class="w-full border rounded-lg px-3 py-2 price-input">
-                </td>
-                <td class="py-2 pr-3">
-                    <div class="w-full border rounded-lg px-3 py-2 bg-gray-50 text-right amount-display">Rp 0</div>
-                </td>
-                <td class="py-2 pr-0 text-right">
-                    <button type="button" class="text-red-600 hover:text-red-800 remove-item">Hapus</button>
-                </td>
-            </tr>
+            <div class="item-row rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="mb-4 flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">Detail Item</p>
+                        <p class="text-xs text-slate-500">Isi nama, rincian, qty, satuan, dan harga satuannya.</p>
+                    </div>
+                    <button type="button" class="remove-item inline-flex items-center rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50">
+                        Hapus
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-12">
+                    <label class="block xl:col-span-4">
+                        <span class="mb-1 block text-sm font-medium text-slate-700">Item</span>
+                        <input type="text" name="items[${index}][nama]" required class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    </label>
+                    <label class="block xl:col-span-4">
+                        <span class="mb-1 block text-sm font-medium text-slate-700">Rincian</span>
+                        <textarea name="items[${index}][rincian]" rows="2" placeholder="Rincian item (opsional)" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500"></textarea>
+                    </label>
+                    <label class="block sm:col-span-1 xl:col-span-1">
+                        <span class="mb-1 block text-sm font-medium text-slate-700">Qty</span>
+                        <input type="number" name="items[${index}][qty]" step="0.01" min="0.01" value="1" required class="qty-input w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    </label>
+                    <label class="block sm:col-span-1 xl:col-span-1">
+                        <span class="mb-1 block text-sm font-medium text-slate-700">Satuan</span>
+                        <select name="items[${index}][satuan]" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                            <option value="month">month</option>
+                            <option value="pcs">pcs</option>
+                            <option value="item">item</option>
+                            <option value="unit">unit</option>
+                        </select>
+                    </label>
+                    <label class="block xl:col-span-1">
+                        <span class="mb-1 block text-sm font-medium text-slate-700">Unit Price</span>
+                        <input type="number" name="items[${index}][unit_price]" step="0.01" min="0" value="0" required class="price-input w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    </label>
+                    <div class="block xl:col-span-1">
+                        <span class="mb-1 block text-sm font-medium text-slate-700">Amount</span>
+                        <div class="amount-display flex min-h-[42px] items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800">Rp 0</div>
+                    </div>
+                </div>
+            </div>
         `;
     }
 
@@ -265,7 +279,7 @@
             return;
         }
 
-        event.target.closest('.item-row').remove();
+        event.target.closest('.item-row')?.remove();
         recalculate();
     });
 

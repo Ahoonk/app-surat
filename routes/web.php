@@ -13,10 +13,15 @@ use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MitraController;
 use App\Http\Controllers\TelegramBotController;
-use App\Models\FakturPajak;
+use App\Http\Controllers\DocumentTemplateController;
+use App\Models\BeritaAcara;
+use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Mitra;
 use App\Models\Penawaran;
-use App\Models\NotaToko;
+use App\Models\SuratJalan;
+use App\Services\DashboardDataService;
+use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,142 +30,22 @@ Route::get('/', function () {
         : redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    $companyId = auth()->user()->company_id;
+Route::get('/dashboard', function (DashboardDataService $dashboardDataService) {
+    $user = auth()->user()->load('company');
+    $companyId = $user->company_id;
+    $dashboard = $dashboardDataService->forCompany($companyId);
 
-    $penawaranQuery = Penawaran::where('company_id', $companyId);
-    $approvedWithoutPo = (clone $penawaranQuery)
-        ->where('status', 'approved')
-        ->whereDoesntHave('purchasingOrder')
-        ->count();
-    $poUploaded = (clone $penawaranQuery)->whereHas('purchasingOrder')->count();
-
-    $invoiceQuery = Invoice::whereHas('penawaran', function ($query) use ($companyId) {
-        $query->where('company_id', $companyId);
-    });
-
-    $invoiceUnpaid = (clone $invoiceQuery)->where('payment_status', 'unpaid')->count();
-    $invoicePaid = (clone $invoiceQuery)->where('payment_status', 'paid')->count();
-
-    $invoiceTotalAll = (clone $invoiceQuery)->sum('total');
-    $invoiceTotalPaid = (clone $invoiceQuery)
-        ->where('payment_status', 'paid')
-        ->sum('total');
-    $invoiceTotalUnpaid = (clone $invoiceQuery)
-        ->where('payment_status', 'unpaid')
-        ->sum('total');
-
-    $invoiceTaxRows = (clone $invoiceQuery)
-        ->with(['penawaran:id,tax_amount']);
-    $invoiceTaxTotalAll = $invoiceTaxRows->get()->sum(function ($invoice) {
-        return (float) ($invoice->penawaran?->tax_amount ?? 0);
-    });
-    $invoiceTaxTotalPaid = (clone $invoiceQuery)
-        ->where('payment_status', 'paid')
-        ->with(['penawaran:id,tax_amount'])
-        ->get()
-        ->sum(function ($invoice) {
-            return (float) ($invoice->penawaran?->tax_amount ?? 0);
-        });
-    $invoiceTaxTotalUnpaid = (clone $invoiceQuery)
-        ->where('payment_status', 'unpaid')
-        ->with(['penawaran:id,tax_amount'])
-        ->get()
-        ->sum(function ($invoice) {
-            return (float) ($invoice->penawaran?->tax_amount ?? 0);
-        });
-
-    $fakturQuery = FakturPajak::whereHas('invoice.penawaran', function ($query) use ($companyId) {
-        $query->where('company_id', $companyId);
-    });
-
-    $fakturUnpaid = (clone $fakturQuery)->where('payment_status', 'unpaid')->count();
-    $fakturPaid = (clone $fakturQuery)->where('payment_status', 'paid')->count();
-    $fakturPendingUpload = (clone $invoiceQuery)->whereDoesntHave('fakturPajak')->count();
-
-    $notaTokoQuery = NotaToko::where('company_id', $companyId);
-    $notaTokoUnpaid = (clone $notaTokoQuery)->where('payment_status', 'unpaid')->count();
-    $notaTokoPaid = (clone $notaTokoQuery)->where('payment_status', 'paid')->count();
-    $notaTokoTotalAll = (clone $notaTokoQuery)->sum('total');
-    $notaTokoTotalPaid = (clone $notaTokoQuery)
-        ->where('payment_status', 'paid')
-        ->sum('total');
-    $notaTokoTotalUnpaid = (clone $notaTokoQuery)
-        ->where('payment_status', 'unpaid')
-        ->sum('total');
-
-    $dashboardStatus = [
-        'penawaran' => [
-            'draft' => (clone $penawaranQuery)->where('status', 'draft')->count(),
-            'submitted' => (clone $penawaranQuery)->where('status', 'submitted')->count(),
-            'approved' => (clone $penawaranQuery)->where('status', 'approved')->count(),
-            'rejected' => (clone $penawaranQuery)->where('status', 'rejected')->count(),
+    return Inertia::render('Dashboard', [
+        'company' => [
+            'id' => $user->company?->id,
+            'name' => $user->company?->name,
+            'address' => $user->company?->address,
+            'logo' => $user->company?->logo,
         ],
-        'purchasing_order' => [
-            'menunggu_upload' => $approvedWithoutPo,
-            'sudah_upload' => $poUploaded,
-        ],
-        'invoice' => [
-            'belum_dibayar' => $invoiceUnpaid,
-            'sudah_dibayar' => $invoicePaid,
-        ],
-        'faktur_pajak' => [
-            'menunggu_upload' => $fakturPendingUpload,
-            'belum_dibayar' => $fakturUnpaid,
-            'sudah_dibayar' => $fakturPaid,
-        ],
-    ];
-
-    $dashboardFinancial = [
-        'total_semua' => $invoiceTotalAll,
-        'total_sudah_dibayar' => $invoiceTotalPaid,
-        'total_belum_dibayar' => $invoiceTotalUnpaid,
-        'jumlah_semua' => $invoiceUnpaid + $invoicePaid,
-        'jumlah_sudah_dibayar' => $invoicePaid,
-        'jumlah_belum_dibayar' => $invoiceUnpaid,
-    ];
-
-    $dashboardTax = [
-        'total_semua' => $invoiceTaxTotalAll,
-        'total_sudah_dibayar' => $invoiceTaxTotalPaid,
-        'total_belum_dibayar' => $invoiceTaxTotalUnpaid,
-        'jumlah_semua' => $invoiceUnpaid + $invoicePaid,
-        'jumlah_sudah_dibayar' => $invoicePaid,
-        'jumlah_belum_dibayar' => $invoiceUnpaid,
-    ];
-
-    $dashboardNotaToko = [
-        'total_semua' => $notaTokoTotalAll,
-        'total_sudah_dibayar' => $notaTokoTotalPaid,
-        'total_belum_dibayar' => $notaTokoTotalUnpaid,
-        'jumlah_semua' => $notaTokoUnpaid + $notaTokoPaid,
-        'jumlah_sudah_dibayar' => $notaTokoPaid,
-        'jumlah_belum_dibayar' => $notaTokoUnpaid,
-    ];
-
-    $dashboardTransactions = $penawaranQuery
-        ->with([
-            'items',
-            'purchasingOrder',
-            'invoices' => function ($query) {
-                $query->orderByDesc('tanggal')->orderByDesc('id');
-            },
-            'invoices.fakturPajak',
-        ])
-        ->latest('tanggal')
-        ->limit(40)
-        ->get()
-        ->map(function ($penawaran) {
-            $latestInvoice = $penawaran->invoices->first();
-            return [
-                'sort_date' => $penawaran->tanggal,
-                'invoice' => $latestInvoice,
-                'penawaran' => $penawaran,
-                'faktur_pajak' => $latestInvoice?->fakturPajak,
-            ];
-        });
-
-    return view('dashboard', compact('dashboardFinancial', 'dashboardStatus', 'dashboardTax', 'dashboardNotaToko', 'dashboardTransactions'));
+        'customersCount' => Customer::where('company_id', $companyId)->count(),
+        'mitrasCount' => Mitra::where('company_id', $companyId)->count(),
+        ...$dashboard,
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::post('telegram/webhook', [TelegramBotController::class, 'webhook'])->name('telegram.webhook');
@@ -174,6 +59,60 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('penawaran', function () {
+        return Inertia::render('Penawaran/Index');
+    });
+    Route::get('penawaran/create', function () {
+        return Inertia::render('Penawaran/Create');
+    });
+    Route::get('penawaran/{penawaran}', function (Penawaran $penawaran) {
+        return Inertia::render('Penawaran/Show', [
+            'penawaranId' => $penawaran->id,
+        ]);
+    });
+    Route::get('penawaran/{penawaran}/edit', function (Penawaran $penawaran) {
+        return Inertia::render('Penawaran/Edit', [
+            'penawaranId' => $penawaran->id,
+        ]);
+    });
+
+    Route::get('invoice', function () {
+        return Inertia::render('Invoice/Index');
+    });
+    Route::get('invoice/{invoice}', function (Invoice $invoice) {
+        return Inertia::render('Invoice/Show', [
+            'invoiceId' => $invoice->id,
+        ]);
+    });
+
+    Route::get('surat-jalan', function () {
+        return Inertia::render('SuratJalan/Index');
+    });
+    Route::get('surat-jalan/{suratJalan}', function (SuratJalan $suratJalan) {
+        return Inertia::render('SuratJalan/Show', [
+            'suratJalanId' => $suratJalan->id,
+        ]);
+    });
+
+    Route::get('berita-acara', function () {
+        return Inertia::render('BeritaAcara/Index');
+    });
+    Route::get('berita-acara/{beritaAcara}', function (BeritaAcara $beritaAcara) {
+        return Inertia::render('BeritaAcara/Show', [
+            'beritaAcaraId' => $beritaAcara->id,
+        ]);
+    });
+
+    Route::get('customers', function () {
+        return Inertia::render('Customers/Index');
+    });
+    Route::get('mitra', function () {
+        return Inertia::render('Mitras/Index');
+    });
+    Route::get('mitras', function () {
+        return redirect()->route('mitra.index');
+    });
+
     Route::get('penawaran/{penawaran}/pdf', [PenawaranController::class, 'pdf'])->name('penawaran.pdf');
     Route::post('penawaran/{penawaran}/send', [PenawaranController::class, 'send'])->name('penawaran.send');
     Route::get('penawaran-mitra/create', [PenawaranController::class, 'createMitra'])->name('penawaran.mitra.create');
@@ -250,5 +189,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('mitra/{mitra}/edit', [MitraController::class, 'edit'])->name('mitra.edit');
     Route::put('mitra/{mitra}', [MitraController::class, 'update'])->name('mitra.update');
     Route::delete('mitra/{mitra}', [MitraController::class, 'destroy'])->name('mitra.destroy');
+
+    Route::get('document-templates', [DocumentTemplateController::class, 'index'])->name('document-templates.index');
+    Route::post('document-templates', [DocumentTemplateController::class, 'store'])->name('document-templates.store');
+    Route::put('document-templates/{documentTemplate}', [DocumentTemplateController::class, 'update'])->name('document-templates.update');
+    Route::delete('document-templates/{documentTemplate}', [DocumentTemplateController::class, 'destroy'])->name('document-templates.destroy');
 
 });

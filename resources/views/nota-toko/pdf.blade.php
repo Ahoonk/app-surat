@@ -47,10 +47,13 @@
         }
 @endphp
 <body @if ($templateNota) style="background-image: url('{{ $templateNota }}'); background-size: 100% auto; background-repeat: no-repeat; background-position: top center;" @endif>
+@php
+    $snapshot = $notaToko->snapshot_data ?? [];
+@endphp
     <div class="content no-break">
     <div class="no-break" style="text-align:center; margin-bottom: 10px;">
         <div>{{ $notaToko->nomor }}</div>
-        <div>{{ \Illuminate\Support\Carbon::parse($notaToko->tanggal)->translatedFormat('d F Y') }}</div>
+        <div>{{ \Illuminate\Support\Carbon::parse(data_get($snapshot, 'date', $notaToko->tanggal))->translatedFormat('d F Y') }}</div>
     </div>
 
     <div class="no-break" style="margin-bottom: 10px;">
@@ -58,12 +61,12 @@
             <tr>
                 <td style="border:0; width:60px; font-weight:700; padding:0; vertical-align:top;">Customer</td>
                 <td style="border:0; width:8px; padding:0; vertical-align:top;">:</td>
-                <td style="border:0; padding:0; vertical-align:top;">{{ $notaToko->customer_nama }}</td>
+                <td style="border:0; padding:0; vertical-align:top;">{{ data_get($snapshot, 'customer_name', $notaToko->customer_nama) }}</td>
             </tr>
             <tr>
                 <td style="border:0; font-weight:700; padding:0; vertical-align:top;">Alamat</td>
                 <td style="border:0; padding:0; vertical-align:top;">:</td>
-                <td style="border:0; padding:0; vertical-align:top;">{{ $notaToko->alamat }}</td>
+                <td style="border:0; padding:0; vertical-align:top;">{{ data_get($snapshot, 'address', $notaToko->alamat) }}</td>
             </tr>
             <tr>
                 <td style="border:0; font-weight:700; padding:0; vertical-align:top;">Payment</td>
@@ -85,17 +88,17 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($notaToko->items as $item)
+            @foreach (data_get($snapshot, 'items', $notaToko->items) as $item)
                 <tr>
                     <td style="text-align:center;">{{ $loop->iteration }}</td>
-                    <td>{{ $item->nama }}</td>
-                    <td style="text-align:center;">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
-                    <td style="text-align:center;">{{ $item->satuan }}</td>
+                    <td>{{ data_get($item, 'nama') }}</td>
+                    <td style="text-align:center;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
+                    <td style="text-align:center;">{{ data_get($item, 'satuan') }}</td>
                     <td>
                         <table style="width:100%; border:0; border-collapse:collapse;">
                             <tr>
                                 <td style="border:0; width:12mm;">Rp</td>
-                                <td style="border:0; text-align:right;">{{ number_format($item->unit_price, 2, ',', '.') }}</td>
+                                <td style="border:0; text-align:right;">{{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
                             </tr>
                         </table>
                     </td>
@@ -103,7 +106,7 @@
                         <table style="width:100%; border:0; border-collapse:collapse;">
                             <tr>
                                 <td style="border:0; width:12mm;">Rp</td>
-                                <td style="border:0; text-align:right;">{{ number_format($item->amount, 2, ',', '.') }}</td>
+                                <td style="border:0; text-align:right;">{{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
                             </tr>
                         </table>
                     </td>
@@ -127,7 +130,7 @@
                 <div style="font-style: italic; margin-top: 2px; font-size: 11px;">{{ $terbilangTotal }}</div>
                 <div style="margin-top: 8px; font-size: 11px; line-height: 1.2;">
                     <strong>Keterangan:</strong><br>
-                    {!! nl2br(e($notaToko->keterangan ?: '-')) !!}
+                    {!! nl2br(e(data_get($snapshot, 'notes', $notaToko->keterangan ?: '-'))) !!}
                 </div>
             </td>
             <td style="border:0;"></td>
@@ -141,7 +144,7 @@
                     </colgroup>
                     <tr>
                         <td style="border:0;">Rp</td>
-                        <td style="border:0; text-align:right;">{{ number_format($notaToko->subtotal, 2, ',', '.') }}</td>
+                        <td style="border:0; text-align:right;">{{ number_format((float) data_get($snapshot, 'subtotal', $notaToko->subtotal), 2, ',', '.') }}</td>
                     </tr>
                 </table>
             </td>
@@ -158,7 +161,7 @@
                     </colgroup>
                     <tr>
                         <td style="border:0; font-weight:700;">Rp</td>
-                        <td style="border:0; text-align:right; font-weight:700;">{{ number_format($notaToko->total, 2, ',', '.') }}</td>
+                        <td style="border:0; text-align:right; font-weight:700;">{{ number_format((float) data_get($snapshot, 'total', $notaToko->total), 2, ',', '.') }}</td>
                     </tr>
                 </table>
             </td>

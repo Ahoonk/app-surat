@@ -7,6 +7,8 @@ use App\Mail\InvoiceMail;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\SuratJalan;
+use App\Services\DocumentSnapshotService;
+use App\Services\DocumentTemplateResolver;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -67,7 +69,8 @@ class InvoiceController extends Controller
         abort_if(!$penawaran || $penawaran->company_id !== $companyId, 403);
 
         $fileName = 'invoice-' . str_replace('/', '-', $invoice->nomor) . '.pdf';
-        $pdf = Pdf::loadView('invoice.pdf', compact('invoice', 'penawaran'))
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'invoice', 'invoice.pdf');
+        $pdf = Pdf::loadView($view, compact('invoice', 'penawaran'))
             ->setPaper('a4', 'portrait');
 
         if (request()->boolean('download')) {
@@ -98,7 +101,8 @@ class InvoiceController extends Controller
         }
 
         $fileName = 'invoice-' . str_replace('/', '-', $invoice->nomor) . '.pdf';
-        $pdf = Pdf::loadView('invoice.pdf', compact('invoice', 'penawaran'))
+        $view = app(DocumentTemplateResolver::class)->resolveView($companyId, 'invoice', 'invoice.pdf');
+        $pdf = Pdf::loadView($view, compact('invoice', 'penawaran'))
             ->setPaper('a4', 'portrait');
         $pdfData = $pdf->output();
 
@@ -167,6 +171,11 @@ class InvoiceController extends Controller
         SuratJalan::where('invoice_id', $invoice->id)->update([
             'tanggal' => $validated['tanggal'],
             'nomor' => $suratJalanNomor,
+        ]);
+
+        $invoice->load('penawaran.company', 'penawaran.mitra', 'penawaran.items', 'purchasingOrder');
+        $invoice->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forInvoice($invoice),
         ]);
 
         return redirect()->route('invoice.index')

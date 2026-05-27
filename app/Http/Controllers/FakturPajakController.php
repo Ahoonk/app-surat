@@ -49,6 +49,7 @@ class FakturPajakController extends Controller
         FakturPajak::updateOrCreate(
             ['invoice_id' => $invoice->id],
             [
+                'company_id' => $companyId,
                 'dokumen_path' => $path,
                 'dokumen_name' => $file->getClientOriginalName(),
                 'uploaded_by' => auth()->id(),

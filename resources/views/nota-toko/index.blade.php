@@ -13,16 +13,67 @@
         </div>
     @endif
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Nota Toko</h1>
-        <a href="{{ route('nota-toko.create') }}" class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">+ Buat Nota Toko</a>
+        <a href="{{ route('nota-toko.create') }}" class="inline-flex items-center justify-center bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+            + Buat Nota Toko
+        </a>
     </div>
 
     <div class="bg-white rounded-xl shadow p-6">
         @if ($notaTokos->isEmpty())
             <p class="text-gray-500">Belum ada data nota toko.</p>
         @else
-            <div class="overflow-x-auto">
+            <div class="space-y-3 md:hidden">
+                @foreach ($notaTokos as $notaToko)
+                    <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="text-base font-semibold text-gray-900">{{ $notaToko->nomor }}</div>
+                                <div class="text-sm text-gray-500">{{ \Illuminate\Support\Carbon::parse($notaToko->tanggal)->translatedFormat('d F Y') }}</div>
+                            </div>
+                            @if (($notaToko->payment_status ?? 'unpaid') === 'paid')
+                                <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Lunas</span>
+                            @else
+                                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Belum Lunas</span>
+                            @endif
+                        </div>
+
+                        <div class="mt-3 space-y-1 text-sm text-gray-700">
+                            <div><span class="font-medium text-gray-500">Customer:</span> {{ $notaToko->customer_nama }}</div>
+                            <div><span class="font-medium text-gray-500">Total:</span> Rp {{ number_format($notaToko->total, 2, ',', '.') }}</div>
+                            @if (($notaToko->payment_status ?? 'unpaid') === 'paid')
+                                <div><span class="font-medium text-gray-500">Dibayar:</span> {{ $notaToko->payment_date ? \Illuminate\Support\Carbon::parse($notaToko->payment_date)->translatedFormat('d F Y') : '-' }}</div>
+                            @endif
+                        </div>
+
+                        <div class="mt-4 action-buttons flex-wrap justify-start">
+                            <a href="{{ route('nota-toko.show', $notaToko) }}" title="Preview" class="action-icon action-icon-blue">&#128065;</a>
+                            <a href="{{ route('nota-toko.edit', $notaToko) }}" title="Ubah" class="action-icon action-icon-emerald">&#9998;</a>
+                            <form method="POST" action="{{ route('nota-toko.send', $notaToko) }}" onsubmit="return confirm('Kirim nota toko ke email customer?')">
+                                @csrf
+                                <button type="submit" title="Kirim" class="action-icon action-icon-gray">&#9993;</button>
+                            </form>
+                            @if (($notaToko->payment_status ?? 'unpaid') !== 'paid' && in_array(auth()->user()?->role, ['admin', 'superadmin'], true))
+                                <button type="button"
+                                        title="Verifikasi Pembayaran"
+                                        class="verify-nota-btn action-icon action-icon-emerald"
+                                        data-action="{{ route('nota-toko.verify-payment', $notaToko) }}"
+                                        data-default-date="{{ now()->format('Y-m-d') }}">
+                                    &#10004;
+                                </button>
+                            @endif
+                            <form method="POST" action="{{ route('nota-toko.destroy', $notaToko) }}" onsubmit="return confirm('Hapus nota toko ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" title="Hapus" class="action-icon action-icon-red">&#128465;</button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead>
                         <tr class="border-b">

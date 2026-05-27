@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PurchasingOrder extends Model
 {
     protected $fillable = [
+        'company_id',
         'penawaran_id',
         'dokumen_path',
         'dokumen_name',
@@ -19,6 +20,11 @@ class PurchasingOrder extends Model
     public function penawaran()
     {
         return $this->belongsTo(Penawaran::class);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function invoices()

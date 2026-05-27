@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\NotaToko;
+use App\Services\DocumentSnapshotService;
+use App\Services\DocumentTemplateResolver;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -99,6 +101,9 @@ class TelegramBotController extends Controller
         });
 
         $notaToko->load('items');
+        $notaToko->update([
+            'snapshot_data' => app(DocumentSnapshotService::class)->forNotaToko($notaToko),
+        ]);
         $fileName = 'nota-toko-' . str_replace('/', '-', $notaToko->nomor) . '.pdf';
         $pdf = $this->makeNotaTokoPdf($notaToko);
         $pdfData = $pdf->output();
@@ -207,7 +212,9 @@ class TelegramBotController extends Controller
         $pdfWidthPt = 210 * 2.83465;
         $pdfHeightPt = 150 * 2.83465;
 
-        return Pdf::loadView('nota-toko.pdf', compact('notaToko'))
+        $view = app(DocumentTemplateResolver::class)->resolveView($notaToko->company_id, 'nota_toko', 'nota-toko.pdf');
+
+        return Pdf::loadView($view, compact('notaToko'))
             ->setPaper([0, 0, $pdfWidthPt, $pdfHeightPt], 'portrait');
     }
 

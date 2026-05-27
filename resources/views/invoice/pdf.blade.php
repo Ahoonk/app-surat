@@ -4,31 +4,31 @@
     <meta charset="UTF-8">
     <title>Invoice - {{ $invoice->nomor }}</title>
     <style>
-        @page { size: A4 portrait; margin: 4mm 16mm 4mm 4mm; }
-        body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; }
-        .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 18mm 6mm 10mm; box-sizing: border-box; }
-        .bg-layer { position: fixed; inset: -4mm 0 0 0; background-size: 100% auto; background-repeat: no-repeat; background-position: top 4mm center; transform: translateX(7mm); z-index: 0; opacity: 1; }
+        @page { size: A4 portrait; margin: 0; }
+        body { font-family: Arial, sans-serif; font-size: 10px; color: #000; margin: 0; }
+        .paper { width: 100%; position: relative; z-index: 2; padding: 44mm 24mm 6mm 2mm; box-sizing: border-box; }
+        .bg-layer { position: fixed; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; background-position: top center; z-index: 0; opacity: 1; }
         .head { display: table; width: 100%; border-bottom: 1px solid #000; padding-bottom: 12px; }
-        .block-90 { width: 90%; margin-left: auto; margin-right: auto; }
+        .block-90 { width: 92%; margin-left: 3%; margin-right: auto; }
         .left, .right { display: table-cell; vertical-align: top; }
         .right { text-align: right; }
-        .inv-meta { font-size: 11px; line-height: 1.35; }
-        .content-wrap { position: relative; left: -4mm; width: calc(100% + 4mm); box-sizing: border-box; }
+        .inv-meta { font-size: 10px; line-height: 1.35; }
+        .content-wrap { position: relative; width: 100%; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 18px; table-layout: fixed; }
-        .main-table { width: 90%; margin-left: auto; margin-right: auto; }
-        th, td { border: 1px solid #000; padding: 6px 8px; }
+        .main-table { width: 92%; margin: 18px auto 0 3%; }
+        th, td { border: 1px solid #000; padding: 6px 8px; font-size: 10px; }
         th { text-align: center; }
         .center { text-align: center; }
         .right-text { text-align: right; }
         .nowrap { white-space: nowrap; }
-        .summary-wrap { width: 90%; margin: 12px auto 0; }
-        .summary { width: 40%; margin-left: auto; margin-top: 0; }
+        .summary-wrap { width: 92%; margin: 12px auto 0 3%; }
+        .summary { width: 36%; margin-left: auto; margin-top: 0; }
         .summary td { border-left: 0; border-right: 0; }
-        .summary tr:last-child td { font-weight: 700; font-size: 11px; }
+        .summary tr:last-child td { font-weight: 700; font-size: 10px; }
         .notes { margin-top: 28px; }
-        .po-meta { width: 90%; margin: 10px auto 6px; }
+        .po-meta { width: 92%; margin: 10px auto 6px 3%; }
         .signoff { width: 260px; margin: 14px 0 0 auto; text-align: center; }
-        .footer-layer { position: fixed; left: 0; right: 0; bottom: -5mm; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; transform: translateX(7mm); z-index: 1; }
+        .footer-layer { position: fixed; left: 0; right: 0; bottom: 0; height: 34mm; background-size: 100% 100%; background-repeat: no-repeat; background-position: bottom center; z-index: 1; }
     </style>
 </head>
 <body>
@@ -39,28 +39,102 @@
         }
 
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if ($ext === 'pdf') {
+            if (!class_exists(\Imagick::class)) {
+                return null;
+            }
+
+            try {
+                $imagick = new \Imagick();
+                $imagick->setResolution(300, 300);
+                $imagick->readImage($path . '[0]');
+                $imagick->setImageFormat('png');
+
+                return 'data:image/png;base64,' . base64_encode($imagick->getImageBlob());
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            $gsBinary = trim((string) shell_exec('command -v gs 2>/dev/null'));
+            if ($gsBinary !== '') {
+                $tmpDir = storage_path('app/template-previews');
+                if (!is_dir($tmpDir)) {
+                    @mkdir($tmpDir, 0775, true);
+                }
+
+                $prefix = tempnam($tmpDir, 'pdf-');
+                if ($prefix !== false) {
+                    $pngPath = $prefix . '.png';
+                    @unlink($prefix);
+
+                    $cmd = escapeshellarg($gsBinary)
+                        . ' -dSAFER -dBATCH -dNOPAUSE -sDEVICE=pngalpha -r300 -dFirstPage=1 -dLastPage=1 -sOutputFile='
+                        . escapeshellarg($pngPath) . ' ' . escapeshellarg($path) . ' 2>&1';
+
+                    $output = [];
+                    $exitCode = 0;
+                    @exec($cmd, $output, $exitCode);
+
+                    if ($exitCode === 0 && file_exists($pngPath)) {
+                        $binary = file_get_contents($pngPath);
+                        @unlink($pngPath);
+
+                        if ($binary !== false) {
+                            return 'data:image/png;base64,' . base64_encode($binary);
+                        }
+                    }
+
+                    @unlink($pngPath);
+                }
+            }
+
+            return null;
+        }
+
         $mime = match ($ext) {
+            'png' => 'image/png',
             'jpg', 'jpeg' => 'image/jpeg',
             'gif' => 'image/gif',
             'webp' => 'image/webp',
-            default => 'image/png',
+            default => null,
         };
 
-        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
-    };
+        if (!$mime) {
+            return null;
+        }
 
+        return 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($path));
+        };
+
+    $snapshot = $invoice->snapshot_data ?? [];
     $mitra = $penawaran->mitra;
-    $isMitra = (bool) $mitra;
-    $issuerName = $mitra?->nama ?? 'PT Aldera Saddatech Karya';
-    $taxPercent = (float) ($penawaran->tax_percent ?? 0);
+    $isMitra = (bool) data_get($snapshot, 'is_mitra', $mitra);
+    $issuerName = data_get($snapshot, 'issuer_name', $mitra?->nama ?? 'PT Aldera Saddatech Karya');
+    $customerName = data_get($snapshot, 'customer_name', $penawaran->to_company ?? $penawaran->customer_nama);
+    $customerAddress = data_get($snapshot, 'customer_address', $penawaran->to_address ?? '-');
+    $invoiceNumber = data_get($snapshot, 'invoice_number', $invoice->nomor);
+    $invoiceDate = data_get($snapshot, 'invoice_date', $invoice->tanggal);
+    $poNumber = data_get($snapshot, 'po_number', $invoice->purchasingOrder?->nomor_po);
+    $poDate = data_get($snapshot, 'po_date', $invoice->purchasingOrder?->tanggal_po);
+    $invoiceItems = data_get($snapshot, 'items', $penawaran->items);
+    $taxPercent = (float) data_get($snapshot, 'tax_percent', $penawaran->tax_percent ?? 0);
     $divisor = 1 + ($taxPercent / 100);
+    $subtotal = (float) data_get($snapshot, 'subtotal', $penawaran->subtotal ?? 0);
+    $taxAmount = (float) data_get($snapshot, 'tax_amount', $penawaran->tax_amount ?? 0);
+    $total = (float) data_get($snapshot, 'total', $penawaran->total ?? 0);
     $pph23 = $isMitra && $divisor > 0
-        ? ($penawaran->total / $divisor) * 0.02
+        ? ($total / $divisor) * 0.02
         : 0;
     $mitraTemplatePath = $mitra?->template_invoice_path
         ? public_path('storage/' . $mitra->template_invoice_path)
         : null;
     $mitraTemplateInvoice = $mitraTemplatePath ? $toDataUri($mitraTemplatePath) : null;
+    $companyTemplatePath = app(\App\Services\DocumentTemplateResolver::class)->resolveTemplatePath($penawaran->company_id, 'invoice');
+    $companyTemplateInvoice = $companyTemplatePath
+        ? $toDataUri(public_path('storage/' . $companyTemplatePath))
+        : null;
+    $documentTemplateInvoice = $mitraTemplateInvoice ?: $companyTemplateInvoice;
 
     $templatePath = public_path('storage/logos/template-invoice.png');
     $footerPath = public_path('storage/logos/kopbawah-invoice.png');
@@ -78,8 +152,8 @@
     </style>
 @endif
 
-@if ($mitraTemplateInvoice)
-    <div class="bg-layer" style="background-image: url('{{ $mitraTemplateInvoice }}');"></div>
+@if ($documentTemplateInvoice)
+    <img src="{{ $documentTemplateInvoice }}" alt="Template Dokumen" style="position: fixed; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: 0;">
 @else
     @if ($templateInvoice)
         <div class="bg-layer" style="background-image: url('{{ $templateInvoice }}');"></div>
@@ -94,50 +168,50 @@
     <div class="head block-90">
         <div class="left">
             <div style="font-size:11px; color:#555; font-weight:700;">Bill To</div>
-            <div><strong>{{ $penawaran->to_company ?? $penawaran->customer_nama }}</strong></div>
-            <div>{{ $penawaran->to_address ?? '-' }}</div>
+            <div><strong>{{ $customerName }}</strong></div>
+            <div>{{ $customerAddress }}</div>
         </div>
         <div class="right">
             <div class="inv-meta">
                 <div style="color:#555; font-weight:700;">No Invoice</div>
-                <div style="margin-top:4px;"><strong>{{ $invoice->nomor }}</strong></div>
-                <div><strong>Date:</strong> {{ \Illuminate\Support\Carbon::parse($invoice->tanggal)->translatedFormat('d F Y') }}</div>
+                <div style="margin-top:4px;"><strong>{{ $invoiceNumber }}</strong></div>
+                <div><strong>Date:</strong> {{ \Illuminate\Support\Carbon::parse($invoiceDate)->translatedFormat('d F Y') }}</div>
             </div>
         </div>
     </div>
 
     @unless($isMitra)
         <div class="po-meta">
-            <div><strong>Nomor PO:</strong> {{ $invoice->purchasingOrder->nomor_po ?? '-' }}</div>
-            <div><strong>Tanggal PO:</strong> {{ $invoice->purchasingOrder->tanggal_po ? \Illuminate\Support\Carbon::parse($invoice->purchasingOrder->tanggal_po)->translatedFormat('d F Y') : '-' }}</div>
+            <div><strong>Nomor PO:</strong> {{ $poNumber ?: '-' }}</div>
+            <div><strong>Tanggal PO:</strong> {{ $poDate ? \Illuminate\Support\Carbon::parse($poDate)->translatedFormat('d F Y') : '-' }}</div>
         </div>
     @endunless
 
     <table class="main-table">
         <thead>
         <tr>
-            <th style="width:6%;">No</th>
-            <th style="width:40%;">Description</th>
-            <th style="width:9%;">Qty</th>
-            <th style="width:9%;">Unit</th>
-            <th style="width:21%;">Unit Price</th>
-            <th style="width:21%;">Total</th>
+            <th style="width:4%;">No</th>
+            <th style="width:36%;">Description</th>
+            <th style="width:6%;">Qty</th>
+            <th style="width:8%;">Unit</th>
+            <th style="width:20%;">Unit Price</th>
+            <th style="width:16%;">Total</th>
         </tr>
         </thead>
         <tbody>
-        @foreach ($penawaran->items as $item)
+        @foreach ($invoiceItems as $item)
             <tr>
-                <td class="center">{{ $loop->iteration }}</td>
-                <td style="text-align:left;">
-                    <div>{{ $item->nama }}</div>
-                    @if (!empty($item->rincian))
-                        <div style="font-size:11px; margin-top:4px; white-space: pre-line;">{{ $item->rincian }}</div>
+                <td class="center" style="width:4%;">{{ $loop->iteration }}</td>
+                <td style="text-align:left; width:36%;">
+                    <div>{{ data_get($item, 'nama') }}</div>
+                    @if (!empty(data_get($item, 'rincian')))
+                        <div style="font-size:10px; margin-top:4px; white-space: pre-line;">{{ data_get($item, 'rincian') }}</div>
                     @endif
                 </td>
-                <td class="center">{{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}</td>
-                <td class="center">{{ strtoupper($item->satuan) }}</td>
-                <td class="right-text nowrap" style="font-size:11px;">Rp {{ number_format($item->unit_price, 2, ',', '.') }}</td>
-                <td class="right-text nowrap" style="font-size:11px;">Rp {{ number_format($item->amount, 2, ',', '.') }}</td>
+                <td class="center" style="width:6%;">{{ rtrim(rtrim(number_format((float) data_get($item, 'qty', 0), 2, '.', ''), '0'), '.') }}</td>
+                <td class="center" style="width:8%;">{{ strtoupper((string) data_get($item, 'satuan', '-')) }}</td>
+                <td class="center nowrap" style="font-size:10px; width:20%;">Rp {{ number_format((float) data_get($item, 'unit_price', 0), 2, ',', '.') }}</td>
+                <td class="right-text nowrap" style="font-size:10px; width:16%;">Rp {{ number_format((float) data_get($item, 'amount', 0), 2, ',', '.') }}</td>
             </tr>
         @endforeach
         </tbody>
@@ -147,11 +221,11 @@
         <table class="summary">
             <tr>
                 <td>Subtotal</td>
-                <td class="right-text">Rp {{ number_format($penawaran->subtotal, 2, ',', '.') }}</td>
+                <td class="right-text">Rp {{ number_format($subtotal, 2, ',', '.') }}</td>
             </tr>
             <tr>
-                <td>Tax ({{ number_format($penawaran->tax_percent, 2, ',', '.') }}%)</td>
-                <td class="right-text">Rp {{ number_format($penawaran->tax_amount, 2, ',', '.') }}</td>
+                <td>Tax ({{ number_format($taxPercent, 2, ',', '.') }}%)</td>
+                <td class="right-text">Rp {{ number_format($taxAmount, 2, ',', '.') }}</td>
             </tr>
             @if ($isMitra)
                 <tr>
@@ -161,7 +235,7 @@
             @endif
             <tr>
                 <td>{{ $isMitra ? 'Amount' : 'Grand Total' }}</td>
-                <td class="right-text">Rp {{ number_format($isMitra ? ($penawaran->total - $pph23) : $penawaran->total, 2, ',', '.') }}</td>
+                <td class="right-text">Rp {{ number_format($isMitra ? ($total - $pph23) : $total, 2, ',', '.') }}</td>
             </tr>
         </table>
     </div>

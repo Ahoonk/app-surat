@@ -3,94 +3,120 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistem Surat</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-
-<body class="min-h-screen flex flex-col bg-no-repeat bg-center"
-      style="background-image: url('{{ asset('storage/logos/background.png') }}');
-             background-size: cover;
-             background-position: center;
-             background-attachment: fixed;">
-
-    <!-- OVERLAY -->
-    <div class="min-h-screen w-full bg-black/50 flex flex-col">
-
-        <!-- JUDUL TENGAH ATAS -->
-        <div class="w-full py-10 text-center">
-            <div class="text-white font-extrabold tracking-wide 
-                        text-4xl md:text-5xl uppercase"
-                 style="font-family: 'Georgia', serif;">
-                APLIKASI SURAT ELEKTRONIK
-            </div>
+<body class="min-h-screen bg-slate-950 text-slate-900">
+    <div class="relative min-h-screen overflow-hidden">
+        <div
+            class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(14,116,144,0.35),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.24),_transparent_35%),linear-gradient(180deg,_#0f172a_0%,_#020617_100%)]">
         </div>
+        <div class="absolute inset-0 bg-slate-950/65"></div>
 
-        <!-- CENTER CONTENT -->
-        <div class="flex flex-1 items-center justify-center px-6">
+    <div class="relative z-10 min-h-screen flex flex-col">
+        @php
+            $appName = config('app.name', 'PT ASKARYA');
+            $appInitials = collect(preg_split('/\s+/', $appName, -1, PREG_SPLIT_NO_EMPTY))
+                ->map(fn ($word) => mb_substr($word, 0, 1))
+                ->implode('');
+            $appInitials = mb_strtoupper(mb_substr($appInitials ?: 'SA', 0, 2));
+        @endphp
 
-            <div class="max-w-5xl w-full bg-white/95 backdrop-blur-md 
-                        rounded-2xl 
-                        shadow-[0_30px_70px_-20px_rgba(0,0,0,0.7)] 
-                        border border-white/20
-                        overflow-hidden flex">
+        <header class="px-4 pt-8 text-center sm:px-6 sm:pt-10 lg:pt-12">
+            <p class="text-xs font-semibold uppercase tracking-[0.4em] text-cyan-200/80">
+                Sistem Administrasi Surat
+            </p>
+                <h1 class="mt-4 text-3xl font-black uppercase tracking-wide text-white sm:text-4xl lg:text-5xl"
+                    style="font-family: Georgia, serif;">
+                    Aplikasi Surat Elektronik
+                </h1>
+            </header>
 
-                <!-- LEFT SIDE LOGIN -->
-                <div class="w-1/2 p-12 flex flex-col justify-center">
+            <main class="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
+                <div class="w-full max-w-5xl overflow-hidden rounded-[28px] border border-white/15 bg-white/95 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.7)] backdrop-blur-md lg:grid lg:grid-cols-[1.05fr_0.95fr]">
+                    <section class="p-6 sm:p-8 lg:p-10 xl:p-12">
+                        <div class="mx-auto flex max-w-md flex-col justify-center">
+                            <div class="mb-6 text-center">
+                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg ring-1 ring-slate-200 sm:h-20 sm:w-20">
+                                    <img
+                                        src="{{ asset('storage/logos/aldera.png') }}"
+                                        class="h-12 w-12 object-contain sm:h-14 sm:w-14"
+                                        alt="Logo PT ASKARYA"
+                                    >
+                                </div>
+                                <h2 class="mt-5 text-2xl font-semibold text-slate-900 sm:text-3xl">
+                                    {{ $appName }}
+                                </h2>
+                                <p class="mt-2 text-sm text-slate-500">
+                                    Akses hanya untuk pengguna internal PT ASKARYA yang berwenang mengelola surat, invoice, dan dokumen transaksi.
+                                </p>
+                            </div>
 
-                    <!-- LOGO PERUSAHAAN (DIPERBESAR) -->
-                    <div class="text-center mb-6">
-                        <img src="{{ asset('storage/logos/aldera.png') }}"
-                             class="mx-auto h-20 object-contain"
-                             alt="Logo">
-                    </div>
+                            @if ($errors->any())
+                                <div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                                    <ul class="list-disc space-y-1 pl-5">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
 
-                    <!-- NAMA PERUSAHAAN -->
-                    <h2 class="text-2xl font-semibold text-center mb-8">
-                        Aldera Saddatech Karya
-                    </h2>
+                            @if (session('status'))
+                                <div class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                                    {{ session('status') }}
+                                </div>
+                            @endif
 
-                    <form method="POST" action="{{ route('login') }}" class="space-y-5">
-                        @csrf
+                            <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                                @csrf
 
-                        <div>
-                            <label class="block text-sm mb-1">Email</label>
-                            <input type="email"
-                                   name="email"
-                                   required
-                                   class="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+                                    <input type="email"
+                                           name="email"
+                                           value="{{ old('email') }}"
+                                           autocomplete="email"
+                                           required
+                                           class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15">
+                                </div>
+
+                                <div>
+                                    <label class="mb-1.5 block text-sm font-medium text-slate-700">Password</label>
+                                    <input type="password"
+                                           name="password"
+                                           autocomplete="current-password"
+                                           required
+                                           class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15">
+                                </div>
+
+                                <button type="submit"
+                                        class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700">
+                                    LOGIN
+                                </button>
+                            </form>
                         </div>
+                    </section>
 
-                        <div>
-                            <label class="block text-sm mb-1">Password</label>
-                            <input type="password"
-                                   name="password"
-                                   required
-                                   class="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <aside class="relative hidden min-h-[620px] lg:block">
+                        <img src="{{ asset('storage/logos/gedung.png') }}"
+                             class="absolute inset-0 h-full w-full object-cover"
+                             alt="Gedung">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+                            <div class="max-w-sm rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm">
+                                <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-100/90">Aplikasi Internal</p>
+                                <p class="mt-2 text-lg leading-relaxed text-white/95">
+                                    Kelola penawaran, invoice, surat jalan, dan nota toko dalam satu alur kerja yang rapi.
+                                </p>
+                            </div>
                         </div>
-
-                        <!-- LOGIN BUTTON -->
-                        <button type="submit"
-                                class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
-                            LOGIN
-                        </button>
-
-                    </form>
-
+                    </aside>
                 </div>
-
-                <!-- RIGHT SIDE IMAGE -->
-                <div class="w-1/2">
-                    <img src="{{ asset('storage/logos/gedung.png') }}"
-                         class="w-full h-full object-cover"
-                         alt="Gedung">
-                </div>
-
-            </div>
-
+            </main>
         </div>
-
     </div>
-
 </body>
 </html>

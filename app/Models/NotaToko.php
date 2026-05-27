@@ -22,6 +22,13 @@ class NotaToko extends Model
         'total',
         'payment_status',
         'payment_date',
+        'snapshot_data',
+    ];
+
+    protected $casts = [
+        'snapshot_data' => 'array',
+        'tanggal' => 'date',
+        'payment_date' => 'date',
     ];
 
     public function items(): HasMany
