@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Company;
 use App\Models\Invoice;
+use App\Models\Mitra;
 use App\Models\Penawaran;
 use App\Models\User;
 use App\Services\DocumentNumberService;
@@ -144,5 +145,83 @@ class DocumentNumberServiceTest extends TestCase
         $nextInvoice = $service->next($company, 'invoice', '2026-05-21');
 
         $this->assertSame('INV/2026/05/003-ASK', $nextInvoice);
+    }
+
+    public function test_aldera_invoice_numbers_reset_each_month_and_ignore_mitra_invoices(): void
+    {
+        $company = Company::create([
+            'name' => 'PT Aldera Saddatech Karya',
+            'address' => 'Jakarta',
+            'logo' => null,
+        ]);
+
+        $user = User::create([
+            'name' => 'Tester',
+            'email' => 'tester@example.com',
+            'password' => 'password',
+            'company_id' => $company->id,
+            'role' => 'admin',
+        ]);
+
+        $alderaPenawaran = Penawaran::create([
+            'company_id' => $company->id,
+            'user_id' => $user->id,
+            'nomor' => 'PNW/2026/05/001',
+            'tanggal' => '2026-05-01',
+            'customer_nama' => 'Customer Aldera',
+            'total' => 1000,
+            'status' => 'draft',
+        ]);
+
+        $mitra = Mitra::create([
+            'company_id' => $company->id,
+            'nama' => 'PT Mitra',
+        ]);
+
+        $mitraPenawaran = Penawaran::create([
+            'company_id' => $company->id,
+            'mitra_id' => $mitra->id,
+            'user_id' => $user->id,
+            'nomor' => 'PNW/MITRA/001',
+            'tanggal' => '2026-05-01',
+            'customer_nama' => 'Customer Mitra',
+            'total' => 1000,
+            'status' => 'draft',
+        ]);
+
+        Invoice::create([
+            'company_id' => $company->id,
+            'penawaran_id' => $alderaPenawaran->id,
+            'nomor' => 'INV/2026/05/001-ASK',
+            'tanggal' => '2026-05-04',
+            'sequence' => 1,
+            'total' => 1000,
+        ]);
+
+        Invoice::create([
+            'company_id' => $company->id,
+            'penawaran_id' => $alderaPenawaran->id,
+            'nomor' => 'INV/2026/05/2032-ASK',
+            'tanggal' => '2026-05-28',
+            'sequence' => 2,
+            'total' => 1000,
+        ]);
+
+        Invoice::create([
+            'company_id' => $company->id,
+            'penawaran_id' => $mitraPenawaran->id,
+            'nomor' => '999/INV/MTR/V/2026',
+            'tanggal' => '2026-05-28',
+            'sequence' => 1,
+            'total' => 1000,
+        ]);
+
+        $service = app(DocumentNumberService::class);
+
+        $nextMayInvoice = $service->nextAlderaInvoice($company, '2026-05-29');
+        $firstJuneInvoice = $service->nextAlderaInvoice($company, '2026-06-01');
+
+        $this->assertSame('INV/2026/05/002-ASK', $nextMayInvoice);
+        $this->assertSame('INV/2026/06/001-ASK', $firstJuneInvoice);
     }
 }

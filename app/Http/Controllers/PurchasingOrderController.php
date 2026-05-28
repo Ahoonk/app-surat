@@ -118,7 +118,7 @@ class PurchasingOrderController extends Controller
         $sequence = 1;
         $invoiceDate = now()->toDateString();
         $mitra = $penawaran->mitra;
-        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->next($companyId, 'invoice', $invoiceDate);
+        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->nextAlderaInvoice($companyId, $invoiceDate);
 
         $invoice = Invoice::create([
             'company_id' => $companyId,
@@ -182,7 +182,7 @@ class PurchasingOrderController extends Controller
         $currentSequence = max((int) $penawaran->invoice_sequence, $latestSequence, 1);
         $nextSequence = $currentSequence + 1;
         $mitra = $penawaran->mitra;
-        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->next($companyId, 'invoice', $validated['invoice_date']);
+        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->nextAlderaInvoice($companyId, $validated['invoice_date']);
 
         $invoice = Invoice::create([
             'company_id' => $companyId,

@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\DocumentSeries;
 use App\Models\Invoice;
 use App\Models\SuratJalan;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DocumentNumberService
@@ -28,6 +29,27 @@ class DocumentNumberService
             $series->save();
 
             return $this->formatNumber($series, $referenceDate);
+        });
+    }
+
+    public function nextAlderaInvoice(Company|int $company, ?string $referenceDate = null): string
+    {
+        $companyId = $company instanceof Company ? $company->id : $company;
+        $date = $referenceDate ? Carbon::parse($referenceDate) : now();
+
+        return DB::transaction(function () use ($companyId, $date) {
+            $this->ensureSeries($companyId, 'invoice');
+
+            $series = DocumentSeries::query()
+                ->where('company_id', $companyId)
+                ->where('document_type', 'invoice')
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $series->counter = $this->maxAlderaInvoiceCounterForMonth($companyId, $date) + 1;
+            $series->save();
+
+            return $this->formatParts('INV', $date->toDateString(), (int) $series->counter, 3, 'ASK');
         });
     }
 
@@ -103,6 +125,22 @@ class DocumentNumberService
             ),
             default => 0,
         };
+    }
+
+    private function maxAlderaInvoiceCounterForMonth(int $companyId, Carbon $date): int
+    {
+        return $this->maxCounterFromCollection(
+            Invoice::where('company_id', $companyId)
+                ->whereBetween('tanggal', [
+                    $date->copy()->startOfMonth()->toDateString(),
+                    $date->copy()->endOfMonth()->toDateString(),
+                ])
+                ->whereHas('penawaran', function ($query) {
+                    $query->whereNull('mitra_id');
+                })
+                ->pluck('nomor')
+                ->all()
+        );
     }
 
     private function maxCounterFromCollection(array $numbers): int
