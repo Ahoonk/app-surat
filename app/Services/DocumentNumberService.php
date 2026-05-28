@@ -126,8 +126,8 @@ class DocumentNumberService
             return null;
         }
 
-        if (preg_match_all('/(\d{3,})/', $number, $matches) && !empty($matches[1])) {
-            return (int) end($matches[1]);
+        if (preg_match('/\/(\d{3})(?:-[A-Z]+)?$/', $number, $match)) {
+            return (int) $match[1];
         }
 
         return null;

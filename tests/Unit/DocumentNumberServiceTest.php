@@ -85,4 +85,64 @@ class DocumentNumberServiceTest extends TestCase
 
         $this->assertSame('INV/2026/05/003-ASK', $nextInvoice);
     }
+
+    public function test_it_ignores_corrupted_invoice_numbers_that_do_not_end_with_three_digit_running_numbers(): void
+    {
+        $company = Company::create([
+            'name' => 'PT Contoh',
+            'address' => 'Jakarta',
+            'logo' => null,
+        ]);
+
+        $user = User::create([
+            'name' => 'Tester',
+            'email' => 'tester@example.com',
+            'password' => 'password',
+            'company_id' => $company->id,
+            'role' => 'admin',
+        ]);
+
+        $penawaran = Penawaran::create([
+            'company_id' => $company->id,
+            'user_id' => $user->id,
+            'nomor' => 'PNW/2026/05/001',
+            'tanggal' => '2026-05-21',
+            'customer_nama' => 'Customer',
+            'total' => 1000,
+            'status' => 'draft',
+        ]);
+
+        Invoice::create([
+            'company_id' => $company->id,
+            'penawaran_id' => $penawaran->id,
+            'nomor' => 'INV/2026/05/001-ASK',
+            'tanggal' => '2026-05-21',
+            'sequence' => 1,
+            'total' => 1000,
+        ]);
+
+        Invoice::create([
+            'company_id' => $company->id,
+            'penawaran_id' => $penawaran->id,
+            'nomor' => 'INV/2026/05/002-ASK',
+            'tanggal' => '2026-05-21',
+            'sequence' => 2,
+            'total' => 1000,
+        ]);
+
+        Invoice::create([
+            'company_id' => $company->id,
+            'penawaran_id' => $penawaran->id,
+            'nomor' => 'INV/2026/05/2031-ASK',
+            'tanggal' => '2026-05-21',
+            'sequence' => 3,
+            'total' => 1000,
+        ]);
+
+        $service = app(DocumentNumberService::class);
+
+        $nextInvoice = $service->next($company, 'invoice', '2026-05-21');
+
+        $this->assertSame('INV/2026/05/003-ASK', $nextInvoice);
+    }
 }
