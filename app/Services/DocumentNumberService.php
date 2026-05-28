@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class DocumentNumberService
 {
+    private const ALDERA_INVOICE_START_COUNTER = 1;
+
     public function next(Company|int $company, string $documentType, ?string $referenceDate = null): string
     {
         $companyId = $company instanceof Company ? $company->id : $company;
@@ -46,7 +48,7 @@ class DocumentNumberService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $series->counter = $this->maxAlderaInvoiceCounter($companyId) + 1;
+            $series->counter = max(self::ALDERA_INVOICE_START_COUNTER, $this->maxAlderaInvoiceCounter($companyId)) + 1;
             $series->save();
 
             return $this->formatParts('INV', $date->toDateString(), (int) $series->counter, 3, 'ASK');

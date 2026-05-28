@@ -41,7 +41,7 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
         return Command::SUCCESS;
     }
 
-    $counter = 0;
+    $counter = 1;
     $changes = [];
 
     foreach ($invoices as $invoice) {

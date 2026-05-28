@@ -192,7 +192,7 @@ class DocumentNumberServiceTest extends TestCase
         Invoice::create([
             'company_id' => $company->id,
             'penawaran_id' => $alderaPenawaran->id,
-            'nomor' => 'INV/2026/01/001-ASK',
+            'nomor' => 'INV/2026/01/002-ASK',
             'tanggal' => '2026-01-07',
             'sequence' => 1,
             'total' => 1000,
@@ -201,7 +201,7 @@ class DocumentNumberServiceTest extends TestCase
         Invoice::create([
             'company_id' => $company->id,
             'penawaran_id' => $alderaPenawaran->id,
-            'nomor' => 'INV/2026/02/002-ASK',
+            'nomor' => 'INV/2026/02/003-ASK',
             'tanggal' => '2026-02-11',
             'sequence' => 2,
             'total' => 1000,
@@ -229,6 +229,21 @@ class DocumentNumberServiceTest extends TestCase
 
         $nextMayInvoice = $service->nextAlderaInvoice($company, '2026-05-29');
 
-        $this->assertSame('INV/2026/05/003-ASK', $nextMayInvoice);
+        $this->assertSame('INV/2026/05/004-ASK', $nextMayInvoice);
+    }
+
+    public function test_first_aldera_invoice_number_starts_from_002(): void
+    {
+        $company = Company::create([
+            'name' => 'PT Aldera Saddatech Karya',
+            'address' => 'Jakarta',
+            'logo' => null,
+        ]);
+
+        $service = app(DocumentNumberService::class);
+
+        $firstInvoice = $service->nextAlderaInvoice($company, '2026-01-07');
+
+        $this->assertSame('INV/2026/01/002-ASK', $firstInvoice);
     }
 }
