@@ -224,7 +224,7 @@ class InvoiceController extends Controller
         $date = \Illuminate\Support\Carbon::parse($newDate);
         $running = '001';
 
-        if (preg_match('/^INV\/\d{4}\/\d{2}\/(\d{3})-ASK$/', $currentNumber, $match)) {
+        if (preg_match('/^INV\/\d{4}\/\d{2}\/(\d+)-ASK$/', $currentNumber, $match)) {
             $running = $match[1];
         }
 
