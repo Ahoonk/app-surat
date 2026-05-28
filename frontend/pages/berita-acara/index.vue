@@ -29,7 +29,7 @@
     </section>
 
     <section class="panel overflow-hidden">
-      <div class="overflow-x-auto">
+      <div class="hidden lg:block overflow-x-auto">
         <table class="w-full min-w-[1100px] border-collapse text-sm">
           <thead class="bg-slate-50 text-left text-slate-500">
             <tr>
@@ -69,6 +69,55 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="grid gap-4 p-4 lg:hidden">
+        <article
+          v-for="item in rows"
+          :key="item.id"
+          class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[11px] uppercase tracking-[0.28em] text-slate-500">Berita Acara</p>
+              <h3 class="mt-1 break-words text-base font-semibold text-slate-900">{{ item.nomor }}</h3>
+              <p class="mt-1 text-xs text-slate-500">{{ formatDate(item.tanggal) }}</p>
+            </div>
+            <div class="shrink-0 rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+              {{ item.invoice?.nomor ?? '-' }}
+            </div>
+          </div>
+
+          <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div class="rounded-2xl bg-slate-50 p-3">
+              <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Customer</dt>
+              <dd class="mt-1 font-medium text-slate-900">
+                {{ item.invoice?.penawaran?.to_company || item.invoice?.penawaran?.customer_nama || '-' }}
+              </dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+              <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">PO</dt>
+              <dd class="mt-1 font-medium text-slate-900">{{ item.invoice?.purchasing_order?.nomor_po ?? '-' }}</dd>
+            </div>
+          </dl>
+
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <NuxtLink :to="`/berita-acara/${item.id}`" class="button-ghost w-full px-3 py-2 text-sm">
+              Detail
+            </NuxtLink>
+            <a :href="pdfLink(item.id)" target="_blank" class="button-primary w-full px-3 py-2 text-sm">
+              PDF
+            </a>
+            <button
+              type="button"
+              class="button-ghost col-span-2 w-full px-3 py-2 text-sm"
+              :disabled="busyActionId === item.id"
+              @click="sendEmail(item)"
+            >
+              {{ busyActionId === item.id ? 'Memproses...' : 'Kirim Email' }}
+            </button>
+          </div>
+        </article>
       </div>
     </section>
   </div>
