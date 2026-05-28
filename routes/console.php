@@ -3,6 +3,7 @@
 use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\Penawaran;
+use App\Services\DocumentNumberService;
 use App\Services\DocumentSnapshotService;
 use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Inspiring;
@@ -26,7 +27,7 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
     }
 
     $invoices = Invoice::query()
-        ->with('penawaran')
+        ->with(['penawaran', 'suratJalan', 'beritaAcara'])
         ->where('company_id', $companyId)
         ->whereHas('penawaran', function ($query) {
             $query->whereNull('mitra_id');
@@ -43,6 +44,7 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
 
     $counter = 1;
     $changes = [];
+    $numberService = app(DocumentNumberService::class);
 
     foreach ($invoices as $invoice) {
         $date = Carbon::parse($invoice->tanggal);
@@ -56,16 +58,48 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
         );
 
         if ($invoice->nomor === $newNumber) {
-            continue;
+            $invoiceNumber = $invoice->nomor;
+        } else {
+            $invoiceNumber = $newNumber;
+
+            $changes[] = [
+                'document' => 'Invoice',
+                'model' => $invoice,
+                'old_number' => $invoice->nomor,
+                'new_number' => $newNumber,
+                'tanggal' => $date->toDateString(),
+                'customer' => $invoice->penawaran?->to_company ?? $invoice->penawaran?->customer_nama ?? '-',
+                'penawaran_id' => $invoice->penawaran_id,
+            ];
         }
 
-        $changes[] = [
-            'invoice' => $invoice,
-            'old_number' => $invoice->nomor,
-            'new_number' => $newNumber,
-            'tanggal' => $date->toDateString(),
-            'customer' => $invoice->penawaran?->to_company ?? $invoice->penawaran?->customer_nama ?? '-',
-        ];
+        $suratJalanNumber = $numberService->alderaNumberFromInvoice($invoiceNumber, 'SJ');
+
+        if ($suratJalanNumber && $invoice->suratJalan && $invoice->suratJalan->nomor !== $suratJalanNumber) {
+            $changes[] = [
+                'document' => 'Surat Jalan',
+                'model' => $invoice->suratJalan,
+                'old_number' => $invoice->suratJalan->nomor,
+                'new_number' => $suratJalanNumber,
+                'tanggal' => Carbon::parse($invoice->suratJalan->tanggal)->toDateString(),
+                'customer' => $invoice->penawaran?->to_company ?? $invoice->penawaran?->customer_nama ?? '-',
+                'penawaran_id' => $invoice->penawaran_id,
+            ];
+        }
+
+        $beritaAcaraNumber = $numberService->alderaNumberFromInvoice($invoiceNumber, 'BA');
+
+        if ($beritaAcaraNumber && $invoice->beritaAcara && $invoice->beritaAcara->nomor !== $beritaAcaraNumber) {
+            $changes[] = [
+                'document' => 'Berita Acara',
+                'model' => $invoice->beritaAcara,
+                'old_number' => $invoice->beritaAcara->nomor,
+                'new_number' => $beritaAcaraNumber,
+                'tanggal' => Carbon::parse($invoice->beritaAcara->tanggal)->toDateString(),
+                'customer' => $invoice->penawaran?->to_company ?? $invoice->penawaran?->customer_nama ?? '-',
+                'penawaran_id' => $invoice->penawaran_id,
+            ];
+        }
     }
 
     if (empty($changes)) {
@@ -75,9 +109,10 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
     }
 
     $this->table(
-        ['ID', 'Tanggal', 'Customer', 'Nomor Lama', 'Nomor Baru'],
+        ['Dokumen', 'ID', 'Tanggal', 'Customer', 'Nomor Lama', 'Nomor Baru'],
         array_map(fn ($change) => [
-            $change['invoice']->id,
+            $change['document'],
+            $change['model']->id,
             $change['tanggal'],
             $change['customer'],
             $change['old_number'],
@@ -86,7 +121,7 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
     );
 
     if ($this->option('dry-run')) {
-        $this->info(count($changes) . ' invoice akan berubah. Jalankan tanpa --dry-run untuk menyimpan.');
+        $this->info(count($changes) . ' nomor dokumen akan berubah. Jalankan tanpa --dry-run untuk menyimpan.');
 
         return Command::SUCCESS;
     }
@@ -96,13 +131,11 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
         $penawaranIds = [];
 
         foreach ($changes as $change) {
-            /** @var Invoice $invoice */
-            $invoice = $change['invoice'];
-            $invoice->update([
+            $change['model']->update([
                 'nomor' => $change['new_number'],
             ]);
 
-            $penawaranIds[$invoice->penawaran_id] = true;
+            $penawaranIds[$change['penawaran_id']] = true;
         }
 
         foreach (array_keys($penawaranIds) as $penawaranId) {
@@ -127,7 +160,7 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
         }
     });
 
-    $this->info(count($changes) . ' invoice Aldera non-mitra berhasil dinomori ulang.');
+    $this->info(count($changes) . ' nomor dokumen Aldera non-mitra berhasil dinomori ulang.');
 
     return Command::SUCCESS;
-})->purpose('Renumber invoice Aldera non-mitra menjadi INV/YYYY/MM/NNN-ASK berurutan lintas bulan');
+})->purpose('Renumber dokumen Aldera non-mitra agar Surat Jalan dan Berita Acara mengikuti nomor Invoice');

@@ -55,6 +55,19 @@ class DocumentNumberService
         });
     }
 
+    public function alderaNumberFromInvoice(string $invoiceNumber, string $prefix): ?string
+    {
+        if (!in_array($prefix, ['SJ', 'BA'], true)) {
+            return null;
+        }
+
+        if (!preg_match('/^INV\/(\d{4})\/(\d{2})\/(\d{3})-ASK$/', $invoiceNumber, $match)) {
+            return null;
+        }
+
+        return sprintf('%s/%s/%s/%s-ASK', $prefix, $match[1], $match[2], $match[3]);
+    }
+
     private function ensureSeries(int $companyId, string $documentType): DocumentSeries
     {
         $defaults = $this->defaultsFor($documentType);

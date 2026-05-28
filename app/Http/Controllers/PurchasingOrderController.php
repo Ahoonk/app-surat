@@ -118,7 +118,8 @@ class PurchasingOrderController extends Controller
         $sequence = 1;
         $invoiceDate = now()->toDateString();
         $mitra = $penawaran->mitra;
-        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->nextAlderaInvoice($companyId, $invoiceDate);
+        $numberService = app(DocumentNumberService::class);
+        $invoiceNumber = $mitra?->nomor_invoice ?: $numberService->nextAlderaInvoice($companyId, $invoiceDate);
 
         $invoice = Invoice::create([
             'company_id' => $companyId,
@@ -135,7 +136,8 @@ class PurchasingOrderController extends Controller
             'snapshot_data' => app(DocumentSnapshotService::class)->forInvoice($invoice),
         ]);
 
-        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: app(DocumentNumberService::class)->next($companyId, 'surat_jalan', $invoiceDate);
+        $suratJalanNomor = $mitra?->nomor_surat_jalan
+            ?: ($numberService->alderaNumberFromInvoice($invoiceNumber, 'SJ') ?? $numberService->next($companyId, 'surat_jalan', $invoiceDate));
 
         $suratJalan = SuratJalan::firstOrCreate(
             ['invoice_id' => $invoice->id],
@@ -182,7 +184,8 @@ class PurchasingOrderController extends Controller
         $currentSequence = max((int) $penawaran->invoice_sequence, $latestSequence, 1);
         $nextSequence = $currentSequence + 1;
         $mitra = $penawaran->mitra;
-        $invoiceNumber = $mitra?->nomor_invoice ?: app(DocumentNumberService::class)->nextAlderaInvoice($companyId, $validated['invoice_date']);
+        $numberService = app(DocumentNumberService::class);
+        $invoiceNumber = $mitra?->nomor_invoice ?: $numberService->nextAlderaInvoice($companyId, $validated['invoice_date']);
 
         $invoice = Invoice::create([
             'company_id' => $companyId,
@@ -199,7 +202,8 @@ class PurchasingOrderController extends Controller
             'snapshot_data' => app(DocumentSnapshotService::class)->forInvoice($invoice),
         ]);
 
-        $suratJalanNomor = $mitra?->nomor_surat_jalan ?: app(DocumentNumberService::class)->next($companyId, 'surat_jalan', $validated['invoice_date']);
+        $suratJalanNomor = $mitra?->nomor_surat_jalan
+            ?: ($numberService->alderaNumberFromInvoice($invoiceNumber, 'SJ') ?? $numberService->next($companyId, 'surat_jalan', $validated['invoice_date']));
 
         $suratJalan = SuratJalan::firstOrCreate(
             ['invoice_id' => $invoice->id],

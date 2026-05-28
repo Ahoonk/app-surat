@@ -31,7 +31,9 @@ class BeritaAcaraController extends Controller
             }
 
             $mitra = $invoice->penawaran?->mitra;
-            $nomor = $mitra?->nomor_berita_acara ?: app(DocumentNumberService::class)->next($companyId, 'berita_acara', $invoice->tanggal);
+            $numberService = app(DocumentNumberService::class);
+            $nomor = $mitra?->nomor_berita_acara
+                ?: ($numberService->alderaNumberFromInvoice($invoice->nomor, 'BA') ?? $numberService->next($companyId, 'berita_acara', $invoice->tanggal));
 
             $beritaAcara = BeritaAcara::create([
                 'company_id' => $companyId,

@@ -31,7 +31,9 @@ class SuratJalanController extends Controller
             }
 
             $mitra = $invoice->penawaran?->mitra;
-            $nomor = $mitra?->nomor_surat_jalan ?: app(DocumentNumberService::class)->next($companyId, 'surat_jalan', $invoice->tanggal);
+            $numberService = app(DocumentNumberService::class);
+            $nomor = $mitra?->nomor_surat_jalan
+                ?: ($numberService->alderaNumberFromInvoice($invoice->nomor, 'SJ') ?? $numberService->next($companyId, 'surat_jalan', $invoice->tanggal));
 
             $suratJalan = SuratJalan::create([
                 'company_id' => $companyId,

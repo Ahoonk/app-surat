@@ -155,6 +155,7 @@ class InvoiceController extends Controller
         ]);
 
         $mitra = $invoice->penawaran->mitra;
+        $numberService = app(\App\Services\DocumentNumberService::class);
         $newNomor = $mitra?->nomor_invoice
             ? $invoice->nomor
             : $this->rebuildInvoiceNumberWithDate($invoice->nomor, $validated['tanggal']);
@@ -166,7 +167,7 @@ class InvoiceController extends Controller
 
         $suratJalanNomor = $mitra?->nomor_surat_jalan
             ? $mitra->nomor_surat_jalan
-            : preg_replace('/^INV\//', 'SJ/', $newNomor);
+            : ($numberService->alderaNumberFromInvoice($newNomor, 'SJ') ?? preg_replace('/^INV\//', 'SJ/', $newNomor));
 
         SuratJalan::where('invoice_id', $invoice->id)->update([
             'tanggal' => $validated['tanggal'],

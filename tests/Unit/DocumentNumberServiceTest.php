@@ -246,4 +246,13 @@ class DocumentNumberServiceTest extends TestCase
 
         $this->assertSame('INV/2026/01/002-ASK', $firstInvoice);
     }
+
+    public function test_aldera_related_document_numbers_follow_invoice_number(): void
+    {
+        $service = app(DocumentNumberService::class);
+
+        $this->assertSame('SJ/2026/05/010-ASK', $service->alderaNumberFromInvoice('INV/2026/05/010-ASK', 'SJ'));
+        $this->assertSame('BA/2026/05/010-ASK', $service->alderaNumberFromInvoice('INV/2026/05/010-ASK', 'BA'));
+        $this->assertNull($service->alderaNumberFromInvoice('010/INV/KYT/I/2026', 'SJ'));
+    }
 }
