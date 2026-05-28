@@ -46,7 +46,7 @@ class DocumentNumberService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $series->counter = $this->maxAlderaInvoiceCounterForMonth($companyId, $date) + 1;
+            $series->counter = $this->maxAlderaInvoiceCounter($companyId) + 1;
             $series->save();
 
             return $this->formatParts('INV', $date->toDateString(), (int) $series->counter, 3, 'ASK');
@@ -127,14 +127,10 @@ class DocumentNumberService
         };
     }
 
-    private function maxAlderaInvoiceCounterForMonth(int $companyId, Carbon $date): int
+    private function maxAlderaInvoiceCounter(int $companyId): int
     {
         return $this->maxCounterFromCollection(
             Invoice::where('company_id', $companyId)
-                ->whereBetween('tanggal', [
-                    $date->copy()->startOfMonth()->toDateString(),
-                    $date->copy()->endOfMonth()->toDateString(),
-                ])
                 ->whereHas('penawaran', function ($query) {
                     $query->whereNull('mitra_id');
                 })

@@ -147,7 +147,7 @@ class DocumentNumberServiceTest extends TestCase
         $this->assertSame('INV/2026/05/003-ASK', $nextInvoice);
     }
 
-    public function test_aldera_invoice_numbers_reset_each_month_and_ignore_mitra_invoices(): void
+    public function test_aldera_invoice_numbers_continue_across_months_and_ignore_mitra_invoices(): void
     {
         $company = Company::create([
             'name' => 'PT Aldera Saddatech Karya',
@@ -192,9 +192,18 @@ class DocumentNumberServiceTest extends TestCase
         Invoice::create([
             'company_id' => $company->id,
             'penawaran_id' => $alderaPenawaran->id,
-            'nomor' => 'INV/2026/05/001-ASK',
-            'tanggal' => '2026-05-04',
+            'nomor' => 'INV/2026/01/001-ASK',
+            'tanggal' => '2026-01-07',
             'sequence' => 1,
+            'total' => 1000,
+        ]);
+
+        Invoice::create([
+            'company_id' => $company->id,
+            'penawaran_id' => $alderaPenawaran->id,
+            'nomor' => 'INV/2026/02/002-ASK',
+            'tanggal' => '2026-02-11',
+            'sequence' => 2,
             'total' => 1000,
         ]);
 
@@ -203,7 +212,7 @@ class DocumentNumberServiceTest extends TestCase
             'penawaran_id' => $alderaPenawaran->id,
             'nomor' => 'INV/2026/05/2032-ASK',
             'tanggal' => '2026-05-28',
-            'sequence' => 2,
+            'sequence' => 3,
             'total' => 1000,
         ]);
 
@@ -219,9 +228,7 @@ class DocumentNumberServiceTest extends TestCase
         $service = app(DocumentNumberService::class);
 
         $nextMayInvoice = $service->nextAlderaInvoice($company, '2026-05-29');
-        $firstJuneInvoice = $service->nextAlderaInvoice($company, '2026-06-01');
 
-        $this->assertSame('INV/2026/05/002-ASK', $nextMayInvoice);
-        $this->assertSame('INV/2026/06/001-ASK', $firstJuneInvoice);
+        $this->assertSame('INV/2026/05/003-ASK', $nextMayInvoice);
     }
 }

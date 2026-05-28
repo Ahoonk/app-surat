@@ -41,19 +41,18 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
         return Command::SUCCESS;
     }
 
-    $counters = [];
+    $counter = 0;
     $changes = [];
 
     foreach ($invoices as $invoice) {
         $date = Carbon::parse($invoice->tanggal);
-        $monthKey = $date->format('Y-m');
-        $counters[$monthKey] = ($counters[$monthKey] ?? 0) + 1;
+        $counter++;
 
         $newNumber = sprintf(
             'INV/%s/%s/%03d-ASK',
             $date->format('Y'),
             $date->format('m'),
-            $counters[$monthKey]
+            $counter
         );
 
         if ($invoice->nomor === $newNumber) {
@@ -131,4 +130,4 @@ Artisan::command('invoices:renumber-aldera {--company= : Company ID Aldera} {--d
     $this->info(count($changes) . ' invoice Aldera non-mitra berhasil dinomori ulang.');
 
     return Command::SUCCESS;
-})->purpose('Renumber invoice Aldera non-mitra menjadi INV/YYYY/MM/NNN-ASK per bulan');
+})->purpose('Renumber invoice Aldera non-mitra menjadi INV/YYYY/MM/NNN-ASK berurutan lintas bulan');
