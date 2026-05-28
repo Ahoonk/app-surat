@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <section v-if="detail" class="panel overflow-hidden">
-      <div class="grid gap-6 p-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div class="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Detail Berita Acara</p>
           <h2 class="section-title mt-3">{{ detail.nomor }}</h2>
@@ -11,7 +11,7 @@
         </div>
         <div class="rounded-[22px] bg-gradient-to-br from-slate-950 to-cyan-900 p-5 text-white">
           <p class="text-xs uppercase tracking-[0.3em] text-cyan-200/70">Perihal</p>
-          <h3 class="mt-3 text-2xl font-semibold">{{ detail.perihal || 'Berita Acara' }}</h3>
+          <h3 class="mt-3 break-words text-2xl font-semibold">{{ detail.perihal || 'Berita Acara' }}</h3>
           <p class="mt-2 text-sm text-slate-200/80">{{ detail.kota_tanggal_manual || '-' }}</p>
         </div>
       </div>
@@ -53,7 +53,7 @@
 
     <section v-if="detail?.invoice?.penawaran" class="panel p-6">
       <h3 class="text-lg font-semibold text-slate-900">Item Penawaran</h3>
-      <div class="mt-4 overflow-x-auto">
+      <div class="mt-4 hidden lg:block overflow-x-auto">
         <table class="w-full min-w-[900px] border-collapse text-sm">
           <thead class="bg-slate-50 text-left text-slate-500">
             <tr>
@@ -77,17 +77,55 @@
           </tbody>
         </table>
       </div>
+
+      <div class="mt-4 grid gap-4 lg:hidden">
+        <article
+          v-for="item in detail.invoice.penawaran.items ?? []"
+          :key="item.id ?? item.nama"
+          class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[11px] uppercase tracking-[0.28em] text-slate-500">Item</p>
+              <h4 class="mt-1 break-words text-base font-semibold text-slate-900">{{ item.nama }}</h4>
+              <p class="mt-1 text-xs text-slate-500">{{ item.rincian || '-' }}</p>
+            </div>
+            <div class="shrink-0 rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+              {{ formatCurrency(item.amount) }}
+            </div>
+          </div>
+
+          <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div class="rounded-2xl bg-slate-50 p-3">
+              <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Qty</dt>
+              <dd class="mt-1 font-medium text-slate-900">{{ item.qty }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+              <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Satuan</dt>
+              <dd class="mt-1 font-medium text-slate-900">{{ item.satuan }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+              <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Harga</dt>
+              <dd class="mt-1 font-medium text-slate-900">{{ formatCurrency(item.unit_price) }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+              <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Amount</dt>
+              <dd class="mt-1 font-medium text-slate-900">{{ formatCurrency(item.amount) }}</dd>
+            </div>
+          </dl>
+        </article>
+      </div>
     </section>
 
     <section class="flex flex-col gap-3 sm:flex-row sm:justify-between">
-      <NuxtLink to="/berita-acara" class="button-ghost justify-center">
+      <NuxtLink to="/berita-acara" class="button-ghost justify-center sm:w-auto">
         Kembali ke daftar
       </NuxtLink>
       <div class="flex flex-col gap-3 sm:flex-row">
-        <button type="button" class="button-ghost justify-center" :disabled="busy" @click="sendEmail">
+        <button type="button" class="button-ghost justify-center sm:w-auto" :disabled="busy" @click="sendEmail">
           {{ busy ? 'Memproses...' : 'Kirim Email' }}
         </button>
-        <a :href="pdfLink" target="_blank" class="button-primary justify-center">
+        <a :href="pdfLink" target="_blank" class="button-primary justify-center sm:w-auto">
           Buka PDF
         </a>
       </div>
