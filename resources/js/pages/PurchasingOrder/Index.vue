@@ -115,17 +115,17 @@
                 <td class="px-5 py-4 capitalize text-slate-600">{{ penawaran.jenis_kontrak }}</td>
                 <td class="px-5 py-4 text-slate-600">
                   <a
-                    v-if="penawaran.purchasingOrder?.dokumen_path"
-                    :href="storageLink(penawaran.purchasingOrder.dokumen_path)"
+                    v-if="penawaran.purchasing_order?.dokumen_path"
+                    :href="storageLink(penawaran.purchasing_order.dokumen_path)"
                     target="_blank"
                     class="text-cyan-700 hover:text-cyan-900"
                   >
-                    {{ penawaran.purchasingOrder.dokumen_name }}
+                    {{ penawaran.purchasing_order.dokumen_name }}
                   </a>
                   <span v-else>-</span>
                 </td>
-                <td class="px-5 py-4 text-slate-600">{{ penawaran.purchasingOrder?.nomor_po ?? '-' }}</td>
-                <td class="px-5 py-4 text-slate-600">{{ formatDate(penawaran.purchasingOrder?.tanggal_po) }}</td>
+                <td class="px-5 py-4 text-slate-600">{{ penawaran.purchasing_order?.nomor_po ?? '-' }}</td>
+                <td class="px-5 py-4 text-slate-600">{{ formatDate(penawaran.purchasing_order?.tanggal_po) }}</td>
                 <td class="px-5 py-4 text-slate-600">
                   <template v-if="latestInvoice(penawaran)">
                     <div class="font-medium text-slate-900">{{ latestInvoice(penawaran).nomor }}</div>
@@ -173,25 +173,25 @@
               <div class="rounded-2xl bg-slate-50 p-3">
                 <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">PO</dt>
                 <dd class="mt-1 break-words font-medium text-slate-900">
-                  {{ penawaran.purchasingOrder?.nomor_po ?? '-' }}
+                  {{ penawaran.purchasing_order?.nomor_po ?? '-' }}
                 </dd>
               </div>
               <div class="rounded-2xl bg-slate-50 p-3">
                 <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Tanggal</dt>
                 <dd class="mt-1 font-medium text-slate-900">
-                  {{ formatDate(penawaran.purchasingOrder?.tanggal_po) }}
+                  {{ formatDate(penawaran.purchasing_order?.tanggal_po) }}
                 </dd>
               </div>
               <div class="rounded-2xl bg-slate-50 p-3">
                 <dt class="text-[11px] uppercase tracking-[0.2em] text-slate-500">Dokumen</dt>
                 <dd class="mt-1 font-medium text-slate-900">
                   <a
-                    v-if="penawaran.purchasingOrder?.dokumen_path"
-                    :href="storageLink(penawaran.purchasingOrder.dokumen_path)"
+                    v-if="penawaran.purchasing_order?.dokumen_path"
+                    :href="storageLink(penawaran.purchasing_order.dokumen_path)"
                     target="_blank"
                     class="text-cyan-700"
                   >
-                    {{ penawaran.purchasingOrder.dokumen_name }}
+                    {{ penawaran.purchasing_order.dokumen_name }}
                   </a>
                   <span v-else>-</span>
                 </dd>
